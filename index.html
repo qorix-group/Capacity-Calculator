@@ -202,7 +202,8 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: visible;
   }
 
   /* ─── TAGS / BADGES ─── */
@@ -287,6 +288,21 @@
     background: var(--surface2);
     color: var(--accent);
     border: 1px solid var(--border);
+  }
+
+  /* ─── EDITABLE CELLS ─── */
+  .editable-cell {
+    transition: all 0.15s;
+    border: 1px solid transparent !important;
+  }
+  .editable-cell:hover {
+    background: rgba(79,158,255,0.12) !important;
+    border: 1px solid var(--accent) !important;
+  }
+  .editable-cell:focus {
+    outline: none;
+    background: rgba(79,158,255,0.15) !important;
+    border: 1px solid var(--accent) !important;
   }
 
   /* ─── CHECKLIST ─── */
@@ -421,6 +437,12 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  
+  /* Table container scrollbar - slightly larger for better visibility */
+  .table-container::-webkit-scrollbar { height: 8px; }
+  .table-container::-webkit-scrollbar-track { background: var(--surface2); }
+  .table-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+  .table-container::-webkit-scrollbar-thumb:hover { background: var(--accent2); }
 
   /* ─── TOAST ─── */
   #toast {
@@ -448,7 +470,6 @@
     * { 
       -webkit-print-color-adjust: exact !important; 
       print-color-adjust: exact !important;
-      color-adjust: exact !important;
     }
     
     body { 
@@ -765,7 +786,8 @@
       <div class="page-sub">Member profiles, experience & productivity factor planning per sprint</div>
 
       <div class="form-card mb-16">
-        <div class="form-title">Add Team Member</div>
+        <div class="form-title" id="kyt-form-title">Add Team Member</div>
+        <input type="hidden" id="kyt-edit-index" value="-1">
         <div class="form-grid">
           <div><label>Name</label><input type="text" id="kyt-name"></div>
           <div><label>Grade</label>
@@ -792,7 +814,7 @@
           <div><label>Delivered</label><select id="kyt-delivered"><option>No</option><option selected>Yes</option></select></div>
         </div>
         <div class="form-grid">
-          <div><label>Module</label><input type="number" id="kyt-module" value="1"></div>
+          <div><label>% Allocation (1.0 = 100%, 0.5 = 50%)</label><input type="number" step="0.01" id="kyt-module" value="1"></div>
         </div>
         <div class="form-grid" style="grid-template-columns:repeat(6,1fr);">
           <div><label>S1 PF</label><input type="number" step="0.01" id="kyt-s1" value="0.95"></div>
@@ -802,14 +824,15 @@
           <div><label>S5 PF</label><input type="number" step="0.01" id="kyt-s5" value="0.95"></div>
           <div><label>S6 PF</label><input type="number" step="0.01" id="kyt-s6" value="0.95"></div>
         </div>
-        <button class="btn btn-primary" onclick="addMember()">+ Add Member</button>
+        <button class="btn btn-primary" id="kyt-submit-btn" onclick="saveMember()">+ Add Member</button>
+        <button class="btn btn-ghost" id="kyt-cancel-btn" onclick="cancelEdit()" style="display:none;margin-left:8px;">Cancel</button>
       </div>
 
       <div class="section-title">Team Members</div>
       <div class="table-container">
         <table>
           <thead>
-            <tr><th>Name</th><th>Grade</th><th>Role</th><th>Exp</th><th>Module</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>Avg PF</th><th>Actions</th></tr>
+            <tr><th>Name</th><th>Grade</th><th>Role</th><th>Exp</th><th>Alloc %</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>Avg PF</th><th>Actions</th></tr>
           </thead>
           <tbody id="kyt-tbody"></tbody>
         </table>
@@ -818,69 +841,97 @@
 
     <!-- ══════════════ CAPACITY ══════════════ -->
     <div class="page" id="page-capacity">
-      <div class="page-title">PI Capacity Calc</div>
-      <div class="page-sub">Leaves, training days, and available working days per member</div>
+      <div class="page-title">PI Capacity Dashboard</div>
+      <div class="page-sub">Comprehensive capacity calculation with all team members</div>
 
-      <div class="form-card mb-16">
-        <div class="form-title">Capacity Configuration</div>
-        <div style="margin-bottom:14px;">
-          <label>Select Member</label>
-          <select id="cap-member-select" onchange="loadCapMember()"></select>
+      <!-- Capacity Summary Cards -->
+      <div class="stat-grid" style="margin-bottom:28px;">
+        <div class="stat-card" style="--accent-color:var(--accent2);">
+          <div class="stat-label">Total Net Capacity</div>
+          <div class="stat-value" id="cap-total-net">0</div>
+          <div class="stat-sub">Days</div>
         </div>
-        <div class="form-grid-3 form-grid">
-          <div><label>Weeks in PI</label><input type="number" id="cap-weeks"></div>
-          <div><label>Saturdays</label><input type="number" id="cap-sat"></div>
-          <div><label>Holidays</label><input type="number" id="cap-holidays"></div>
+        <div class="stat-card" style="--accent-color:var(--accent);">
+          <div class="stat-label">Feature Development</div>
+          <div class="stat-value" id="cap-feature-days">0</div>
+          <div class="stat-sub" id="cap-feature-pct">95% of capacity</div>
         </div>
-        <div class="form-grid-3 form-grid">
-          <div><label>Leaves</label><input type="number" id="cap-leaves"></div>
-          <div><label>Misc Days</label><input type="number" id="cap-misc"></div>
-          <div><label>Allocation %</label><input type="number" step="0.01" id="cap-alloc"></div>
+        <div class="stat-card" style="--accent-color:var(--accent4);">
+          <div class="stat-label">Bug Fixing</div>
+          <div class="stat-value" id="cap-bug-days">0</div>
+          <div class="stat-sub" id="cap-bug-pct">5% of capacity</div>
         </div>
-        <div class="form-grid-3 form-grid">
-          <div><label>Pre-PI</label><input type="number" id="cap-prepi"></div>
-          <div><label>All Hands</label><input type="number" step="0.01" id="cap-allhands"></div>
-          <div><label>Factory Days</label><input type="number" id="cap-factory"></div>
+        <div class="stat-card" style="--accent-color:var(--accent3);">
+          <div class="stat-label">Capacity Utilization</div>
+          <div class="stat-value" id="cap-util-pct">0%</div>
+          <div class="stat-sub">Gross vs Net</div>
         </div>
-        <div class="form-grid">
-          <div><label>Competency</label><input type="number" id="cap-competency"></div>
-          <div><label>GNC</label><input type="number" id="cap-gnc"></div>
-        </div>
-        <button class="btn btn-primary" onclick="saveCapacity()">Save Capacity</button>
       </div>
 
-      <div class="section-title">Capacity Summary</div>
+      <!-- Main Capacity Table (Horizontal Layout) -->
+      <div class="section-title">Capacity Calculation Matrix</div>
       <div class="table-container">
-        <table>
+        <table id="cap-matrix-table" style="font-size:11px;">
           <thead>
-            <tr><th>Name</th><th>Weekdays</th><th>Training</th><th>Available</th><th>Avg PF</th><th>Net Capacity</th></tr>
-          </thead>
-          <tbody id="cap-tbody"></tbody>
-          <tfoot>
             <tr>
-              <td><strong>TOTAL</strong></td>
-              <td>—</td>
-              <td>—</td>
-              <td id="cap-foot-avail">0</td>
-              <td>—</td>
-              <td id="cap-foot-net"><strong>0</strong></td>
+              <th style="min-width:200px;">Parameter</th>
+              <!-- Team member columns will be added dynamically -->
             </tr>
-          </tfoot>
+          </thead>
+          <tbody id="cap-matrix-tbody">
+            <!-- Rows will be added dynamically -->
+          </tbody>
         </table>
       </div>
 
-      <div class="section" style="margin-top:24px;">
-        <div class="section-title">Feature vs Bug Split</div>
-        <div class="stat-grid" style="max-width:500px;">
-          <div class="stat-card" style="--accent-color:var(--accent);">
-            <div class="stat-label">Feature Dev</div>
-            <div class="stat-value" id="cap-split-feat">0</div>
-            <div class="stat-sub">Days</div>
-          </div>
-          <div class="stat-card" style="--accent-color:var(--accent4);">
-            <div class="stat-label">Bug Fix</div>
-            <div class="stat-value" id="cap-split-bug">0</div>
-            <div class="stat-sub">Days</div>
+      <!-- Training Breakdown -->
+      <div class="section" style="margin-top:28px;">
+        <div class="section-title">Training Days Breakdown <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">(Click cells to edit)</span></div>
+        <div class="table-container">
+          <table id="cap-training-table" style="font-size:11px;">
+            <thead>
+              <tr>
+                <th style="min-width:200px;">Training Type</th>
+                <!-- Team member columns will be added dynamically -->
+              </tr>
+            </thead>
+            <tbody id="cap-training-tbody">
+              <!-- Rows will be added dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Edit Capacity Form (Collapsible) -->
+      <div class="section" style="margin-top:28px;">
+        <div class="section-title" style="cursor:pointer;" onclick="toggleCapForm()">
+          📝 Edit Individual Capacity <span id="cap-form-toggle">(Click to expand)</span>
+        </div>
+        <div id="cap-edit-form" style="display:none;">
+          <div class="form-card">
+            <div class="form-title">Capacity Configuration</div>
+            <div style="margin-bottom:14px;">
+              <label>Select Member</label>
+              <select id="cap-member-select" onchange="loadCapMember()"></select>
+            </div>
+            <div class="form-grid-3 form-grid">
+              <div><label>Weeks in PI</label><input type="number" id="cap-weeks"></div>
+              <div><label>Saturdays</label><input type="number" id="cap-sat"></div>
+              <div><label>Holidays</label><input type="number" id="cap-holidays"></div>
+            </div>
+            <div class="form-grid-3 form-grid">
+              <div><label>Leaves</label><input type="number" id="cap-leaves"></div>
+              <div><label>Misc Days</label><input type="number" id="cap-misc"></div>
+              <div><label>% Allocation (1.0 = 100%)</label><input type="number" step="0.01" id="cap-alloc"></div>
+            </div>
+            <div class="form-grid">
+              <div><label>Pre-PI</label><input type="number" id="cap-prepi"></div>
+              <div><label>All Hands</label><input type="number" step="0.01" id="cap-allhands"></div>
+              <div><label>Competency</label><input type="number" id="cap-competency"></div>
+              <div><label>GNC</label><input type="number" id="cap-gnc"></div>
+              <div><label>Others</label><input type="number" step="0.01" id="cap-others"></div>
+            </div>
+            <button class="btn btn-primary" onclick="saveCapacity()">Save Capacity</button>
           </div>
         </div>
       </div>
@@ -970,9 +1021,10 @@
       <div class="form-card" id="report-preview">
         <div class="form-title">Loading report...</div>
       </div>
-      <div class="flex gap-8">
+      <div class="flex gap-8" style="flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="downloadData()">📥 Download Data (JSON)</button>
-        <button class="btn btn-primary" onclick="printReport()">🖨️ Print Report</button>
+        <button class="btn btn-primary" onclick="downloadCSV()">📊 Download Excel (CSV)</button>
+        <button class="btn btn-primary" onclick="printReport()">🖨️ Print Report (PDF)</button>
         <button class="btn btn-ghost" onclick="copyReport()">📋 Copy to Clipboard</button>
       </div>
     </div>
@@ -1016,8 +1068,7 @@ state.members.forEach(m => {
     alloc:1,
     prepi:  m.name==='Janekallu Raghukumar'||m.name==='Sudheendra Desai'?1:0,
     allhands:0.18,
-    factory:m.name==='Janekallu Raghukumar'?5:m.name==='Sudheendra Desai'?3:0,
-    competency:2, gnc:1
+    competency:2, gnc:1, others:0
   };
 });
 
@@ -1113,7 +1164,7 @@ function calcCapacity(name) {
   const m = state.members.find(x=>x.name===name);
   if (!c || !m) return {};
   const weekdays = c.weeks * 5;
-  const training = c.prepi + c.allhands + c.factory + c.competency + c.gnc;
+  const training = c.prepi + c.allhands + c.competency + c.gnc + (c.others||0);
   const available = (weekdays + c.sat - c.holidays - c.leaves - c.misc - training) * c.alloc;
   const pf = parseFloat(calcAvgPF(m));
   const net = available * pf;
@@ -1201,9 +1252,10 @@ function renderDashboard() {
 // ════════════════════════════════════════════
 //  KYT
 // ════════════════════════════════════════════
-function addMember() {
+function saveMember() {
   const name = document.getElementById('kyt-name').value.trim();
   if (!name) { toast('Name is required'); return; }
+  
   const m = {
     name,
     grade: document.getElementById('kyt-grade').value,
@@ -1222,12 +1274,69 @@ function addMember() {
       +document.getElementById('kyt-s6').value
     ]
   };
-  state.members.push(m);
-  state.capacity[m.name] = { weeks:12,sat:0,holidays:3,leaves:7,misc:7,alloc:1,prepi:0,allhands:0.18,factory:0,competency:2,gnc:1 };
+  
+  const editIndex = +document.getElementById('kyt-edit-index').value;
+  const allocValue = m.module; // Use module as allocation percentage
+  
+  if (editIndex >= 0) {
+    // Update existing member
+    const oldName = state.members[editIndex].name;
+    if (oldName !== name && state.capacity[oldName]) {
+      // Transfer capacity data to new name if name changed
+      state.capacity[name] = state.capacity[oldName];
+      delete state.capacity[oldName];
+    }
+    state.members[editIndex] = m;
+    // Sync allocation from KYT to capacity
+    if (state.capacity[name]) {
+      state.capacity[name].alloc = allocValue;
+    }
+    toast('Member updated ✓');
+  } else {
+    // Add new member
+    state.members.push(m);
+    state.capacity[m.name] = { weeks:12,sat:0,holidays:3,leaves:7,misc:7,alloc:allocValue,prepi:0,allhands:0.18,competency:2,gnc:1,others:0 };
+    toast('Member added ✓');
+  }
+  
   clearKytForm();
   renderKYT();
   autoSave();
-  toast('Member added ✓');
+}
+
+function editMember(i) {
+  const m = state.members[i];
+  const currentAlloc = state.capacity[m.name]?.alloc || m.module || 1;
+  
+  document.getElementById('kyt-name').value = m.name;
+  document.getElementById('kyt-grade').value = m.grade;
+  document.getElementById('kyt-role').value = m.role;
+  document.getElementById('kyt-exp').value = m.exp;
+  document.getElementById('kyt-safety').value = m.safety;
+  document.getElementById('kyt-training').value = m.training;
+  document.getElementById('kyt-delivered').value = m.delivered;
+  document.getElementById('kyt-module').value = currentAlloc; // Load from capacity allocation
+  document.getElementById('kyt-s1').value = m.s[0];
+  document.getElementById('kyt-s2').value = m.s[1];
+  document.getElementById('kyt-s3').value = m.s[2];
+  document.getElementById('kyt-s4').value = m.s[3];
+  document.getElementById('kyt-s5').value = m.s[4];
+  document.getElementById('kyt-s6').value = m.s[5];
+  document.getElementById('kyt-edit-index').value = i;
+  
+  // Update UI
+  document.getElementById('kyt-form-title').textContent = 'Edit Team Member';
+  document.getElementById('kyt-submit-btn').textContent = '💾 Update Member';
+  document.getElementById('kyt-cancel-btn').style.display = 'inline-flex';
+  
+  // Scroll to form
+  document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  toast('Editing ' + m.name.split(' ')[0]);
+}
+
+function cancelEdit() {
+  clearKytForm();
+  toast('Edit cancelled');
 }
 
 function removeMember(i) {
@@ -1241,6 +1350,19 @@ function removeMember(i) {
 function clearKytForm() {
   ['kyt-name'].forEach(id => document.getElementById(id).value='');
   ['kyt-s1','kyt-s2','kyt-s3','kyt-s4','kyt-s5','kyt-s6'].forEach(id => document.getElementById(id).value='0.95');
+  document.getElementById('kyt-edit-index').value = '-1';
+  document.getElementById('kyt-form-title').textContent = 'Add Team Member';
+  document.getElementById('kyt-submit-btn').textContent = '+ Add Member';
+  document.getElementById('kyt-cancel-btn').style.display = 'none';
+  
+  // Reset dropdowns to defaults
+  document.getElementById('kyt-grade').value = 'C';
+  document.getElementById('kyt-role').value = 'Developer';
+  document.getElementById('kyt-exp').value = 'Medium > 3 to 5 yrs';
+  document.getElementById('kyt-safety').value = 'No';
+  document.getElementById('kyt-training').value = 'Yes';
+  document.getElementById('kyt-delivered').value = 'Yes';
+  document.getElementById('kyt-module').value = '1';
 }
 
 function renderKYT() {
@@ -1251,7 +1373,7 @@ function renderKYT() {
       <td><span class="badge badge-purple">${m.grade}</span></td>
       <td>${m.role}</td>
       <td><span class="badge badge-blue">${m.exp}</span></td>
-      <td>${m.module}</td>
+      <td>${(m.module * 100).toFixed(0)}%</td>
       <td class="sprint-cell"><span class="sprint-val ${m.s[0]=='T'?'training':m.s[0]>=0.9?'high':''}">${m.s[0]}</span></td>
       <td class="sprint-cell"><span class="sprint-val ${m.s[1]=='T'?'training':m.s[1]>=0.9?'high':''}">${m.s[1]}</span></td>
       <td class="sprint-cell"><span class="sprint-val ${m.s[2]=='T'?'training':m.s[2]>=0.9?'high':''}">${m.s[2]}</span></td>
@@ -1259,7 +1381,10 @@ function renderKYT() {
       <td class="sprint-cell"><span class="sprint-val ${m.s[4]=='T'?'training':m.s[4]>=0.9?'high':''}">${m.s[4]}</span></td>
       <td class="sprint-cell"><span class="sprint-val ${m.s[5]=='T'?'training':m.s[5]>=0.9?'high':''}">${m.s[5]}</span></td>
       <td><strong>${calcAvgPF(m)}</strong></td>
-      <td><button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="removeMember(${i})">Remove</button></td>
+      <td>
+        <button class="btn btn-primary" style="padding:4px 10px;font-size:11px;margin-right:4px;" onclick="editMember(${i})">Edit</button>
+        <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="removeMember(${i})">Remove</button>
+      </td>
     </tr>`).join('');
 }
 
@@ -1270,7 +1395,9 @@ function renderCapacity() {
   const sel = document.getElementById('cap-member-select');
   sel.innerHTML = state.members.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
   loadCapMember();
-  renderCapTable();
+  renderCapacitySummary();
+  renderCapacityMatrix();
+  renderTrainingMatrix();
 }
 
 function loadCapMember() {
@@ -1284,52 +1411,301 @@ function loadCapMember() {
   document.getElementById('cap-alloc').value = c.alloc||1;
   document.getElementById('cap-prepi').value = c.prepi||0;
   document.getElementById('cap-allhands').value = c.allhands||0.18;
-  document.getElementById('cap-factory').value = c.factory||0;
   document.getElementById('cap-competency').value = c.competency||2;
   document.getElementById('cap-gnc').value = c.gnc||1;
+  document.getElementById('cap-others').value = c.others||0;
 }
 
 function saveCapacity() {
   const name = document.getElementById('cap-member-select').value;
+  const allocValue = +document.getElementById('cap-alloc').value;
+  
   state.capacity[name] = {
     weeks: +document.getElementById('cap-weeks').value,
     sat: +document.getElementById('cap-sat').value,
     holidays: +document.getElementById('cap-holidays').value,
     leaves: +document.getElementById('cap-leaves').value,
     misc: +document.getElementById('cap-misc').value,
-    alloc: +document.getElementById('cap-alloc').value,
+    alloc: allocValue,
     prepi: +document.getElementById('cap-prepi').value,
     allhands: +document.getElementById('cap-allhands').value,
-    factory: +document.getElementById('cap-factory').value,
     competency: +document.getElementById('cap-competency').value,
     gnc: +document.getElementById('cap-gnc').value,
+    others: +document.getElementById('cap-others').value,
   };
-  renderCapTable();
+  
+  // Sync allocation back to KYT module field
+  const member = state.members.find(m => m.name === name);
+  if (member) {
+    member.module = allocValue;
+  }
+  
+  renderCapacity();
   autoSave();
   toast('Capacity saved ✓');
 }
 
-function renderCapTable() {
-  const tbody = document.getElementById('cap-tbody');
-  let totalAvail = 0, totalNet = 0;
-  tbody.innerHTML = state.members.map(m => {
+function toggleCapForm() {
+  const form = document.getElementById('cap-edit-form');
+  const toggle = document.getElementById('cap-form-toggle');
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    toggle.textContent = '(Click to collapse)';
+  } else {
+    form.style.display = 'none';
+    toggle.textContent = '(Click to expand)';
+  }
+}
+
+function renderCapacitySummary() {
+  const cfg = state.config;
+  const net = totalCapacity();
+  const featDays = (net * cfg.featSplit / 100).toFixed(1);
+  const bugDays = (net * (100 - cfg.featSplit) / 100).toFixed(1);
+  
+  // Calculate gross capacity
+  const grossDays = state.members.reduce((sum, m) => {
+    const c = state.capacity[m.name] || {};
+    return sum + ((c.weeks||12) * 5);
+  }, 0);
+  const utilPct = ((grossDays - totalAvailDays()) / grossDays * 100).toFixed(1);
+  
+  document.getElementById('cap-total-net').textContent = net.toFixed(1);
+  document.getElementById('cap-feature-days').textContent = featDays;
+  document.getElementById('cap-feature-pct').textContent = `${cfg.featSplit}% of capacity`;
+  document.getElementById('cap-bug-days').textContent = bugDays;
+  document.getElementById('cap-bug-pct').textContent = `${100-cfg.featSplit}% of capacity`;
+  document.getElementById('cap-util-pct').textContent = `${utilPct}%`;
+}
+
+function renderCapacityMatrix() {
+  const cfg = state.config;
+  const table = document.getElementById('cap-matrix-table');
+  const tbody = document.getElementById('cap-matrix-tbody');
+  
+  // Build header with team member names
+  let headerRow = '<tr><th style="min-width:200px;">Parameter</th>';
+  state.members.forEach(m => {
+    headerRow += `<th style="min-width:120px;"><strong>${m.name.split(' ')[0]}</strong><br/><small>${m.name.split(' ').slice(1).join(' ')}</small></th>`;
+  });
+  headerRow += '<th style="min-width:100px;"><strong>TOTAL</strong></th></tr>';
+  table.querySelector('thead').innerHTML = headerRow;
+  
+  // Build rows
+  let rows = '';
+  
+  // Role
+  rows += '<tr style="background:var(--surface2);"><td><strong>Role</strong></td>';
+  state.members.forEach(m => rows += `<td>${m.role}</td>`);
+  rows += '<td>—</td></tr>';
+  
+  // Weeks in PI
+  rows += `<tr><td><strong>Weeks in ${cfg.pi}</strong></td>`;
+  let totalWeeks = 0;
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    const weeks = c.weeks||12;
+    totalWeeks += weeks;
+    rows += `<td>${weeks}</td>`;
+  });
+  rows += `<td>${totalWeeks}</td></tr>`;
+  
+  // Weekdays
+  rows += `<tr><td><strong>Weekdays in ${cfg.pi}</strong></td>`;
+  let totalWeekdays = 0;
+  state.members.forEach(m => {
+    const c = calcCapacity(m.name);
+    totalWeekdays += c.weekdays||0;
+    rows += `<td>${c.weekdays||0}</td>`;
+  });
+  rows += `<td>${totalWeekdays}</td></tr>`;
+  
+  // Sat Working
+  rows += '<tr><td><strong>Sat Working</strong></td>';
+  let totalSat = 0;
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    totalSat += c.sat||0;
+    rows += `<td>${c.sat||0}</td>`;
+  });
+  rows += `<td>${totalSat}</td></tr>`;
+  
+  // Holidays
+  rows += '<tr><td><strong>Company Holidays/Flexi Holiday</strong></td>';
+  let totalHol = 0;
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    totalHol += c.holidays||3;
+    rows += `<td>${c.holidays||3}</td>`;
+  });
+  rows += `<td>${totalHol}</td></tr>`;
+  
+  // Leaves
+  rows += '<tr><td><strong>Leaves</strong></td>';
+  let totalLeaves = 0;
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    totalLeaves += c.leaves||0;
+    rows += `<td>${(c.leaves||0).toFixed(2)}</td>`;
+  });
+  rows += `<td>${totalLeaves.toFixed(2)}</td></tr>`;
+  
+  // Misc Days
+  rows += '<tr><td><strong>Misc / Non Training Activities</strong></td>';
+  let totalMisc = 0;
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    totalMisc += c.misc||0;
+    rows += `<td>${(c.misc||0).toFixed(2)}</td>`;
+  });
+  rows += `<td>${totalMisc.toFixed(2)}</td></tr>`;
+  
+  // Training Days
+  rows += '<tr><td><strong>Training Days</strong></td>';
+  let totalTraining = 0;
+  state.members.forEach(m => {
+    const c = calcCapacity(m.name);
+    totalTraining += c.training||0;
+    rows += `<td>${(c.training||0).toFixed(2)}</td>`;
+  });
+  rows += `<td>${totalTraining.toFixed(2)}</td></tr>`;
+  
+  // Allocation %
+  rows += '<tr><td><strong>% Allocation</strong></td>';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    rows += `<td>${((c.alloc||1)*100).toFixed(0)}%</td>`;
+  });
+  rows += '<td>—</td></tr>';
+  
+  // Available Days
+  rows += '<tr style="background:var(--surface2);"><td><strong>Available Days</strong></td>';
+  let totalAvail = 0;
+  state.members.forEach(m => {
     const c = calcCapacity(m.name);
     totalAvail += c.available||0;
+    rows += `<td><strong>${(c.available||0).toFixed(1)}</strong></td>`;
+  });
+  rows += `<td><strong>${totalAvail.toFixed(1)}</strong></td></tr>`;
+  
+  // KYT Productivity Factor
+  rows += '<tr><td><strong>KYT Productivity Factor</strong></td>';
+  state.members.forEach(m => {
+    rows += `<td>${calcAvgPF(m)}</td>`;
+  });
+  rows += '<td>—</td></tr>';
+  
+  // Total Available Capacity
+  rows += '<tr style="background:var(--accent2);color:#000;"><td><strong>Total Available Capacity (days)</strong></td>';
+  let totalNet = 0;
+  state.members.forEach(m => {
+    const c = calcCapacity(m.name);
     totalNet += c.net||0;
-    return `<tr>
-      <td><strong>${m.name}</strong></td>
-      <td>${c.weekdays||0}</td>
-      <td>${(c.training||0).toFixed(2)}</td>
-      <td>${c.available||0}</td>
-      <td>${c.pf||0}</td>
-      <td class="text-green"><strong>${c.net||0}</strong></td>
-    </tr>`;
-  }).join('');
-  document.getElementById('cap-foot-avail').textContent = totalAvail.toFixed(2);
-  document.getElementById('cap-foot-net').textContent = totalNet.toFixed(2);
-  const featSplit = state.config.featSplit/100;
-  document.getElementById('cap-split-feat').textContent = (totalNet*featSplit).toFixed(2);
-  document.getElementById('cap-split-bug').textContent = (totalNet*(1-featSplit)).toFixed(2);
+    rows += `<td><strong>${(c.net||0).toFixed(1)}</strong></td>`;
+  });
+  rows += `<td><strong>${totalNet.toFixed(1)}</strong></td></tr>`;
+  
+  tbody.innerHTML = rows;
+}
+
+function renderTrainingMatrix() {
+  const table = document.getElementById('cap-training-table');
+  const tbody = document.getElementById('cap-training-tbody');
+  
+  // Build header
+  let headerRow = '<tr><th style="min-width:200px;">Training Type</th>';
+  state.members.forEach(m => {
+    headerRow += `<th style="min-width:120px;">${m.name.split(' ')[0]}</th>`;
+  });
+  headerRow += '<th style="min-width:100px;"><strong>TOTAL</strong></th></tr>';
+  table.querySelector('thead').innerHTML = headerRow;
+  
+  let rows = '';
+  
+  // Pre-PI
+  rows += '<tr><td><strong>Pre-PI</strong></td>';
+  let totalPrepi = 0;
+  state.members.forEach((m, idx) => {
+    const c = state.capacity[m.name] || {};
+    totalPrepi += c.prepi||0;
+    rows += `<td contenteditable="true" data-member="${m.name}" data-field="prepi" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${(c.prepi||0).toFixed(2)}</td>`;
+  });
+  rows += `<td><strong>${totalPrepi.toFixed(2)}</strong></td></tr>`;
+  
+  // All Hands
+  rows += '<tr><td><strong>All Hands</strong></td>';
+  let totalAllhands = 0;
+  state.members.forEach((m, idx) => {
+    const c = state.capacity[m.name] || {};
+    totalAllhands += c.allhands||0;
+    rows += `<td contenteditable="true" data-member="${m.name}" data-field="allhands" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${(c.allhands||0).toFixed(2)}</td>`;
+  });
+  rows += `<td><strong>${totalAllhands.toFixed(2)}</strong></td></tr>`;
+  
+  // Competency
+  rows += '<tr><td><strong>Competency</strong></td>';
+  let totalComp = 0;
+  state.members.forEach((m, idx) => {
+    const c = state.capacity[m.name] || {};
+    totalComp += c.competency||0;
+    rows += `<td contenteditable="true" data-member="${m.name}" data-field="competency" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${(c.competency||0).toFixed(2)}</td>`;
+  });
+  rows += `<td><strong>${totalComp.toFixed(2)}</strong></td></tr>`;
+  
+  // GNC
+  rows += '<tr><td><strong>GNC</strong></td>';
+  let totalGnc = 0;
+  state.members.forEach((m, idx) => {
+    const c = state.capacity[m.name] || {};
+    totalGnc += c.gnc||0;
+    rows += `<td contenteditable="true" data-member="${m.name}" data-field="gnc" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${(c.gnc||0).toFixed(2)}</td>`;
+  });
+  rows += `<td><strong>${totalGnc.toFixed(2)}</strong></td></tr>`;
+  
+  // Others
+  rows += '<tr><td><strong>Others</strong></td>';
+  let totalOthers = 0;
+  state.members.forEach((m, idx) => {
+    const c = state.capacity[m.name] || {};
+    totalOthers += c.others||0;
+    rows += `<td contenteditable="true" data-member="${m.name}" data-field="others" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${(c.others||0).toFixed(2)}</td>`;
+  });
+  rows += `<td><strong>${totalOthers.toFixed(2)}</strong></td></tr>`;
+  
+  // Total
+  rows += '<tr style="background:var(--surface2);"><td><strong>TOTAL Training Days</strong></td>';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    const total = (c.prepi||0) + (c.allhands||0) + (c.competency||0) + (c.gnc||0) + (c.others||0);
+    rows += `<td><strong>${total.toFixed(2)}</strong></td>`;
+  });
+  const grandTotal = totalPrepi + totalAllhands + totalComp + totalGnc + totalOthers;
+  rows += `<td><strong>${grandTotal.toFixed(2)}</strong></td></tr>`;
+  
+  tbody.innerHTML = rows;
+  
+  // Add event listeners for editable cells
+  tbody.querySelectorAll('.editable-cell').forEach(cell => {
+    cell.addEventListener('blur', function() {
+      const member = this.getAttribute('data-member');
+      const field = this.getAttribute('data-field');
+      const value = parseFloat(this.textContent) || 0;
+      
+      if (state.capacity[member]) {
+        state.capacity[member][field] = value;
+        renderCapacity();
+        autoSave();
+        toast(`${field} updated for ${member.split(' ')[0]} ✓`);
+      }
+    });
+    
+    cell.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.blur();
+      }
+    });
+  });
 }
 
 // ════════════════════════════════════════════
@@ -1604,6 +1980,195 @@ function downloadData() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   toast('Data downloaded ✓');
+}
+
+function downloadCSV() {
+  const cfg = state.config;
+  const net = totalCapacity();
+  const avail = totalAvailDays();
+  const timestamp = new Date().toISOString().slice(0,10);
+  
+  let csv = '';
+  
+  // Header rows (empty for spacing)
+  csv += ',,,,,,,,,,,\n';
+  csv += ',,,,,,,,,,,\n';
+  
+  // Team member names row
+  csv += ',,';
+  state.members.forEach(m => csv += `"${m.name}",`);
+  csv += '0,0,0,0\n';
+  
+  // Role row
+  csv += ',Role,';
+  state.members.forEach(m => csv += `${m.role},`);
+  csv += ',,,\n';
+  
+  // Weeks in PI
+  csv += `,Weeks in ${cfg.pi},`;
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `${c.weeks||12},`;
+  });
+  csv += ',,,\n';
+  
+  // Weekdays
+  csv += `,Weekdays in ${cfg.pi},`;
+  state.members.forEach(m => {
+    const c = calcCapacity(m.name);
+    csv += `${c.weekdays||0},`;
+  });
+  csv += ',,,\n';
+  
+  // Sat Working
+  csv += ',Sat Working,';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `${c.sat||0},`;
+  });
+  csv += ',,,\n';
+  
+  // Company Holidays
+  csv += ',Company Holidays/Flexi Holiday,';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `${c.holidays||3},`;
+  });
+  csv += ',,,\n';
+  
+  // Leaves
+  csv += ',Leaves,';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `${(c.leaves||0).toFixed(2)},`;
+  });
+  csv += ',,,\n';
+  
+  // Misc / Non Training Project Activities
+  csv += ',Misc / Non Training Project Activities (Days),';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `${(c.misc||0).toFixed(2)},`;
+  });
+  csv += ',,,\n';
+  
+  // Training Days
+  csv += ',Training Days,';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    const training = (c.prepi||0) + (c.allhands||0) + (c.factory||0) + (c.competency||0) + (c.gnc||0);
+    csv += `${training.toFixed(2)},`;
+  });
+  csv += ',,,\n';
+  
+  // % Allocation
+  csv += ',% Allocation,';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `${((c.alloc||1)*100).toFixed(0)}%,`;
+  });
+  csv += ',,,\n';
+  
+  // Available Days
+  csv += ',Available Days,';
+  state.members.forEach(m => {
+    const c = calcCapacity(m.name);
+    csv += `${(c.available||0).toFixed(1)},`;
+  });
+  csv += ',,,\n';
+  
+  // KYT Productivity Factor
+  csv += ',KYT Productivity Factor,';
+  state.members.forEach(m => {
+    csv += `${calcAvgPF(m)},`;
+  });
+  csv += ',,,\n';
+  
+  // Total Available Capacity
+  csv += ',Total Available Capacity (days),';
+  state.members.forEach(m => {
+    const c = calcCapacity(m.name);
+    csv += `${(c.net||0).toFixed(1)},`;
+  });
+  csv += ',,,\n';
+  
+  // Empty rows
+  csv += ',,,,,,,,,,,\n';
+  csv += ',,,,,,,,,,,\n';
+  
+  // Training time section
+  csv += ',Training time in (days),,,,,,,,,,\n';
+  csv += ',Pre-PI,';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `${(c.prepi||0).toFixed(2)},`;
+  });
+  csv += ',,,\n';
+  
+  csv += ',All Hands,';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `${(c.allhands||0).toFixed(2)},`;
+  });
+  csv += ',,,\n';
+  
+  csv += ',Factory Days,';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `${(c.factory||0).toFixed(2)},`;
+  });
+  csv += ',,,\n';
+  
+  csv += ',Competency,';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `${(c.competency||0).toFixed(2)},`;
+  });
+  csv += ',,,\n';
+  
+  csv += ',GNC,';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `${(c.gnc||0).toFixed(2)},`;
+  });
+  csv += ',,,\n';
+  
+  csv += ',,,,,,,,,,,\n';
+  
+  // Training Total
+  csv += ',Total,';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    const training = (c.prepi||0) + (c.allhands||0) + (c.factory||0) + (c.competency||0) + (c.gnc||0);
+    csv += `${training.toFixed(2)},`;
+  });
+  csv += '0.00,0.00,0.00,0.00\n';
+  
+  csv += ',,,,,,,,,,,\n';
+  
+  // Summary section
+  const grossDays = state.members.reduce((sum, m) => {
+    const c = state.capacity[m.name] || {};
+    return sum + ((c.weeks||12) * 5);
+  }, 0);
+  const diffPercent = ((grossDays - avail) / grossDays * 100).toFixed(1);
+  
+  csv += `,Available Cummulative Capacity (Days),,${avail.toFixed(1)},,"Step 1: Double check the data, all the data is transferred from the KYT Sheet.",,,,,,\n`;
+  csv += `,Capacity for Feature Development (Days),${cfg.featSplit}%,${(net*cfg.featSplit/100).toFixed(1)},,Step 2: Update the leaves and non training activities in the first table.,,,,,,\n`;
+  csv += `,Capacity for Regression Bug Fixing (Days),${100-cfg.featSplit}%,${(net*(100-cfg.featSplit)/100).toFixed(1)},,Step 3: Update the training details in the training table below.,,,,,,\n`;
+  csv += `,Difference of Gross Vs Net Available Days,,${diffPercent}%,,Step 4: Update the Capacity for Feature development in the bottom column.,,,,,,\n`;
+  
+  // Create and download CSV
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${cfg.project.replace(/\s+/g, '-')}-Adaptive-PI-Plan-${cfg.pi.replace('PI-', '')}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('CSV downloaded ✓');
 }
 
 // ════════════════════════════════════════════
