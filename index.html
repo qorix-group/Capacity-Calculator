@@ -734,7 +734,7 @@
     <!-- ══════════════ DASHBOARD ══════════════ -->
     <div class="page active" id="page-dashboard">
       <div class="page-title">PI Plan Overview</div>
-      <div class="page-sub">Program Increment · CY26 Q1 · Qorix Developer</div>
+      <div class="page-sub" id="dashboard-subtitle">Program Increment · CY26 Q1 · Qorix Developer</div>
 
       <div class="stat-grid">
         <div class="stat-card" style="--accent-color: var(--accent);">
@@ -802,16 +802,20 @@
               <option>Architect</option><option>Tech Lead</option><option selected>Developer</option><option>Tester</option>
             </select>
           </div>
-          <div><label>Experience</label>
+          <div><label>Overall Experience</label>
             <select id="kyt-exp">
               <option>Low > 1 to 3 yrs</option><option selected>Medium > 3 to 5 yrs</option><option>High > 5+ yrs</option>
             </select>
           </div>
         </div>
-        <div class="form-grid-3 form-grid">
-          <div><label>Safety</label><select id="kyt-safety"><option selected>No</option><option>Yes</option></select></div>
-          <div><label>Training</label><select id="kyt-training"><option>No</option><option selected>Yes</option></select></div>
-          <div><label>Delivered</label><select id="kyt-delivered"><option>No</option><option selected>Yes</option></select></div>
+        <div class="form-grid">
+          <div style="grid-column: span 2;"><label>Technologies & Experience (e.g., "C++: 5yrs, Python: 3yrs, AUTOSAR: 2yrs")</label><input type="text" id="kyt-tech" placeholder="Technology: Years, Technology: Years..."></div>
+        </div>
+        <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
+          <div><label>Safety Certified</label><select id="kyt-safety"><option selected>No</option><option>Yes</option></select></div>
+          <div><label>Cybersec Trained</label><select id="kyt-cybersec"><option selected>No</option><option>Yes</option></select></div>
+          <div><label>Project Training Done?</label><select id="kyt-training"><option>No</option><option selected>Yes</option></select></div>
+          <div><label>Delivered Code</label><select id="kyt-delivered"><option>No</option><option selected>Yes</option></select></div>
         </div>
         <div class="form-grid">
           <div><label>% Allocation (1.0 = 100%, 0.5 = 50%)</label><input type="number" step="0.01" id="kyt-module" value="1"></div>
@@ -832,7 +836,7 @@
       <div class="table-container">
         <table>
           <thead>
-            <tr><th>Name</th><th>Grade</th><th>Role</th><th>Exp</th><th>Alloc %</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>Avg PF</th><th>Actions</th></tr>
+            <tr><th>Name</th><th>Grade</th><th>Role</th><th>Overall Exp</th><th>Technologies</th><th>Safety Certified</th><th>Cybersec Trained</th><th>Project Training</th><th>Delivered Code</th><th>Alloc %</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>Avg PF</th><th>Actions</th></tr>
           </thead>
           <tbody id="kyt-tbody"></tbody>
         </table>
@@ -1021,9 +1025,31 @@
       <div class="form-card" id="report-preview">
         <div class="form-title">Loading report...</div>
       </div>
+      
+      <!-- Backup & Restore Section -->
+      <div class="section" style="margin-top:24px;">
+        <div class="section-title">Backup & Restore</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:18px;">
+          <div style="margin-bottom:16px;">
+            <label style="display:block;margin-bottom:8px;font-size:12px;color:var(--text);">Upload Complete Backup (CSV)</label>
+            <input type="file" id="csv-upload" accept=".csv" style="display:none;" onchange="uploadCSV(event)">
+            <button class="btn btn-primary" onclick="document.getElementById('csv-upload').click()">📤 Upload CSV Backup</button>
+            <span style="margin-left:12px;font-size:11px;color:var(--muted);">Upload a previously saved backup to restore all data</span>
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="downloadCompleteCSV()">💾 Download Complete Backup (CSV)</button>
+            <span style="margin-left:12px;font-size:11px;color:var(--muted);">Save all dashboard data for backup or editing in Excel</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Export Options -->
+      <div class="section">
+        <div class="section-title">Export Options</div>
+      </div>
       <div class="flex gap-8" style="flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="downloadData()">📥 Download Data (JSON)</button>
-        <button class="btn btn-primary" onclick="downloadCSV()">📊 Download Excel (CSV)</button>
+        <button class="btn btn-primary" onclick="downloadCSV()">📊 Export Capacity Matrix (CSV)</button>
         <button class="btn btn-primary" onclick="printReport()">🖨️ Print Report (PDF)</button>
         <button class="btn btn-ghost" onclick="copyReport()">📋 Copy to Clipboard</button>
       </div>
@@ -1046,12 +1072,12 @@ let state = {
     featSplit: 95, sprints: 6
   },
   members: [
-    { name:'Janekallu Raghukumar', grade:'F', role:'Architect', exp:'High > 5+ yrs', safety:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
-    { name:'Mayur Aggarwal',        grade:'C', role:'Developer', exp:'Medium > 3 to 5 yrs', safety:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
-    { name:'Dhanush K',             grade:'C', role:'Developer', exp:'Medium > 3 to 5 yrs', safety:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
-    { name:'Sumegh Thale',          grade:'C', role:'Developer', exp:'Low > 1 to 3 yrs',    safety:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
-    { name:'Sudheendra Desai',      grade:'E', role:'Tech Lead', exp:'High > 5+ yrs',        safety:'Yes',training:'Yes', delivered:'Yes', module:1, s:[0.9,0.9,0.9,0.9,0.9,0.9] },
-    { name:'Rohit Malla',           grade:'C', role:'Developer', exp:'Low > 1 to 3 yrs',     safety:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] }
+    { name:'Janekallu Raghukumar', grade:'F', role:'Architect', exp:'High > 5+ yrs', tech:'C++: 10yrs, AUTOSAR: 8yrs', safety:'No', cybersec:'Yes', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
+    { name:'Mayur Aggarwal',        grade:'C', role:'Developer', exp:'Medium > 3 to 5 yrs', tech:'C++: 5yrs, Python: 3yrs', safety:'No', cybersec:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
+    { name:'Dhanush K',             grade:'C', role:'Developer', exp:'Medium > 3 to 5 yrs', tech:'C++: 4yrs', safety:'No', cybersec:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
+    { name:'Sumegh Thale',          grade:'C', role:'Developer', exp:'Low > 1 to 3 yrs',    tech:'C++: 2yrs', safety:'No', cybersec:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
+    { name:'Sudheendra Desai',      grade:'E', role:'Tech Lead', exp:'High > 5+ yrs',        tech:'C++: 8yrs, AUTOSAR: 5yrs', safety:'Yes', cybersec:'Yes', training:'Yes', delivered:'Yes', module:1, s:[0.9,0.9,0.9,0.9,0.9,0.9] },
+    { name:'Rohit Malla',           grade:'C', role:'Developer', exp:'Low > 1 to 3 yrs',     tech:'C++: 2yrs', safety:'No', cybersec:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] }
   ],
   capacity: {},
   features: [],
@@ -1204,6 +1230,7 @@ function renderPage(id) {
   if (id==='capacity') renderCapacity();
   if (id==='checklist') renderChecklist();
   if (id==='guidelines') renderGuidelines();
+  if (id==='config') renderConfig();
   if (id==='report') renderReport();
 }
 
@@ -1215,6 +1242,12 @@ function renderDashboard() {
   const avail = totalAvailDays();
   const featDays = (total * state.config.featSplit / 100).toFixed(1);
   const bugDays = (total * (100-state.config.featSplit) / 100).toFixed(1);
+
+  // Update dashboard subtitle
+  const subtitle = document.getElementById('dashboard-subtitle');
+  if (subtitle) {
+    subtitle.textContent = `Program Increment · ${state.config.pi} · ${state.config.project}`;
+  }
 
   document.getElementById('stat-members').textContent = state.members.length;
   document.getElementById('stat-cap').textContent = total.toFixed(1);
@@ -1261,7 +1294,9 @@ function saveMember() {
     grade: document.getElementById('kyt-grade').value,
     role: document.getElementById('kyt-role').value,
     exp: document.getElementById('kyt-exp').value,
+    tech: document.getElementById('kyt-tech').value.trim(),
     safety: document.getElementById('kyt-safety').value,
+    cybersec: document.getElementById('kyt-cybersec').value,
     training: document.getElementById('kyt-training').value,
     delivered: document.getElementById('kyt-delivered').value,
     module: +document.getElementById('kyt-module').value,
@@ -1312,7 +1347,9 @@ function editMember(i) {
   document.getElementById('kyt-grade').value = m.grade;
   document.getElementById('kyt-role').value = m.role;
   document.getElementById('kyt-exp').value = m.exp;
+  document.getElementById('kyt-tech').value = m.tech || '';
   document.getElementById('kyt-safety').value = m.safety;
+  document.getElementById('kyt-cybersec').value = m.cybersec || 'No';
   document.getElementById('kyt-training').value = m.training;
   document.getElementById('kyt-delivered').value = m.delivered;
   document.getElementById('kyt-module').value = currentAlloc; // Load from capacity allocation
@@ -1348,7 +1385,7 @@ function removeMember(i) {
 }
 
 function clearKytForm() {
-  ['kyt-name'].forEach(id => document.getElementById(id).value='');
+  ['kyt-name', 'kyt-tech'].forEach(id => document.getElementById(id).value='');
   ['kyt-s1','kyt-s2','kyt-s3','kyt-s4','kyt-s5','kyt-s6'].forEach(id => document.getElementById(id).value='0.95');
   document.getElementById('kyt-edit-index').value = '-1';
   document.getElementById('kyt-form-title').textContent = 'Add Team Member';
@@ -1360,6 +1397,7 @@ function clearKytForm() {
   document.getElementById('kyt-role').value = 'Developer';
   document.getElementById('kyt-exp').value = 'Medium > 3 to 5 yrs';
   document.getElementById('kyt-safety').value = 'No';
+  document.getElementById('kyt-cybersec').value = 'No';
   document.getElementById('kyt-training').value = 'Yes';
   document.getElementById('kyt-delivered').value = 'Yes';
   document.getElementById('kyt-module').value = '1';
@@ -1373,6 +1411,11 @@ function renderKYT() {
       <td><span class="badge badge-purple">${m.grade}</span></td>
       <td>${m.role}</td>
       <td><span class="badge badge-blue">${m.exp}</span></td>
+      <td style="font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${m.tech||''}">${m.tech||'—'}</td>
+      <td><span class="badge ${m.safety==='Yes'?'badge-green':'badge-orange'}">${m.safety}</span></td>
+      <td><span class="badge ${(m.cybersec||'No')==='Yes'?'badge-green':'badge-orange'}">${m.cybersec||'No'}</span></td>
+      <td><span class="badge ${m.training==='Yes'?'badge-green':'badge-orange'}">${m.training}</span></td>
+      <td><span class="badge ${m.delivered==='Yes'?'badge-green':'badge-orange'}">${m.delivered}</span></td>
       <td>${(m.module * 100).toFixed(0)}%</td>
       <td class="sprint-cell"><span class="sprint-val ${m.s[0]=='T'?'training':m.s[0]>=0.9?'high':''}">${m.s[0]}</span></td>
       <td class="sprint-cell"><span class="sprint-val ${m.s[1]=='T'?'training':m.s[1]>=0.9?'high':''}">${m.s[1]}</span></td>
@@ -1752,6 +1795,22 @@ function renderGuidelines() {
 // ════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════
+function renderConfig() {
+  const cfg = state.config;
+  document.getElementById('cfg-pi').value = cfg.pi;
+  document.getElementById('cfg-project').value = cfg.project;
+  document.getElementById('cfg-configid').value = cfg.configId || '';
+  document.getElementById('cfg-version').value = cfg.version;
+  document.getElementById('cfg-date').value = cfg.date || '';
+  document.getElementById('cfg-status').value = cfg.status;
+  document.getElementById('cfg-ppm').value = cfg.ppm || '';
+  document.getElementById('cfg-po').value = cfg.po || '';
+  document.getElementById('cfg-sm').value = cfg.sm || '';
+  document.getElementById('cfg-author').value = cfg.author || '';
+  document.getElementById('cfg-featsplit').value = cfg.featSplit;
+  document.getElementById('cfg-sprints').value = cfg.sprints;
+}
+
 function saveConfig() {
   state.config = {
     pi: document.getElementById('cfg-pi').value,
@@ -1768,6 +1827,18 @@ function saveConfig() {
     sprints: +document.getElementById('cfg-sprints').value,
   };
   document.querySelector('.pi-badge').textContent = state.config.pi;
+  
+  // Update dashboard subtitle
+  const subtitle = document.getElementById('dashboard-subtitle');
+  if (subtitle) {
+    subtitle.textContent = `Program Increment · ${state.config.pi} · ${state.config.project}`;
+  }
+  
+  // Update capacity matrix if it exists (user might be viewing capacity tab)
+  if (document.getElementById('cap-matrix-tbody')) {
+    renderCapacityMatrix();
+  }
+  
   autoSave();
   toast('Config saved ✓');
 }
@@ -2172,6 +2243,199 @@ function downloadCSV() {
 }
 
 // ════════════════════════════════════════════
+//  COMPLETE BACKUP & RESTORE (CSV)
+// ════════════════════════════════════════════
+function downloadCompleteCSV() {
+  const timestamp = new Date().toISOString().slice(0,10);
+  let csv = '';
+  
+  // ===== CONFIGURATION SECTION =====
+  csv += '### CONFIGURATION ###\n';
+  csv += 'Field,Value\n';
+  csv += `PI Name,${state.config.pi}\n`;
+  csv += `Project,${state.config.project}\n`;
+  csv += `Config ID,${state.config.configId || ''}\n`;
+  csv += `Version,${state.config.version}\n`;
+  csv += `Date,${state.config.date || ''}\n`;
+  csv += `Status,${state.config.status}\n`;
+  csv += `PPM,${state.config.ppm || ''}\n`;
+  csv += `PO,${state.config.po || ''}\n`;
+  csv += `Scrum Master,${state.config.sm || ''}\n`;
+  csv += `Author,${state.config.author || ''}\n`;
+  csv += `Feature Split %,${state.config.featSplit}\n`;
+  csv += `Sprints,${state.config.sprints}\n`;
+  csv += '\n';
+  
+  // ===== KYT SECTION =====
+  csv += '### TEAM MEMBERS (KYT) ###\n';
+  csv += 'Name,Grade,Role,Overall Experience,Technologies,Safety Certified,Cybersec Trained,Project Training Done,Delivered Code,Allocation %,S1 PF,S2 PF,S3 PF,S4 PF,S5 PF,S6 PF\n';
+  state.members.forEach(m => {
+    csv += `"${m.name}",${m.grade},${m.role},"${m.exp}","${m.tech||''}",${m.safety},${m.cybersec||'No'},${m.training},${m.delivered},${m.module},${m.s[0]},${m.s[1]},${m.s[2]},${m.s[3]},${m.s[4]},${m.s[5]}\n`;
+  });
+  csv += '\n';
+  
+  // ===== CAPACITY SECTION =====
+  csv += '### CAPACITY DETAILS ###\n';
+  csv += 'Name,Weeks,Saturdays,Holidays,Leaves,Misc Days,Allocation %,Pre-PI,All Hands,Competency,GNC,Others\n';
+  state.members.forEach(m => {
+    const c = state.capacity[m.name] || {};
+    csv += `"${m.name}",${c.weeks||12},${c.sat||0},${c.holidays||3},${c.leaves||0},${c.misc||0},${c.alloc||1},${c.prepi||0},${c.allhands||0},${c.competency||0},${c.gnc||0},${c.others||0}\n`;
+  });
+  csv += '\n';
+  
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `PI-Plan-Complete-Backup-${state.config.pi}-${timestamp}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Complete backup downloaded ✓');
+}
+
+function uploadCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const text = e.target.result;
+      const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+      
+      let section = '';
+      const newState = {
+        config: { ...state.config },
+        members: [],
+        capacity: {},
+        features: [],
+        userStories: [],
+        checklist: state.checklist
+      };
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        // Detect sections
+        if (line.includes('### CONFIGURATION ###')) {
+          section = 'config';
+          i++; // Skip header row
+          continue;
+        } else if (line.includes('### TEAM MEMBERS')) {
+          section = 'kyt';
+          i++; // Skip header row
+          continue;
+        } else if (line.includes('### CAPACITY DETAILS')) {
+          section = 'capacity';
+          i++; // Skip header row
+          continue;
+        }
+        
+        // Parse data based on section
+        if (section === 'config' && line) {
+          const parts = line.split(',').map(p => p.trim());
+          if (parts.length >= 2) {
+            const field = parts[0];
+            const value = parts.slice(1).join(',');
+            if (field === 'PI Name') newState.config.pi = value;
+            else if (field === 'Project') newState.config.project = value;
+            else if (field === 'Config ID') newState.config.configId = value;
+            else if (field === 'Version') newState.config.version = value;
+            else if (field === 'Date') newState.config.date = value;
+            else if (field === 'Status') newState.config.status = value;
+            else if (field === 'PPM') newState.config.ppm = value;
+            else if (field === 'PO') newState.config.po = value;
+            else if (field === 'Scrum Master') newState.config.sm = value;
+            else if (field === 'Author') newState.config.author = value;
+            else if (field === 'Feature Split %') newState.config.featSplit = +value;
+            else if (field === 'Sprints') newState.config.sprints = +value;
+          }
+        } else if (section === 'kyt' && line) {
+          // Parse KYT data: Name,Grade,Role,Overall Experience,Technologies,Safety,Cybersec,Training,Delivered,Allocation %,S1-S6
+          const parts = parseCSVLine(line);
+          if (parts.length >= 16) {
+            newState.members.push({
+              name: parts[0],
+              grade: parts[1],
+              role: parts[2],
+              exp: parts[3],
+              tech: parts[4],
+              safety: parts[5],
+              cybersec: parts[6],
+              training: parts[7],
+              delivered: parts[8],
+              module: +parts[9],
+              s: [+parts[10], +parts[11], +parts[12], +parts[13], +parts[14], +parts[15]]
+            });
+          }
+        } else if (section === 'capacity' && line) {
+          // Parse capacity: Name,Weeks,Saturdays,Holidays,Leaves,Misc,Alloc,Pre-PI,All Hands,Competency,GNC,Others
+          const parts = parseCSVLine(line);
+          if (parts.length >= 12) {
+            const name = parts[0];
+            newState.capacity[name] = {
+              weeks: +parts[1],
+              sat: +parts[2],
+              holidays: +parts[3],
+              leaves: +parts[4],
+              misc: +parts[5],
+              alloc: +parts[6],
+              prepi: +parts[7],
+              allhands: +parts[8],
+              competency: +parts[9],
+              gnc: +parts[10],
+              others: +parts[11]
+            };
+          }
+        }
+      }
+      
+      // Apply the new state
+      state.config = newState.config;
+      state.members = newState.members;
+      state.capacity = newState.capacity;
+      
+      // Save and refresh
+      saveState();
+      document.querySelector('.pi-badge').textContent = state.config.pi;
+      renderDashboard();
+      toast('Data imported successfully ✓');
+      
+      // Clear file input
+      event.target.value = '';
+      
+    } catch (error) {
+      console.error('CSV import error:', error);
+      toast('Error importing CSV file. Please check format.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Helper function to parse CSV line considering quoted values
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+// ════════════════════════════════════════════
 //  TOAST
 // ════════════════════════════════════════════
 function toast(msg) {
@@ -2194,6 +2458,7 @@ updateClock();
 //  INIT
 // ════════════════════════════════════════════
 loadState();
+document.querySelector('.pi-badge').textContent = state.config.pi;
 renderDashboard();
 </script>
 </body>
