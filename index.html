@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PI Plan Dashboard — Qorix Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e28;
+    --border: #252a38;
+    --accent: #4f9eff;
+    --accent2: #00e5a0;
+    --accent3: #ff6b6b;
+    --accent4: #f5a623;
+    --text: #e8eaf0;
+    --muted: #6b7394;
+    --confirmed: #00e5a0;
+    --tentative: #f5a623;
+    --planned-later: #4f9eff;
+    --danger: #ff6b6b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 13px;
+  }
+
+  /* ─── TOP HEADER ─── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent); }
+  .pi-badge {
+    font-size: 11px;
+    background: var(--accent);
+    color: #000;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+  .header-meta {
+    display: flex; align-items: center; gap: 16px;
+  }
+  .status-pill {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--muted);
+  }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent2); }
+
+  /* ─── LAYOUT ─── */
+  .shell {
+    display: flex;
+    height: calc(100vh - 57px);
+  }
+
+  /* ─── SIDEBAR ─── */
+  nav {
+    width: 200px;
+    min-width: 200px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nav-section {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    padding: 12px 20px 6px;
+    text-transform: uppercase;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 20px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+    font-size: 12px;
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: rgba(79,158,255,0.07);
+  }
+  .nav-icon { font-size: 14px; width: 16px; text-align: center; }
+
+  /* ─── MAIN ─── */
+  main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px;
+  }
+
+  /* ─── PAGE TITLES ─── */
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .page-sub { color: var(--muted); margin-bottom: 28px; }
+
+  /* ─── STAT CARDS ─── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent-color, var(--accent));
+  }
+  .stat-label { font-size: 10px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; }
+  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ─── SECTION ─── */
+  .section { margin-bottom: 28px; }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .section-title::after {
+    content: ''; flex: 1;
+    height: 1px; background: var(--border);
+  }
+
+  /* ─── TABLE ─── */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  th {
+    background: var(--surface2);
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:hover td { background: var(--surface2); }
+  tr:last-child td { border-bottom: none; }
+  tfoot { background: var(--surface2); font-weight: 600; }
+  tfoot td { font-weight: 600; }
+  .table-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  /* ─── TAGS / BADGES ─── */
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .badge-blue { background: rgba(79,158,255,0.15); color: var(--accent); }
+  .badge-green { background: rgba(0,229,160,0.12); color: var(--accent2); }
+  .badge-orange { background: rgba(245,166,35,0.12); color: var(--accent4); }
+  .badge-red { background: rgba(255,107,107,0.12); color: var(--accent3); }
+  .badge-purple { background: rgba(167,139,250,0.12); color: #a78bfa; }
+
+  /* ─── PRODUCTIVITY BAR ─── */
+  .pf-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .pf-bar {
+    flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+  }
+  .pf-fill { height: 100%; border-radius: 3px; background: var(--accent2); transition: width 0.4s; }
+  .pf-val { font-size: 11px; color: var(--muted); width: 32px; text-align: right; }
+
+  /* ─── CAPACITY RING ─── */
+  .capacity-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .cap-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .cap-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .cap-role { font-size: 10px; color: var(--muted); margin-bottom: 12px; }
+  .cap-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; color: var(--muted); }
+  .cap-row strong { color: var(--text); }
+  .cap-bar-wrap { margin-top: 10px; }
+  .cap-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .cap-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+
+  /* ─── FEATURE TABLE ─── */
+  .feature-status {
+    display: inline-block;
+    width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 6px;
+  }
+  .fs-confirmed { background: var(--confirmed); }
+  .fs-tentative { background: var(--tentative); }
+  .fs-planned { background: var(--planned-later); }
+
+  /* ─── SPRINT CELLS ─── */
+  .sprint-cell {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+  .sprint-val {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    min-width: 36px;
+    text-align: center;
+    background: rgba(79,158,255,0.1);
+    color: var(--accent);
+  }
+  .sprint-val.high { background: rgba(0,229,160,0.12); color: var(--accent2); }
+  .sprint-val.training { background: rgba(245,166,35,0.1); color: var(--accent4); letter-spacing: 1px; }
+
+  /* ─── US PLANNING ─── */
+  .tshirt {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--surface2);
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+
+  /* ─── CHECKLIST ─── */
+  .check-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-num { color: var(--muted); min-width: 28px; font-size: 11px; }
+  .check-text { flex: 1; line-height: 1.5; }
+  .check-cat { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 0.5px; }
+  .check-toggle {
+    width: 18px; height: 18px; min-width: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 4px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: transparent;
+    transition: all 0.15s;
+  }
+  .check-toggle.done {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    color: #000;
+  }
+
+  /* ─── FORMS ─── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  label { display: block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  input, select, textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 70px; }
+  select option { background: var(--surface); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px;
+    border-radius: 6px;
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-ghost { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+  .btn-danger { background: rgba(255,107,107,0.12); color: var(--accent3); border: 1px solid rgba(255,107,107,0.2); }
+
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
+  }
+  .form-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ─── PROGRESS ─── */
+  .progress-wrap { background: var(--border); border-radius: 4px; overflow: hidden; height: 8px; }
+  .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+
+  /* ─── SPRINT PLANNER ─── */
+  .sprint-grid {
+    display: grid;
+    grid-template-columns: 180px repeat(6, 1fr);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .sg-header {
+    background: var(--surface2);
+    padding: 10px 12px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    display: flex; align-items: center;
+  }
+  .sg-cell {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sg-cell.name { justify-content: flex-start; font-weight: 500; }
+  .sg-cell:last-child { border-right: none; }
+  .sg-row:last-child .sg-cell { border-bottom: none; }
+
+  /* ─── UTILS ─── */
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .mb-16 { margin-bottom: 16px; }
+  .ml-auto { margin-left: auto; }
+  .text-muted { color: var(--muted); }
+  .text-accent { color: var(--accent); }
+  .text-green { color: var(--accent2); }
+  .text-orange { color: var(--accent4); }
+  .text-red { color: var(--accent3); }
+  .fw-600 { font-weight: 600; }
+  .font-syne { font-family: 'Syne', sans-serif; }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* ─── TOAST ─── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 12px;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.25s;
+    pointer-events: none;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .page.active { animation: fadeIn 0.25s ease; }
+
+  /* ─── PRINT STYLES ─── */
+  @media print {
+    * { 
+      -webkit-print-color-adjust: exact !important; 
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+    
+    body { 
+      background: white !important; 
+      color: #000 !important; 
+    }
+    
+    header, nav, .btn, #toast, .flex.gap-8 { display: none !important; }
+    main { padding: 20px; width: 100%; }
+    
+    /* Hide all pages except report during print */
+    .page { display: none !important; }
+    #page-report { display: block !important; }
+    
+    /* Hide page navigation elements */
+    #page-report .page-title,
+    #page-report .page-sub { display: none !important; }
+    
+    /* Report card styling */
+    .form-card { 
+      border: none !important;
+      padding: 0 !important;
+      margin-bottom: 20px;
+      page-break-inside: avoid;
+      background: white !important;
+    }
+    
+    .form-title { 
+      color: #000 !important; 
+      font-size: 20px !important;
+      font-weight: bold !important;
+      border-bottom: 3px solid #000 !important;
+      padding-bottom: 10px !important;
+      margin-bottom: 20px !important;
+      text-align: center !important;
+    }
+    
+    .section-title { 
+      color: #000 !important; 
+      font-weight: bold !important;
+      margin: 25px 0 12px 0 !important;
+      font-size: 14px !important;
+      text-transform: uppercase !important;
+      border-bottom: 2px solid #333 !important;
+      padding-bottom: 5px !important;
+      background: none !important;
+    }
+    .section-title::after { display: none !important; }
+    .section-title:first-of-type { margin-top: 0 !important; }
+    
+    /* Configuration grid */
+    .config-grid,
+    #report-preview > div[style*="display:grid"] {
+      display: grid !important;
+      background: white !important;
+      border: 1px solid #ccc !important;
+      padding: 15px !important;
+      margin-bottom: 20px !important;
+      page-break-inside: avoid;
+    }
+    
+    .config-grid > div,
+    #report-preview > div[style*="display:grid"] > div {
+      color: #000 !important;
+      background: white !important;
+      padding: 8px !important;
+      line-height: 1.6 !important;
+      border-bottom: 1px dotted #ddd !important;
+    }
+    
+    #report-preview strong { 
+      color: #000 !important; 
+      font-weight: bold !important;
+    }
+    
+    /* Tables */
+    .table-container { 
+      border: 2px solid #000 !important;
+      margin-bottom: 20px !important;
+      page-break-inside: avoid;
+      background: white !important;
+      overflow: visible !important;
+    }
+    
+    table { 
+      width: 100% !important; 
+      border-collapse: collapse !important;
+      background: white !important;
+    }
+    
+    th { 
+      background: #e0e0e0 !important; 
+      color: #000 !important; 
+      border: 1px solid #000 !important;
+      padding: 8px !important;
+      font-weight: bold !important;
+      text-align: left !important;
+    }
+    
+    td { 
+      border: 1px solid #666 !important;
+      padding: 8px !important;
+      color: #000 !important;
+      background: white !important;
+    }
+    
+    tbody tr:nth-child(even) td {
+      background: #f9f9f9 !important;
+    }
+    
+    tfoot td {
+      background: #e0e0e0 !important;
+      font-weight: bold !important;
+      border: 2px solid #000 !important;
+      color: #000 !important;
+    }
+    
+    /* Stat cards */
+    .stat-card { 
+      border: 2px solid #333 !important; 
+      padding: 12px !important;
+      page-break-inside: avoid;
+      background: white !important;
+      min-height: auto !important;
+    }
+    .stat-card::before { display: none !important; }
+    
+    .stat-label { 
+      color: #666 !important; 
+      font-weight: bold !important;
+      font-size: 10px !important;
+      text-transform: uppercase !important;
+      margin-bottom: 5px !important;
+    }
+    
+    .stat-value { 
+      color: #000 !important; 
+      font-size: 24px !important;
+      font-weight: bold !important;
+    }
+    
+    .stat-sub { 
+      color: #666 !important;
+      font-size: 10px !important;
+    }
+    
+    /* Badges */
+    .badge { 
+      border: 1px solid #000 !important;
+      padding: 3px 8px !important;
+      background: white !important;
+      color: #000 !important;
+      font-weight: bold !important;
+      display: inline-block !important;
+    }
+    
+    .badge-green { 
+      background: #e8f5e9 !important;
+      border-color: #2e7d32 !important;
+    }
+    
+    .badge-orange { 
+      background: #fff3e0 !important;
+      border-color: #f57c00 !important;
+    }
+    
+    .badge-blue { 
+      background: #e3f2fd !important;
+      border-color: #1976d2 !important;
+    }
+    
+    /* Progress bars */
+    .progress-wrap { 
+      border: 1px solid #000 !important;
+      background: #f0f0f0 !important;
+      height: 20px !important;
+      border-radius: 0 !important;
+    }
+    
+    .progress-fill { 
+      background: #333 !important;
+      height: 100% !important;
+    }
+    
+    /* Text colors - ensure everything is readable */
+    .text-green, 
+    .text-accent, 
+    .text-muted,
+    [class*="text-"] { 
+      color: #000 !important; 
+    }
+    
+    /* Remove any dark backgrounds */
+    [style*="background"],
+    [style*="var(--surface)"],
+    [style*="var(--border)"] {
+      background: white !important;
+    }
+    
+    /* Page settings */
+    @page { 
+      margin: 1.5cm;
+      size: A4 portrait;
+    }
+    
+    /* Ensure divs with inline styles are visible */
+    div { 
+      color: #000 !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="flex items-center gap-12">
+    <div class="logo">Qorix<span>.</span>PI</div>
+    <span class="pi-badge">PI-CY26-Q1</span>
+  </div>
+  <div class="header-meta">
+    <div class="status-pill"><span class="status-dot"></span> In-Review</div>
+    <div class="status-pill" id="clock" style="margin-left:8px;"></div>
+  </div>
+</header>
+
+<div class="shell">
+  <!-- ─── SIDEBAR ─── -->
+  <nav>
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="navigate('dashboard')">
+      <span class="nav-icon">◈</span> Dashboard
+    </div>
+
+    <div class="nav-section">Planning</div>
+    <div class="nav-item" onclick="navigate('kyt')">
+      <span class="nav-icon">◉</span> KYT
+    </div>
+    <div class="nav-item" onclick="navigate('capacity')">
+      <span class="nav-icon">▦</span> Capacity
+    </div>
+
+    <div class="nav-section">Process</div>
+    <div class="nav-item" onclick="navigate('checklist')">
+      <span class="nav-icon">✓</span> Checklist
+    </div>
+    <div class="nav-item" onclick="navigate('guidelines')">
+      <span class="nav-icon">≡</span> Guidelines
+    </div>
+
+    <div class="nav-section">Config</div>
+    <div class="nav-item" onclick="navigate('config')">
+      <span class="nav-icon">⚙</span> Configuration
+    </div>
+    <div class="nav-item" onclick="navigate('report')">
+      <span class="nav-icon">⬇</span> Export Report
+    </div>
+  </nav>
+
+  <!-- ─── MAIN CONTENT ─── -->
+  <main>
+
+    <!-- ══════════════ DASHBOARD ══════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">PI Plan Overview</div>
+      <div class="page-sub">Program Increment · CY26 Q1 · Qorix Developer</div>
+
+      <div class="stat-grid">
+        <div class="stat-card" style="--accent-color: var(--accent);">
+          <div class="stat-label">Team Size</div>
+          <div class="stat-value" id="stat-members">6</div>
+          <div class="stat-sub">Active members</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--accent2);">
+          <div class="stat-label">Net Capacity</div>
+          <div class="stat-value" id="stat-cap">0</div>
+          <div class="stat-sub">Total days available</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--accent);">
+          <div class="stat-label">Feature Dev</div>
+          <div class="stat-value" id="stat-featuredev">0</div>
+          <div class="stat-sub">Days allocated</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--accent4);">
+          <div class="stat-label">Bug Fix</div>
+          <div class="stat-value" id="stat-bugfix">0</div>
+          <div class="stat-sub">Days allocated</div>
+        </div>
+
+      </div>
+
+      <!-- Capacity by member -->
+      <div class="section">
+        <div class="section-title">Capacity Distribution</div>
+        <div class="capacity-row" id="cap-cards"></div>
+      </div>
+
+      <!-- Sprint utilization -->
+      <div class="section">
+        <div class="section-title">Team Summary</div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Grade</th><th>Role</th><th>Module</th><th>Avg PF</th></tr>
+            </thead>
+            <tbody id="kyt-summary-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ KYT ══════════════ -->
+    <div class="page" id="page-kyt">
+      <div class="page-title">Know Your Team</div>
+      <div class="page-sub">Member profiles, experience & productivity factor planning per sprint</div>
+
+      <div class="form-card mb-16">
+        <div class="form-title">Add Team Member</div>
+        <div class="form-grid">
+          <div><label>Name</label><input type="text" id="kyt-name"></div>
+          <div><label>Grade</label>
+            <select id="kyt-grade">
+              <option>A</option><option>B</option><option selected>C</option><option>D</option><option>E</option><option>F</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div><label>Role</label>
+            <select id="kyt-role">
+              <option>Architect</option><option>Tech Lead</option><option selected>Developer</option><option>Tester</option>
+            </select>
+          </div>
+          <div><label>Experience</label>
+            <select id="kyt-exp">
+              <option>Low > 1 to 3 yrs</option><option selected>Medium > 3 to 5 yrs</option><option>High > 5+ yrs</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-3 form-grid">
+          <div><label>Safety</label><select id="kyt-safety"><option selected>No</option><option>Yes</option></select></div>
+          <div><label>Training</label><select id="kyt-training"><option>No</option><option selected>Yes</option></select></div>
+          <div><label>Delivered</label><select id="kyt-delivered"><option>No</option><option selected>Yes</option></select></div>
+        </div>
+        <div class="form-grid">
+          <div><label>Module</label><input type="number" id="kyt-module" value="1"></div>
+        </div>
+        <div class="form-grid" style="grid-template-columns:repeat(6,1fr);">
+          <div><label>S1 PF</label><input type="number" step="0.01" id="kyt-s1" value="0.95"></div>
+          <div><label>S2 PF</label><input type="number" step="0.01" id="kyt-s2" value="0.95"></div>
+          <div><label>S3 PF</label><input type="number" step="0.01" id="kyt-s3" value="0.95"></div>
+          <div><label>S4 PF</label><input type="number" step="0.01" id="kyt-s4" value="0.95"></div>
+          <div><label>S5 PF</label><input type="number" step="0.01" id="kyt-s5" value="0.95"></div>
+          <div><label>S6 PF</label><input type="number" step="0.01" id="kyt-s6" value="0.95"></div>
+        </div>
+        <button class="btn btn-primary" onclick="addMember()">+ Add Member</button>
+      </div>
+
+      <div class="section-title">Team Members</div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Grade</th><th>Role</th><th>Exp</th><th>Module</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>Avg PF</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="kyt-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════ CAPACITY ══════════════ -->
+    <div class="page" id="page-capacity">
+      <div class="page-title">PI Capacity Calc</div>
+      <div class="page-sub">Leaves, training days, and available working days per member</div>
+
+      <div class="form-card mb-16">
+        <div class="form-title">Capacity Configuration</div>
+        <div style="margin-bottom:14px;">
+          <label>Select Member</label>
+          <select id="cap-member-select" onchange="loadCapMember()"></select>
+        </div>
+        <div class="form-grid-3 form-grid">
+          <div><label>Weeks in PI</label><input type="number" id="cap-weeks"></div>
+          <div><label>Saturdays</label><input type="number" id="cap-sat"></div>
+          <div><label>Holidays</label><input type="number" id="cap-holidays"></div>
+        </div>
+        <div class="form-grid-3 form-grid">
+          <div><label>Leaves</label><input type="number" id="cap-leaves"></div>
+          <div><label>Misc Days</label><input type="number" id="cap-misc"></div>
+          <div><label>Allocation %</label><input type="number" step="0.01" id="cap-alloc"></div>
+        </div>
+        <div class="form-grid-3 form-grid">
+          <div><label>Pre-PI</label><input type="number" id="cap-prepi"></div>
+          <div><label>All Hands</label><input type="number" step="0.01" id="cap-allhands"></div>
+          <div><label>Factory Days</label><input type="number" id="cap-factory"></div>
+        </div>
+        <div class="form-grid">
+          <div><label>Competency</label><input type="number" id="cap-competency"></div>
+          <div><label>GNC</label><input type="number" id="cap-gnc"></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveCapacity()">Save Capacity</button>
+      </div>
+
+      <div class="section-title">Capacity Summary</div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Weekdays</th><th>Training</th><th>Available</th><th>Avg PF</th><th>Net Capacity</th></tr>
+          </thead>
+          <tbody id="cap-tbody"></tbody>
+          <tfoot>
+            <tr>
+              <td><strong>TOTAL</strong></td>
+              <td>—</td>
+              <td>—</td>
+              <td id="cap-foot-avail">0</td>
+              <td>—</td>
+              <td id="cap-foot-net"><strong>0</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="section" style="margin-top:24px;">
+        <div class="section-title">Feature vs Bug Split</div>
+        <div class="stat-grid" style="max-width:500px;">
+          <div class="stat-card" style="--accent-color:var(--accent);">
+            <div class="stat-label">Feature Dev</div>
+            <div class="stat-value" id="cap-split-feat">0</div>
+            <div class="stat-sub">Days</div>
+          </div>
+          <div class="stat-card" style="--accent-color:var(--accent4);">
+            <div class="stat-label">Bug Fix</div>
+            <div class="stat-value" id="cap-split-bug">0</div>
+            <div class="stat-sub">Days</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ CHECKLIST ══════════════ -->
+    <div class="page" id="page-checklist">
+      <div class="page-title">Review Checklist</div>
+      <div class="page-sub">Verify all quality gates before PI Plan submission</div>
+
+      <div class="stat-grid" style="max-width:400px;margin-bottom:24px;">
+        <div class="stat-card" style="--accent-color:var(--accent2);">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value" id="chk-done">0</div>
+          <div class="stat-sub" id="chk-sub">of 25 items</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--accent);">
+          <div class="stat-label">Progress</div>
+          <div class="stat-value" id="chk-pct">0%</div>
+          <div class="stat-sub">
+            <div class="progress-wrap" style="margin-top:8px;">
+              <div class="progress-fill" id="chk-bar" style="width:0%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container" id="chk-container"></div>
+    </div>
+
+    <!-- ══════════════ GUIDELINES ══════════════ -->
+    <div class="page" id="page-guidelines">
+      <div class="page-title">Productivity Guidelines</div>
+      <div class="page-sub">Reference: suggested productivity factors per scenario</div>
+      <div class="table-container">
+        <table>
+          <thead><tr><th>Scenario</th><th>PF</th><th>Notes</th></tr></thead>
+          <tbody id="guide-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════ CONFIG ══════════════ -->
+    <div class="page" id="page-config">
+      <div class="page-title">Configuration</div>
+      <div class="page-sub">PI metadata, document details & project settings</div>
+
+      <div class="form-card">
+        <div class="form-title">PI Configuration</div>
+        <div class="form-grid">
+          <div><label>PI Name</label><input type="text" id="cfg-pi" value="PI-CY26-Q1"></div>
+          <div><label>Project</label><input type="text" id="cfg-project" value="Qorix Developer"></div>
+        </div>
+        <div class="form-grid">
+          <div><label>Config ID</label><input type="text" id="cfg-configid"></div>
+          <div><label>Version</label><input type="text" id="cfg-version" value="1.0.0"></div>
+        </div>
+        <div class="form-grid">
+          <div><label>Date</label><input type="date" id="cfg-date"></div>
+          <div><label>Status</label>
+            <select id="cfg-status">
+              <option>Draft</option><option selected>In-Review</option><option>Approved</option><option>Active</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div><label>PPM</label><input type="text" id="cfg-ppm"></div>
+          <div><label>PO</label><input type="text" id="cfg-po"></div>
+        </div>
+        <div class="form-grid">
+          <div><label>Scrum Master</label><input type="text" id="cfg-sm"></div>
+          <div><label>Author</label><input type="text" id="cfg-author"></div>
+        </div>
+        <div class="form-grid">
+          <div><label>Feature Split %</label><input type="number" id="cfg-featsplit" value="95"></div>
+          <div><label>Sprints</label><input type="number" id="cfg-sprints" value="6"></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
+      </div>
+    </div>
+
+    <!-- ══════════════ REPORT ══════════════ -->
+    <div class="page" id="page-report">
+      <div class="page-title">Export Report</div>
+      <div class="page-sub">Generate a PI plan summary for distribution</div>
+
+      <div class="form-card" id="report-preview">
+        <div class="form-title">Loading report...</div>
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-primary" onclick="downloadData()">📥 Download Data (JSON)</button>
+        <button class="btn btn-primary" onclick="printReport()">🖨️ Print Report</button>
+        <button class="btn btn-ghost" onclick="copyReport()">📋 Copy to Clipboard</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+//  STATE & LOCAL STORAGE
+// ════════════════════════════════════════════
+let state = {
+  config: {
+    pi: 'PI-CY26-Q1', project: 'Qorix Developer',
+    configId: '', version: '1.0.0', date: '', status: 'In-Review',
+    ppm: '', po: '', sm: '', author: '',
+    featSplit: 95, sprints: 6
+  },
+  members: [
+    { name:'Janekallu Raghukumar', grade:'F', role:'Architect', exp:'High > 5+ yrs', safety:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
+    { name:'Mayur Aggarwal',        grade:'C', role:'Developer', exp:'Medium > 3 to 5 yrs', safety:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
+    { name:'Dhanush K',             grade:'C', role:'Developer', exp:'Medium > 3 to 5 yrs', safety:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
+    { name:'Sumegh Thale',          grade:'C', role:'Developer', exp:'Low > 1 to 3 yrs',    safety:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
+    { name:'Sudheendra Desai',      grade:'E', role:'Tech Lead', exp:'High > 5+ yrs',        safety:'Yes',training:'Yes', delivered:'Yes', module:1, s:[0.9,0.9,0.9,0.9,0.9,0.9] },
+    { name:'Rohit Malla',           grade:'C', role:'Developer', exp:'Low > 1 to 3 yrs',     safety:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] }
+  ],
+  capacity: {},
+  features: [],
+  userStories: [],
+  checklist: Array(25).fill(false)
+};
+
+// Default capacity per member
+state.members.forEach(m => {
+  state.capacity[m.name] = {
+    weeks:12, sat:0, holidays:3,
+    leaves: m.name==='Sumegh Thale'?6 : m.name==='Sudheendra Desai'?6 : 7,
+    misc:   m.name==='Janekallu Raghukumar'?9 : m.name==='Sudheendra Desai'?9 : 7,
+    alloc:1,
+    prepi:  m.name==='Janekallu Raghukumar'||m.name==='Sudheendra Desai'?1:0,
+    allhands:0.18,
+    factory:m.name==='Janekallu Raghukumar'?5:m.name==='Sudheendra Desai'?3:0,
+    competency:2, gnc:1
+  };
+});
+
+// Load from localStorage if available
+function loadState() {
+  const saved = localStorage.getItem('piPlanState');
+  if (saved) {
+    try {
+      state = JSON.parse(saved);
+      toast('Data loaded from browser storage ✓');
+    } catch (e) {
+      console.error('Failed to load state:', e);
+    }
+  }
+}
+
+// Save to localStorage
+function saveState() {
+  localStorage.setItem('piPlanState', JSON.stringify(state));
+}
+
+// Auto-save on any change
+function autoSave() {
+  saveState();
+}
+
+const guidelines = [
+  ['First 2 sprints fresh engineer (A grade)','0','Training only'],
+  ['3rd sprint fresh engineer','0.25',''],
+  ['4th sprint fresh engineer','0.35',''],
+  ['5th sprint fresh engineer','0.5',''],
+  ['6th sprint fresh engineer','0.6',''],
+  ['7th sprint fresh engineer','0.75',''],
+  ['8th sprint onwards','0.75–0.95',''],
+  ['1st sprint new joiner B grade (C++)','0',''],
+  ['2nd sprint new joiner B grade (C++)','0.2',''],
+  ['3rd sprint new joiner B grade (C++)','0.4',''],
+  ['4th sprint new joiner B grade (C++)','0.6',''],
+  ['5th sprint new joiner B grade (C++)','0.75–0.95',''],
+  ['1st sprint new joiner C grade (C++)','0',''],
+  ['2nd sprint new joiner C grade (C++)','0.25',''],
+  ['3rd sprint new joiner C grade (C++)','0.5',''],
+  ['4th sprint new joiner C grade (C++)','0.75',''],
+  ['5th sprint new joiner C grade (C++)','0.95',''],
+  ['Tech lead managing 1 member','0.1 reduction','10% on mentoring'],
+  ['Tech lead managing 2 members','0.2 reduction','20% on mentoring'],
+  ['Tech lead managing 3 members','0.3 reduction',''],
+  ['Tech lead managing 4 members','0.4 reduction',''],
+  ['Architect managing 1 module','0.8',''],
+  ['Architect managing 2 modules','0.6 per module',''],
+  ['Architect managing 3 modules','0.45 per module',''],
+  ['Max for developer role','0.95',''],
+];
+
+const checklistItems = [
+  ['General','Verify formatting. Correct formatting on all tabs as per template.'],
+  ['KYT','Ensure productivity factor is planned as "T" (Training) for new joiners.'],
+  ['KYT','Ensure productivity factor is planned for available sprints for SNP/PIP candidates.'],
+  ['KYT','Verify productivity factor and module allocation for POs and shared resources.'],
+  ['KYT','Hide unused rows for team members.'],
+  ['PI Capacity','Manually update "Weeks in CYxx" if resource is leaving between sprints.'],
+  ['PI Capacity','Ensure leaves are considered only after individual discussion.'],
+  ['PI Capacity','3 days module-level training budgeted for all team members unless specific training exists.'],
+  ['PI Capacity','CLI training not to be planned for first PI unless module lacks trained personnel.'],
+  ['PI Capacity','Verify split between Feature Development and Regression Bug Fixing is correct.'],
+  ['PI Feature','Verify Customer (Honda/Hitachi) inputs are considered in planning.'],
+  ['PI Feature','Verify internally identified features are planned per "Internal PI Planning Inputs".'],
+  ['PI Feature','Verify spillover Features/Bugs/US from previous PI are marked in Light Blue.'],
+  ['PI Feature','Verify bugs from Features/US do not have estimation against actual bug.'],
+  ['PI Feature','Verify ordering of Features is maintained per execution priority.'],
+  ['PI Feature','Commitment on external dependencies documented with sprint number.'],
+  ['PI Feature','Verify Feature naming convention is per guideline.'],
+  ['PI Feature','Required Capacity ≤ Capacity available; otherwise mark feature as Tentative.'],
+  ['PI Feature','Ensure Unplanned topics from "Internal PI Planning Inputs" are listed.'],
+  ['PI US','Verify ordering of US per execution priority of features.'],
+  ['PI US','Verify US naming convention is per guideline.'],
+  ['PI US','Check US are planned based on required RA/Design/Review capacity.'],
+  ['KAP','Bugs resolved with Feature/US implementation are linked with "follows" relation.'],
+  ['KAP','Verify features/Bugs/US planned in PI plan are correctly imported in KAP.'],
+  ['KAP','Verify planning status in KAP matches PI Planning sheet (Confirmed/Tentative/Planned Later tags).'],
+];
+
+// ════════════════════════════════════════════
+//  CAPACITY HELPERS
+// ════════════════════════════════════════════
+function calcAvgPF(m) {
+  const sum = m.s.reduce((a,b)=>a+b,0);
+  return (sum / m.s.length).toFixed(2);
+}
+
+function calcCapacity(name) {
+  const c = state.capacity[name];
+  const m = state.members.find(x=>x.name===name);
+  if (!c || !m) return {};
+  const weekdays = c.weeks * 5;
+  const training = c.prepi + c.allhands + c.factory + c.competency + c.gnc;
+  const available = (weekdays + c.sat - c.holidays - c.leaves - c.misc - training) * c.alloc;
+  const pf = parseFloat(calcAvgPF(m));
+  const net = available * pf;
+  return { weekdays, training, available: +available.toFixed(3), pf, net: +net.toFixed(3), ...c };
+}
+
+function totalCapacity() {
+  return state.members.reduce((sum, m) => {
+    const c = calcCapacity(m.name);
+    return sum + (c.net || 0);
+  }, 0);
+}
+
+function totalAvailDays() {
+  return state.members.reduce((sum, m) => {
+    const c = calcCapacity(m.name);
+    return sum + (c.available || 0);
+  }, 0);
+}
+
+// ════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════
+function navigate(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(id)) n.classList.add('active');
+  });
+  renderPage(id);
+}
+
+function renderPage(id) {
+  if (id==='dashboard') renderDashboard();
+  if (id==='kyt') renderKYT();
+  if (id==='capacity') renderCapacity();
+  if (id==='checklist') renderChecklist();
+  if (id==='guidelines') renderGuidelines();
+  if (id==='report') renderReport();
+}
+
+// ════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════
+function renderDashboard() {
+  const total = totalCapacity();
+  const avail = totalAvailDays();
+  const featDays = (total * state.config.featSplit / 100).toFixed(1);
+  const bugDays = (total * (100-state.config.featSplit) / 100).toFixed(1);
+
+  document.getElementById('stat-members').textContent = state.members.length;
+  document.getElementById('stat-cap').textContent = total.toFixed(1);
+  document.getElementById('stat-featuredev').textContent = featDays;
+  document.getElementById('stat-bugfix').textContent = bugDays;
+
+  // Capacity cards
+  const ccEl = document.getElementById('cap-cards');
+  ccEl.innerHTML = state.members.map(m => {
+    const c = calcCapacity(m.name);
+    const pct = Math.min(100, ((c.net||0)/total*100)).toFixed(0);
+    return `
+    <div class="cap-card">
+      <div class="cap-name">${m.name.split(' ')[0]} ${m.name.split(' ').slice(1).join(' ')}</div>
+      <div class="cap-role"><span class="badge badge-blue">${m.role}</span> &nbsp; Grade ${m.grade}</div>
+      <div class="cap-row"><span>Available</span><strong>${c.available||0} days</strong></div>
+      <div class="cap-row"><span>Net Capacity</span><strong class="text-green">${c.net||0} days</strong></div>
+      <div class="cap-row"><span>Avg PF</span><strong>${calcAvgPF(m)}</strong></div>
+      <div class="cap-bar-wrap"><div class="cap-bar"><div class="cap-fill" style="width:${pct}%"></div></div></div>
+    </div>`;
+  }).join('');
+
+  // KYT summary
+  const tbody = document.getElementById('kyt-summary-tbody');
+  tbody.innerHTML = state.members.map(m => `
+    <tr>
+      <td><strong>${m.name}</strong></td>
+      <td><span class="badge badge-purple">${m.grade}</span></td>
+      <td>${m.role}</td>
+      <td>${m.module}</td>
+      <td><div class="pf-bar-wrap"><div class="pf-bar"><div class="pf-fill" style="width:${calcAvgPF(m)*100}%"></div></div><span class="pf-val">${calcAvgPF(m)}</span></div></td>
+    </tr>`).join('');
+}
+
+// ════════════════════════════════════════════
+//  KYT
+// ════════════════════════════════════════════
+function addMember() {
+  const name = document.getElementById('kyt-name').value.trim();
+  if (!name) { toast('Name is required'); return; }
+  const m = {
+    name,
+    grade: document.getElementById('kyt-grade').value,
+    role: document.getElementById('kyt-role').value,
+    exp: document.getElementById('kyt-exp').value,
+    safety: document.getElementById('kyt-safety').value,
+    training: document.getElementById('kyt-training').value,
+    delivered: document.getElementById('kyt-delivered').value,
+    module: +document.getElementById('kyt-module').value,
+    s: [
+      +document.getElementById('kyt-s1').value,
+      +document.getElementById('kyt-s2').value,
+      +document.getElementById('kyt-s3').value,
+      +document.getElementById('kyt-s4').value,
+      +document.getElementById('kyt-s5').value,
+      +document.getElementById('kyt-s6').value
+    ]
+  };
+  state.members.push(m);
+  state.capacity[m.name] = { weeks:12,sat:0,holidays:3,leaves:7,misc:7,alloc:1,prepi:0,allhands:0.18,factory:0,competency:2,gnc:1 };
+  clearKytForm();
+  renderKYT();
+  autoSave();
+  toast('Member added ✓');
+}
+
+function removeMember(i) {
+  delete state.capacity[state.members[i].name];
+  state.members.splice(i,1);
+  renderKYT();
+  autoSave();
+  toast('Member removed');
+}
+
+function clearKytForm() {
+  ['kyt-name'].forEach(id => document.getElementById(id).value='');
+  ['kyt-s1','kyt-s2','kyt-s3','kyt-s4','kyt-s5','kyt-s6'].forEach(id => document.getElementById(id).value='0.95');
+}
+
+function renderKYT() {
+  const tbody = document.getElementById('kyt-tbody');
+  tbody.innerHTML = state.members.map((m,i) => `
+    <tr>
+      <td><strong>${m.name}</strong></td>
+      <td><span class="badge badge-purple">${m.grade}</span></td>
+      <td>${m.role}</td>
+      <td><span class="badge badge-blue">${m.exp}</span></td>
+      <td>${m.module}</td>
+      <td class="sprint-cell"><span class="sprint-val ${m.s[0]=='T'?'training':m.s[0]>=0.9?'high':''}">${m.s[0]}</span></td>
+      <td class="sprint-cell"><span class="sprint-val ${m.s[1]=='T'?'training':m.s[1]>=0.9?'high':''}">${m.s[1]}</span></td>
+      <td class="sprint-cell"><span class="sprint-val ${m.s[2]=='T'?'training':m.s[2]>=0.9?'high':''}">${m.s[2]}</span></td>
+      <td class="sprint-cell"><span class="sprint-val ${m.s[3]=='T'?'training':m.s[3]>=0.9?'high':''}">${m.s[3]}</span></td>
+      <td class="sprint-cell"><span class="sprint-val ${m.s[4]=='T'?'training':m.s[4]>=0.9?'high':''}">${m.s[4]}</span></td>
+      <td class="sprint-cell"><span class="sprint-val ${m.s[5]=='T'?'training':m.s[5]>=0.9?'high':''}">${m.s[5]}</span></td>
+      <td><strong>${calcAvgPF(m)}</strong></td>
+      <td><button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="removeMember(${i})">Remove</button></td>
+    </tr>`).join('');
+}
+
+// ════════════════════════════════════════════
+//  CAPACITY
+// ════════════════════════════════════════════
+function renderCapacity() {
+  const sel = document.getElementById('cap-member-select');
+  sel.innerHTML = state.members.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+  loadCapMember();
+  renderCapTable();
+}
+
+function loadCapMember() {
+  const name = document.getElementById('cap-member-select').value;
+  const c = state.capacity[name] || {};
+  document.getElementById('cap-weeks').value = c.weeks||12;
+  document.getElementById('cap-sat').value = c.sat||0;
+  document.getElementById('cap-holidays').value = c.holidays||3;
+  document.getElementById('cap-leaves').value = c.leaves||7;
+  document.getElementById('cap-misc').value = c.misc||7;
+  document.getElementById('cap-alloc').value = c.alloc||1;
+  document.getElementById('cap-prepi').value = c.prepi||0;
+  document.getElementById('cap-allhands').value = c.allhands||0.18;
+  document.getElementById('cap-factory').value = c.factory||0;
+  document.getElementById('cap-competency').value = c.competency||2;
+  document.getElementById('cap-gnc').value = c.gnc||1;
+}
+
+function saveCapacity() {
+  const name = document.getElementById('cap-member-select').value;
+  state.capacity[name] = {
+    weeks: +document.getElementById('cap-weeks').value,
+    sat: +document.getElementById('cap-sat').value,
+    holidays: +document.getElementById('cap-holidays').value,
+    leaves: +document.getElementById('cap-leaves').value,
+    misc: +document.getElementById('cap-misc').value,
+    alloc: +document.getElementById('cap-alloc').value,
+    prepi: +document.getElementById('cap-prepi').value,
+    allhands: +document.getElementById('cap-allhands').value,
+    factory: +document.getElementById('cap-factory').value,
+    competency: +document.getElementById('cap-competency').value,
+    gnc: +document.getElementById('cap-gnc').value,
+  };
+  renderCapTable();
+  autoSave();
+  toast('Capacity saved ✓');
+}
+
+function renderCapTable() {
+  const tbody = document.getElementById('cap-tbody');
+  let totalAvail = 0, totalNet = 0;
+  tbody.innerHTML = state.members.map(m => {
+    const c = calcCapacity(m.name);
+    totalAvail += c.available||0;
+    totalNet += c.net||0;
+    return `<tr>
+      <td><strong>${m.name}</strong></td>
+      <td>${c.weekdays||0}</td>
+      <td>${(c.training||0).toFixed(2)}</td>
+      <td>${c.available||0}</td>
+      <td>${c.pf||0}</td>
+      <td class="text-green"><strong>${c.net||0}</strong></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('cap-foot-avail').textContent = totalAvail.toFixed(2);
+  document.getElementById('cap-foot-net').textContent = totalNet.toFixed(2);
+  const featSplit = state.config.featSplit/100;
+  document.getElementById('cap-split-feat').textContent = (totalNet*featSplit).toFixed(2);
+  document.getElementById('cap-split-bug').textContent = (totalNet*(1-featSplit)).toFixed(2);
+}
+
+// ════════════════════════════════════════════
+//  CHECKLIST
+// ════════════════════════════════════════════
+function renderChecklist() {
+  const done = state.checklist.filter(Boolean).length;
+  const pct = Math.round(done/checklistItems.length*100);
+  document.getElementById('chk-done').textContent = done;
+  document.getElementById('chk-sub').textContent = `of ${checklistItems.length} items`;
+  document.getElementById('chk-pct').textContent = pct + '%';
+  document.getElementById('chk-bar').style.width = pct + '%';
+
+  const cont = document.getElementById('chk-container');
+  cont.innerHTML = `<div>${checklistItems.map((item,i) => `
+    <div class="check-item">
+      <div class="check-num">${(i+1).toString().padStart(2,'0')}</div>
+      <div class="check-text">
+        <div>${item[1]}</div>
+        <div class="check-cat">${item[0]}</div>
+      </div>
+      <div class="check-toggle ${state.checklist[i]?'done':''}" onclick="toggleCheck(${i})">${state.checklist[i]?'✓':''}</div>
+    </div>`).join('')}</div>`;
+}
+
+function toggleCheck(i) {
+  state.checklist[i] = !state.checklist[i];
+  renderChecklist();
+  autoSave();
+}
+
+// ════════════════════════════════════════════
+//  GUIDELINES
+// ════════════════════════════════════════════
+function renderGuidelines() {
+  document.getElementById('guide-tbody').innerHTML = guidelines.map(g => `
+    <tr>
+      <td>${g[0]}</td>
+      <td><strong>${g[1]}</strong></td>
+      <td class="text-muted">${g[2]}</td>
+    </tr>`).join('');
+}
+
+// ════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════
+function saveConfig() {
+  state.config = {
+    pi: document.getElementById('cfg-pi').value,
+    project: document.getElementById('cfg-project').value,
+    configId: document.getElementById('cfg-configid').value,
+    version: document.getElementById('cfg-version').value,
+    date: document.getElementById('cfg-date').value,
+    status: document.getElementById('cfg-status').value,
+    ppm: document.getElementById('cfg-ppm').value,
+    po: document.getElementById('cfg-po').value,
+    sm: document.getElementById('cfg-sm').value,
+    author: document.getElementById('cfg-author').value,
+    featSplit: +document.getElementById('cfg-featsplit').value,
+    sprints: +document.getElementById('cfg-sprints').value,
+  };
+  document.querySelector('.pi-badge').textContent = state.config.pi;
+  autoSave();
+  toast('Config saved ✓');
+}
+
+// ════════════════════════════════════════════
+//  REPORT
+// ════════════════════════════════════════════
+function renderReport() {
+  const cfg = state.config;
+  const net = totalCapacity();
+  const avail = totalAvailDays();
+  const done = state.checklist.filter(Boolean).length;
+  const featDays = (net * cfg.featSplit / 100).toFixed(1);
+  const bugDays = (net * (100 - cfg.featSplit) / 100).toFixed(1);
+  const el = document.getElementById('report-preview');
+  
+  el.innerHTML = `
+    <div class="form-title">PI Plan Report — ${cfg.pi}</div>
+    
+    <!-- PI Configuration -->
+    <div class="section-title">PI Configuration</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;" class="config-grid">
+      <div><strong>Project:</strong> ${cfg.project}</div>
+      <div><strong>Status:</strong> <span class="badge ${cfg.status==='Approved'?'badge-green':cfg.status==='Active'?'badge-blue':'badge-orange'}">${cfg.status}</span></div>
+      <div><strong>Version:</strong> ${cfg.version}</div>
+      <div><strong>Date:</strong> ${cfg.date||'Not set'}</div>
+      <div><strong>PPM:</strong> ${cfg.ppm||'—'}</div>
+      <div><strong>PO:</strong> ${cfg.po||'—'}</div>
+      <div><strong>Scrum Master:</strong> ${cfg.sm||'—'}</div>
+      <div><strong>Author:</strong> ${cfg.author||'—'}</div>
+      <div><strong>Sprints:</strong> ${cfg.sprints}</div>
+      <div><strong>Feature/Bug Split:</strong> ${cfg.featSplit}% / ${100-cfg.featSplit}%</div>
+    </div>
+
+    <!-- Dashboard Overview -->
+    <div class="section-title">Dashboard Overview</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+      <div class="stat-card" style="--accent-color:var(--accent);"><div class="stat-label">Team Size</div><div class="stat-value">${state.members.length}</div><div class="stat-sub">Active members</div></div>
+      <div class="stat-card" style="--accent-color:var(--accent2);"><div class="stat-label">Net Capacity</div><div class="stat-value">${net.toFixed(1)}</div><div class="stat-sub">Total days</div></div>
+      <div class="stat-card" style="--accent-color:var(--accent);"><div class="stat-label">Feature Dev</div><div class="stat-value">${featDays}</div><div class="stat-sub">Days allocated</div></div>
+      <div class="stat-card" style="--accent-color:var(--accent4);"><div class="stat-label">Bug Fix</div><div class="stat-value">${bugDays}</div><div class="stat-sub">Days allocated</div></div>
+    </div>
+
+    <!-- Team Members Details -->
+    <div class="section-title">Team Members (${state.members.length})</div>
+    <div class="table-container" style="margin-bottom:18px;">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Role</th><th>Grade</th><th>Module</th><th>Avg PF</th></tr>
+        </thead>
+        <tbody>
+          ${state.members.map(m=>`<tr><td><strong>${m.name}</strong></td><td>${m.role}</td><td>${m.grade}</td><td>${m.module}</td><td>${calcAvgPF(m)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Capacity Breakdown by Member -->
+    <div class="section-title">Capacity Breakdown</div>
+    <div class="table-container" style="margin-bottom:18px;">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Weekdays</th><th>Training Days</th><th>Available Days</th><th>Avg PF</th><th>Net Capacity</th></tr>
+        </thead>
+        <tbody>
+          ${state.members.map(m => {
+            const c = calcCapacity(m.name);
+            return `<tr>
+              <td><strong>${m.name}</strong></td>
+              <td>${c.weekdays||0}</td>
+              <td>${(c.training||0).toFixed(1)}</td>
+              <td>${(c.available||0).toFixed(1)}</td>
+              <td>${c.pf||0}</td>
+              <td><strong>${(c.net||0).toFixed(1)}</strong></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td><strong>TOTAL</strong></td>
+            <td>—</td>
+            <td>—</td>
+            <td><strong>${avail.toFixed(1)}</strong></td>
+            <td>—</td>
+            <td><strong>${net.toFixed(1)}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Capacity Allocation -->
+    <div class="section-title">Capacity Allocation</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+      <div class="stat-card" style="--accent-color:var(--accent);">
+        <div class="stat-label">Feature Development</div>
+        <div class="stat-value">${featDays}</div>
+        <div class="stat-sub">${cfg.featSplit}% of ${net.toFixed(1)} days</div>
+      </div>
+      <div class="stat-card" style="--accent-color:var(--accent4);">
+        <div class="stat-label">Regression Bug Fix</div>
+        <div class="stat-value">${bugDays}</div>
+        <div class="stat-sub">${100-cfg.featSplit}% of ${net.toFixed(1)} days</div>
+      </div>
+    </div>
+
+    <!-- Checklist Progress -->
+    <div class="section-title">Quality Checklist</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+      <div class="progress-wrap" style="flex:1;"><div class="progress-fill" style="width:${Math.round(done/checklistItems.length*100)}%;"></div></div>
+      <span style="font-size:13px;"><strong>${done}/${checklistItems.length} complete</strong> (${Math.round(done/checklistItems.length*100)}%)</span>
+    </div>
+
+    <!-- Report Footer -->
+    <div style="margin-top:24px;padding-top:18px;border-top:1px solid var(--border);color:var(--muted);font-size:11px;text-align:center;">
+      Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
+    </div>
+  `;
+}
+
+function printReport() { 
+  // Ensure we're on the report page and data is fresh
+  navigate('report');
+  // Small delay to ensure rendering completes
+  setTimeout(() => {
+    window.print();
+  }, 100);
+}
+
+function copyReport() {
+  const cfg = state.config;
+  const net = totalCapacity();
+  const avail = totalAvailDays();
+  const featDays = (net * cfg.featSplit / 100).toFixed(2);
+  const bugDays = (net * (100 - cfg.featSplit) / 100).toFixed(2);
+  const done = state.checklist.filter(Boolean).length;
+  
+  // Build detailed capacity breakdown
+  const capacityBreakdown = state.members.map(m => {
+    const c = calcCapacity(m.name);
+    return `  ${m.name.padEnd(25)} | ${String(c.weekdays||0).padStart(8)} | ${String((c.training||0).toFixed(1)).padStart(12)} | ${String((c.available||0).toFixed(1)).padStart(14)} | ${String(c.pf||0).padStart(7)} | ${String((c.net||0).toFixed(1)).padStart(12)}`;
+  }).join('\n');
+  
+  const txt = `
+╔════════════════════════════════════════════════════════════════════════════╗
+║                         PI PLAN REPORT — ${cfg.pi.padEnd(16)}                 ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+PI CONFIGURATION
+${'─'.repeat(78)}
+Project              : ${cfg.project}
+Status               : ${cfg.status}
+Version              : ${cfg.version}
+Date                 : ${cfg.date||'Not set'}
+PPM                  : ${cfg.ppm||'—'}
+PO                   : ${cfg.po||'—'}
+Scrum Master         : ${cfg.sm||'—'}
+Author               : ${cfg.author||'—'}
+Sprints              : ${cfg.sprints}
+Feature/Bug Split    : ${cfg.featSplit}% / ${100-cfg.featSplit}%
+
+DASHBOARD OVERVIEW
+${'─'.repeat(78)}
+Team Size            : ${state.members.length} members
+Net Capacity         : ${net.toFixed(2)} days
+Feature Development  : ${featDays} days (${cfg.featSplit}%)
+Regression Bug Fix   : ${bugDays} days (${100-cfg.featSplit}%)
+Available Days       : ${avail.toFixed(2)} days
+
+TEAM MEMBERS
+${'─'.repeat(78)}
+${state.members.map((m,i)=>`${String(i+1).padStart(2)}. ${m.name.padEnd(25)} │ ${m.role.padEnd(12)} │ Grade ${m.grade} │ Module ${m.module} │ PF: ${calcAvgPF(m)}`).join('\n')}
+
+CAPACITY BREAKDOWN
+${'─'.repeat(78)}
+${'Name'.padEnd(25)} | Weekdays | Training Days | Available Days | Avg PF | Net Capacity
+${'-'.repeat(78)}
+${capacityBreakdown}
+${'-'.repeat(78)}
+${'TOTAL'.padEnd(25)} | ${' '.repeat(8)} | ${' '.repeat(12)} | ${String(avail.toFixed(1)).padStart(14)} | ${' '.repeat(7)} | ${String(net.toFixed(1)).padStart(12)}
+
+CAPACITY ALLOCATION
+${'─'.repeat(78)}
+Feature Development  : ${featDays} days (${cfg.featSplit}% of total capacity)
+Regression Bug Fix   : ${bugDays} days (${100-cfg.featSplit}% of total capacity)
+
+QUALITY CHECKLIST
+${'─'.repeat(78)}
+Completed            : ${done}/${checklistItems.length} items (${Math.round(done/checklistItems.length*100)}%)
+Progress             : ${'█'.repeat(Math.round(done/checklistItems.length*20))}${'░'.repeat(20-Math.round(done/checklistItems.length*20))} ${Math.round(done/checklistItems.length*100)}%
+
+${'─'.repeat(78)}
+Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
+`;
+  
+  navigator.clipboard.writeText(txt).then(()=>toast('Copied to clipboard ✓'));
+}
+
+// ════════════════════════════════════════════
+//  DOWNLOAD DATA
+// ════════════════════════════════════════════
+function downloadData() {
+  const dataStr = JSON.stringify(state, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const timestamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `PI-Plan-${state.config.pi}-${timestamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Data downloaded ✓');
+}
+
+// ════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ════════════════════════════════════════════
+//  CLOCK
+// ════════════════════════════════════════════
+function updateClock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+loadState();
+renderDashboard();
+</script>
+</body>
+</html>
