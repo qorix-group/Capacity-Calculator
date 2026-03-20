@@ -278,6 +278,130 @@
   .sprint-val.high { background: rgba(0,229,160,0.12); color: var(--accent2); }
   .sprint-val.training { background: rgba(245,166,35,0.1); color: var(--accent4); letter-spacing: 1px; }
 
+  /* ─── TEAM MEMBER CARDS ─── */
+  .member-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .member-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .member-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .member-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .member-info h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: var(--text);
+  }
+  .member-meta {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .member-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .member-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .member-detail-item {
+    font-size: 11px;
+  }
+  .member-detail-label {
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  .member-detail-value {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .member-tech {
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    padding: 6px 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .member-certs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .cert-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .cert-icon.yes {
+    background: rgba(0,229,160,0.12);
+    color: var(--accent2);
+  }
+  .cert-icon.no {
+    background: rgba(245,166,35,0.1);
+    color: var(--accent4);
+  }
+  .member-sprints {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+  }
+  .sprint-mini {
+    text-align: center;
+    padding: 4px 2px;
+    background: var(--surface2);
+    border-radius: 4px;
+    font-size: 10px;
+  }
+  .sprint-mini-label {
+    font-size: 8px;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .sprint-mini-value {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .sprint-mini-value.high { color: var(--accent2); }
+  .sprint-mini-value.training { color: var(--accent4); }
+
   /* ─── US PLANNING ─── */
   .tshirt {
     display: inline-block;
@@ -690,7 +814,7 @@
     <span class="pi-badge">PI-CY26-Q1</span>
   </div>
   <div class="header-meta">
-    <div class="status-pill"><span class="status-dot"></span> In-Review</div>
+    <div class="status-pill" id="header-status"><span class="status-dot"></span> <span id="header-status-text">In-Review</span></div>
     <div class="status-pill" id="clock" style="margin-left:8px;"></div>
   </div>
 </header>
@@ -832,15 +956,8 @@
         <button class="btn btn-ghost" id="kyt-cancel-btn" onclick="cancelEdit()" style="display:none;margin-left:8px;">Cancel</button>
       </div>
 
-      <div class="section-title">Team Members</div>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr><th>Name</th><th>Grade</th><th>Role</th><th>Overall Exp</th><th>Technologies</th><th>Safety Certified</th><th>Cybersec Trained</th><th>Project Training</th><th>Delivered Code</th><th>Alloc %</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>Avg PF</th><th>Actions</th></tr>
-          </thead>
-          <tbody id="kyt-tbody"></tbody>
-        </table>
-      </div>
+      <div class="section-title">Team Members (<span id="kyt-count">0</span>)</div>
+      <div class="member-grid" id="kyt-members-grid"></div>
     </div>
 
     <!-- ══════════════ CAPACITY ══════════════ -->
@@ -996,7 +1113,7 @@
         <div class="form-grid">
           <div><label>Date</label><input type="date" id="cfg-date"></div>
           <div><label>Status</label>
-            <select id="cfg-status">
+            <select id="cfg-status" onchange="updateStatusRealtime()">
               <option>Draft</option><option selected>In-Review</option><option>Approved</option><option>Active</option>
             </select>
           </div>
@@ -1249,6 +1366,24 @@ function renderDashboard() {
     subtitle.textContent = `Program Increment · ${state.config.pi} · ${state.config.project}`;
   }
 
+  // Update header status
+  const statusText = document.getElementById('header-status-text');
+  const statusPill = document.getElementById('header-status');
+  if (statusText && statusPill) {
+    statusText.textContent = state.config.status;
+    // Update status dot color based on status
+    if (state.config.status === 'Approved') {
+      statusPill.style.borderColor = 'var(--green)';
+      statusPill.querySelector('.status-dot').style.backgroundColor = 'var(--green)';
+    } else if (state.config.status === 'Active') {
+      statusPill.style.borderColor = 'var(--accent2)';
+      statusPill.querySelector('.status-dot').style.backgroundColor = 'var(--accent2)';
+    } else {
+      statusPill.style.borderColor = 'var(--orange)';
+      statusPill.querySelector('.status-dot').style.backgroundColor = 'var(--orange)';
+    }
+  }
+
   document.getElementById('stat-members').textContent = state.members.length;
   document.getElementById('stat-cap').textContent = total.toFixed(1);
   document.getElementById('stat-featuredev').textContent = featDays;
@@ -1404,31 +1539,65 @@ function clearKytForm() {
 }
 
 function renderKYT() {
-  const tbody = document.getElementById('kyt-tbody');
-  tbody.innerHTML = state.members.map((m,i) => `
-    <tr>
-      <td><strong>${m.name}</strong></td>
-      <td><span class="badge badge-purple">${m.grade}</span></td>
-      <td>${m.role}</td>
-      <td><span class="badge badge-blue">${m.exp}</span></td>
-      <td style="font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${m.tech||''}">${m.tech||'—'}</td>
-      <td><span class="badge ${m.safety==='Yes'?'badge-green':'badge-orange'}">${m.safety}</span></td>
-      <td><span class="badge ${(m.cybersec||'No')==='Yes'?'badge-green':'badge-orange'}">${m.cybersec||'No'}</span></td>
-      <td><span class="badge ${m.training==='Yes'?'badge-green':'badge-orange'}">${m.training}</span></td>
-      <td><span class="badge ${m.delivered==='Yes'?'badge-green':'badge-orange'}">${m.delivered}</span></td>
-      <td>${(m.module * 100).toFixed(0)}%</td>
-      <td class="sprint-cell"><span class="sprint-val ${m.s[0]=='T'?'training':m.s[0]>=0.9?'high':''}">${m.s[0]}</span></td>
-      <td class="sprint-cell"><span class="sprint-val ${m.s[1]=='T'?'training':m.s[1]>=0.9?'high':''}">${m.s[1]}</span></td>
-      <td class="sprint-cell"><span class="sprint-val ${m.s[2]=='T'?'training':m.s[2]>=0.9?'high':''}">${m.s[2]}</span></td>
-      <td class="sprint-cell"><span class="sprint-val ${m.s[3]=='T'?'training':m.s[3]>=0.9?'high':''}">${m.s[3]}</span></td>
-      <td class="sprint-cell"><span class="sprint-val ${m.s[4]=='T'?'training':m.s[4]>=0.9?'high':''}">${m.s[4]}</span></td>
-      <td class="sprint-cell"><span class="sprint-val ${m.s[5]=='T'?'training':m.s[5]>=0.9?'high':''}">${m.s[5]}</span></td>
-      <td><strong>${calcAvgPF(m)}</strong></td>
-      <td>
-        <button class="btn btn-primary" style="padding:4px 10px;font-size:11px;margin-right:4px;" onclick="editMember(${i})">Edit</button>
-        <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="removeMember(${i})">Remove</button>
-      </td>
-    </tr>`).join('');
+  const grid = document.getElementById('kyt-members-grid');
+  const count = document.getElementById('kyt-count');
+  count.textContent = state.members.length;
+  
+  grid.innerHTML = state.members.map((m,i) => `
+    <div class="member-card">
+      <div class="member-header">
+        <div class="member-info">
+          <h3>${m.name}</h3>
+          <div class="member-meta">
+            <span class="badge badge-purple">${m.grade}</span>
+            <span>${m.role}</span>
+            <span class="badge badge-blue">${m.exp}</span>
+          </div>
+        </div>
+        <div class="member-actions">
+          <button class="btn btn-primary" style="padding:4px 10px;font-size:11px;" onclick="editMember(${i})">Edit</button>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="removeMember(${i})">×</button>
+        </div>
+      </div>
+      
+      ${m.tech ? `<div class="member-tech" title="${m.tech}">🔧 ${m.tech}</div>` : ''}
+      
+      <div class="member-details">
+        <div class="member-detail-item">
+          <div class="member-detail-label">Allocation</div>
+          <div class="member-detail-value">${(m.module * 100).toFixed(0)}%</div>
+        </div>
+        <div class="member-detail-item">
+          <div class="member-detail-label">Avg PF</div>
+          <div class="member-detail-value">${calcAvgPF(m)}</div>
+        </div>
+      </div>
+      
+      <div class="member-certs">
+        <span class="cert-icon ${m.safety==='Yes'?'yes':'no'}">
+          ${m.safety==='Yes'?'✓':'×'} Safety
+        </span>
+        <span class="cert-icon ${(m.cybersec||'No')==='Yes'?'yes':'no'}">
+          ${(m.cybersec||'No')==='Yes'?'✓':'×'} Cybersec
+        </span>
+        <span class="cert-icon ${m.training==='Yes'?'yes':'no'}">
+          ${m.training==='Yes'?'✓':'×'} Training
+        </span>
+        <span class="cert-icon ${m.delivered==='Yes'?'yes':'no'}">
+          ${m.delivered==='Yes'?'✓':'×'} Delivered
+        </span>
+      </div>
+      
+      <div class="member-sprints">
+        ${m.s.map((val, idx) => `
+          <div class="sprint-mini">
+            <div class="sprint-mini-label">S${idx+1}</div>
+            <div class="sprint-mini-value ${val=='T'?'training':val>=0.9?'high':''}">${val}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
 }
 
 // ════════════════════════════════════════════
@@ -1839,8 +2008,19 @@ function saveConfig() {
     renderCapacityMatrix();
   }
   
+  // Update dashboard to reflect status change
+  renderDashboard();
+  
   autoSave();
   toast('Config saved ✓');
+}
+
+function updateStatusRealtime() {
+  // Update status in config immediately
+  state.config.status = document.getElementById('cfg-status').value;
+  // Refresh dashboard to show new status
+  renderDashboard();
+  autoSave();
 }
 
 // ════════════════════════════════════════════
