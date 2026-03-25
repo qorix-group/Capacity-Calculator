@@ -1267,7 +1267,7 @@
         <div class="form-grid">
           <div><label>Status</label>
             <select id="cfg-status" onchange="updateStatusRealtime()">
-              <option>Draft</option><option selected>In-Review</option><option>Approved</option><option>Active</option>
+              <option>Draft</option><option>In-Review</option><option>Approved</option><option>Active</option>
             </select>
           </div>
           <div><label>PPM</label><input type="text" id="cfg-ppm"></div>
@@ -2791,20 +2791,31 @@ function downloadCompleteCSV() {
   const timestamp = new Date().toISOString().slice(0,10);
   let csv = '';
   
+  // Helper function to properly escape CSV values
+  const escapeCSV = (val) => {
+    if (val === null || val === undefined) return '';
+    const str = String(val);
+    // Quote if contains comma, quotes, or newlines
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+  
   // ===== CONFIGURATION SECTION =====
   csv += '### CONFIGURATION ###\n';
   csv += 'Field,Value\n';
-  csv += `PI Name,${state.config.pi}\n`;
-  csv += `Project,${state.config.project}\n`;
-  csv += `Module/Team Name,${state.config.module || ''}\n`;
-  csv += `Config ID,${state.config.configId || ''}\n`;
-  csv += `Version,${state.config.version}\n`;
-  csv += `Date,${state.config.date || ''}\n`;
-  csv += `Status,${state.config.status}\n`;
-  csv += `PPM,${state.config.ppm || ''}\n`;
-  csv += `PO,${state.config.po || ''}\n`;
-  csv += `Scrum Master,${state.config.sm || ''}\n`;
-  csv += `Author,${state.config.author || ''}\n`;
+  csv += `PI Name,${escapeCSV(state.config.pi)}\n`;
+  csv += `Project,${escapeCSV(state.config.project)}\n`;
+  csv += `Module/Team Name,${escapeCSV(state.config.module || '')}\n`;
+  csv += `Config ID,${escapeCSV(state.config.configId || '')}\n`;
+  csv += `Version,${escapeCSV(state.config.version)}\n`;
+  csv += `Date,${escapeCSV(state.config.date || '')}\n`;
+  csv += `Status,${escapeCSV(state.config.status)}\n`;
+  csv += `PPM,${escapeCSV(state.config.ppm || '')}\n`;
+  csv += `PO,${escapeCSV(state.config.po || '')}\n`;
+  csv += `Scrum Master,${escapeCSV(state.config.sm || '')}\n`;
+  csv += `Author,${escapeCSV(state.config.author || '')}\n`;
   csv += `Feature Split %,${state.config.featSplit}\n`;
   csv += `Sprints,${state.config.sprints}\n`;
   csv += '\n';
@@ -2813,7 +2824,7 @@ function downloadCompleteCSV() {
   csv += '### TEAM MEMBERS (KYT) ###\n';
   csv += 'Name,Grade,Role,Overall Experience,Technologies,Safety Certified,Cybersec Trained,Project Training Done,Delivered Code,Allocation %,S1 PF,S2 PF,S3 PF,S4 PF,S5 PF,S6 PF\n';
   state.members.forEach(m => {
-    csv += `"${m.name}",${m.grade},${m.role},"${m.exp}","${m.tech||''}",${m.safety},${m.cybersec||'No'},${m.training},${m.delivered},${m.module},${m.s[0]},${m.s[1]},${m.s[2]},${m.s[3]},${m.s[4]},${m.s[5]}\n`;
+    csv += `${escapeCSV(m.name)},${escapeCSV(m.grade)},${escapeCSV(m.role)},${escapeCSV(m.exp)},${escapeCSV(m.tech||'')},${escapeCSV(m.safety)},${escapeCSV(m.cybersec||'No')},${escapeCSV(m.training)},${escapeCSV(m.delivered)},${m.module},${m.s[0]},${m.s[1]},${m.s[2]},${m.s[3]},${m.s[4]},${m.s[5]}\n`;
   });
   csv += '\n';
   
@@ -2822,7 +2833,7 @@ function downloadCompleteCSV() {
   csv += 'Name,Weeks,Saturdays,Holidays,Leaves,Misc Days,Allocation %,Pre-PI,All Hands,Competency,GNC,Others\n';
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    csv += `"${m.name}",${c.weeks||12},${c.sat||0},${c.holidays||3},${c.leaves||0},${c.misc||0},${c.alloc||1},${c.prepi||0},${c.allhands||0},${c.competency||0},${c.gnc||0},${c.others||0}\n`;
+    csv += `${escapeCSV(m.name)},${c.weeks||12},${c.sat||0},${c.holidays||3},${c.leaves||0},${c.misc||0},${c.alloc||1},${c.prepi||0},${c.allhands||0},${c.competency||0},${c.gnc||0},${c.others||0}\n`;
   });
   csv += '\n';
   
@@ -2831,7 +2842,7 @@ function downloadCompleteCSV() {
   csv += 'Item #,Category,Description,Checked,Comment\n';
   checklistItems.forEach((item, i) => {
     const checkItem = state.checklist[i] || { checked: false, comment: '' };
-    csv += `${i+1},"${item[0]}","${item[1]}",${checkItem.checked ? 'Yes' : 'No'},"${(checkItem.comment || '').replace(/"/g, '""')}"\n`;
+    csv += `${i+1},${escapeCSV(item[0])},${escapeCSV(item[1])},${checkItem.checked ? 'Yes' : 'No'},${escapeCSV(checkItem.comment || '')}\n`;
   });
   csv += '\n';
   
@@ -2856,7 +2867,10 @@ function uploadCSV(event) {
   reader.onload = function(e) {
     try {
       const text = e.target.result;
-      const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+      // Split lines, trim, and filter out empty lines or lines with only commas
+      const lines = text.split('\n')
+        .map(line => line.trim())
+        .filter(line => line && line.replace(/,/g, '').length > 0);
       
       let section = '';
       const newState = {
@@ -2892,10 +2906,13 @@ function uploadCSV(event) {
         
         // Parse data based on section
         if (section === 'config' && line) {
-          const parts = line.split(',').map(p => p.trim());
+          const parts = parseCSVLine(line);
           if (parts.length >= 2) {
-            const field = parts[0];
-            const value = parts.slice(1).join(',');
+            const field = parts[0].trim();
+            const value = parts[1].trim();
+            
+            console.log(`Config: ${field} = ${value}`); // Debug logging
+            
             if (field === 'PI Name') newState.config.pi = value;
             else if (field === 'Project') newState.config.project = value;
             else if (field === 'Module/Team Name') newState.config.module = value;
@@ -2907,8 +2924,8 @@ function uploadCSV(event) {
             else if (field === 'PO') newState.config.po = value;
             else if (field === 'Scrum Master') newState.config.sm = value;
             else if (field === 'Author') newState.config.author = value;
-            else if (field === 'Feature Split %') newState.config.featSplit = +value;
-            else if (field === 'Sprints') newState.config.sprints = +value;
+            else if (field === 'Feature Split %') newState.config.featSplit = parseFloat(value) || 95;
+            else if (field === 'Sprints') newState.config.sprints = parseInt(value) || 6;
           }
         } else if (section === 'kyt' && line) {
           // Parse KYT data: Name,Grade,Role,Overall Experience,Technologies,Safety,Cybersec,Training,Delivered,Allocation %,S1-S6
@@ -2962,17 +2979,27 @@ function uploadCSV(event) {
         }
       }
       
+      console.log('Imported configuration:', newState.config); // Debug logging
+      
       // Apply the new state
       state.config = newState.config;
       state.members = newState.members;
       state.capacity = newState.capacity;
       state.checklist = newState.checklist;
       
-      // Save and refresh
+      console.log('Applied configuration:', state.config); // Debug logging
+      
+      // Save and refresh all UI components
       saveState();
       document.querySelector('.pi-badge').textContent = state.config.pi;
-      renderDashboard();
+      renderConfig(); // Refresh configuration form (updates status dropdown and other fields)
+      renderDashboard(); // Refresh dashboard view
+      renderKYT(); // Refresh KYT view
+      renderChecklist(); // Refresh checklist
       toast('Data imported successfully ✓');
+      
+      // Navigate to dashboard to show imported data
+      navigate('dashboard');
       
       // Clear file input
       event.target.value = '';
@@ -2985,7 +3012,7 @@ function uploadCSV(event) {
   reader.readAsText(file);
 }
 
-// Helper function to parse CSV line considering quoted values
+// Helper function to parse CSV line considering quoted values and escaped quotes
 function parseCSVLine(line) {
   const result = [];
   let current = '';
@@ -2993,16 +3020,30 @@ function parseCSVLine(line) {
   
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    if (char === '"') {
+    const nextChar = line[i + 1];
+    
+    if (char === '"' && inQuotes && nextChar === '"') {
+      // Escaped quote ("" means literal ")
+      current += '"';
+      i++; // Skip next quote
+    } else if (char === '"') {
+      // Toggle quote mode
       inQuotes = !inQuotes;
     } else if (char === ',' && !inQuotes) {
-      result.push(current.trim());
+      // Field separator outside quotes
+      result.push(current);
       current = '';
     } else {
       current += char;
     }
   }
-  result.push(current.trim());
+  result.push(current);
+  
+  // Remove trailing empty fields (Excel adds these)
+  while (result.length > 0 && result[result.length - 1] === '') {
+    result.pop();
+  }
+  
   return result;
 }
 
