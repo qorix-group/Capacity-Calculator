@@ -1,4 +1,4 @@
-# PI Planning Dashboard
+# PI Planning Capacity Dashboard
 
 > A comprehensive, browser-based PI Planning tool for team capacity management and resource tracking
 
