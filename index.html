@@ -434,6 +434,40 @@
     display: flex; gap: 12px; align-items: flex-start;
     padding: 10px 14px;
     border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .check-item-main {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    flex: 1;
+    min-width: 100%;
+  }
+  .check-comment-row {
+    flex: 1;
+    min-width: 100%;
+    margin-top: 8px;
+    padding-left: 40px;
+  }
+  .check-comment-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    outline: none;
+    transition: all 0.15s;
+  }
+  .check-comment-input:focus {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .check-comment-input::placeholder {
+    color: var(--muted);
+    opacity: 0.5;
   }
   .check-item:last-child { border-bottom: none; }
   .check-num { color: var(--muted); min-width: 28px; font-size: 11px; }
@@ -604,13 +638,26 @@
     header, nav, .btn, #toast, .flex.gap-8 { display: none !important; }
     main { padding: 20px; width: 100%; }
     
-    /* Hide all pages except report during print */
+    /* Hide all pages except dashboard during print */
     .page { display: none !important; }
-    #page-report { display: block !important; }
+    #page-dashboard { display: block !important; }
     
-    /* Hide page navigation elements */
-    #page-report .page-title,
-    #page-report .page-sub { display: none !important; }
+    /* Page styling for dashboard */
+    #page-dashboard .page-title {
+      text-align: center !important;
+      font-size: 24px !important;
+      color: #000 !important;
+      margin-bottom: 10px !important;
+    }
+    
+    #page-dashboard .page-sub {
+      text-align: center !important;
+      font-size: 14px !important;
+      color: #666 !important;
+      margin-bottom: 25px !important;
+      padding-bottom: 15px !important;
+      border-bottom: 2px solid #000 !important;
+    }
     
     /* Report card styling */
     .form-card { 
@@ -765,6 +812,106 @@
       border-color: #1976d2 !important;
     }
     
+    .badge-purple {
+      background: #f3e5f5 !important;
+      border-color: #7b1fa2 !important;
+    }
+    
+    /* Dashboard capacity cards */
+    .capacity-row {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 10px !important;
+      margin-bottom: 20px !important;
+    }
+    
+    .cap-card {
+      border: 1px solid #333 !important;
+      padding: 10px !important;
+      background: white !important;
+      page-break-inside: avoid;
+    }
+    
+    .cap-name {
+      font-weight: bold !important;
+      color: #000 !important;
+      margin-bottom: 5px !important;
+    }
+    
+    .cap-role {
+      font-size: 10px !important;
+      color: #666 !important;
+      margin-bottom: 8px !important;
+    }
+    
+    .cap-row {
+      display: flex !important;
+      justify-content: space-between !important;
+      font-size: 10px !important;
+      margin-bottom: 3px !important;
+      color: #000 !important;
+    }
+    
+    .cap-bar-wrap {
+      margin-top: 8px !important;
+      border: 1px solid #ccc !important;
+      height: 8px !important;
+      background: #f0f0f0 !important;
+    }
+    
+    .cap-fill {
+      background: #333 !important;
+      height: 100% !important;
+    }
+    
+    /* Dashboard stat grid */
+    .stat-grid {
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 10px !important;
+      margin-bottom: 25px !important;
+    }
+    
+    /* Dashboard section titles and content */
+    #page-dashboard .section {
+      page-break-inside: avoid;
+      margin-bottom: 25px !important;
+    }
+    
+    #page-dashboard .section-title {
+      color: #000 !important;
+      font-weight: bold !important;
+      font-size: 14px !important;
+      margin-bottom: 15px !important;
+      border-bottom: 2px solid #333 !important;
+      padding-bottom: 5px !important;
+    }
+    
+    /* PF bar styling */
+    .pf-bar-wrap {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+    }
+    
+    .pf-bar {
+      flex: 1 !important;
+      height: 12px !important;
+      border: 1px solid #ccc !important;
+      background: #f0f0f0 !important;
+    }
+    
+    .pf-fill {
+      background: #333 !important;
+      height: 100% !important;
+    }
+    
+    .pf-val {
+      font-size: 11px !important;
+      color: #000 !important;
+      font-weight: bold !important;
+    }
+    
     /* Progress bars */
     .progress-wrap { 
       border: 1px solid #000 !important;
@@ -814,6 +961,9 @@
     <span class="pi-badge">PI-CY26-Q1</span>
   </div>
   <div class="header-meta">
+    <button class="btn btn-danger" onclick="resetDashboard()" style="margin-right:12px;padding:6px 14px;font-size:12px;" title="Reset all data and start with empty template">
+      ⟲ Reset
+    </button>
     <div class="status-pill" id="header-status"><span class="status-dot"></span> <span id="header-status-text">In-Review</span></div>
     <div class="status-pill" id="clock" style="margin-left:8px;"></div>
   </div>
@@ -858,7 +1008,7 @@
     <!-- ══════════════ DASHBOARD ══════════════ -->
     <div class="page active" id="page-dashboard">
       <div class="page-title">PI Plan Overview</div>
-      <div class="page-sub" id="dashboard-subtitle">Program Increment · CY26 Q1 · Qorix Developer</div>
+      <div class="page-sub" id="dashboard-subtitle">Program Increment · PI-YYYY-QX · Project Name</div>
 
       <div class="stat-grid">
         <div class="stat-card" style="--accent-color: var(--accent);">
@@ -1033,7 +1183,7 @@
             <div class="form-title">Capacity Configuration</div>
             <div style="margin-bottom:14px;">
               <label>Select Member</label>
-              <select id="cap-member-select" onchange="loadCapMember()"></select>
+              <select id="cap-member-select" onchange="switchCapMember()"></select>
             </div>
             <div class="form-grid-3 form-grid">
               <div><label>Weeks in PI</label><input type="number" id="cap-weeks"></div>
@@ -1107,27 +1257,30 @@
           <div><label>Project</label><input type="text" id="cfg-project" value="Qorix Developer"></div>
         </div>
         <div class="form-grid">
+          <div><label>Module/Team Name</label><input type="text" id="cfg-module"></div>
           <div><label>Config ID</label><input type="text" id="cfg-configid"></div>
-          <div><label>Version</label><input type="text" id="cfg-version" value="1.0.0"></div>
         </div>
         <div class="form-grid">
+          <div><label>Version</label><input type="text" id="cfg-version" value="1.0.0"></div>
           <div><label>Date</label><input type="date" id="cfg-date"></div>
+        </div>
+        <div class="form-grid">
           <div><label>Status</label>
             <select id="cfg-status" onchange="updateStatusRealtime()">
               <option>Draft</option><option selected>In-Review</option><option>Approved</option><option>Active</option>
             </select>
           </div>
-        </div>
-        <div class="form-grid">
           <div><label>PPM</label><input type="text" id="cfg-ppm"></div>
+        </div>
+        <div class="form-grid">
           <div><label>PO</label><input type="text" id="cfg-po"></div>
-        </div>
-        <div class="form-grid">
           <div><label>Scrum Master</label><input type="text" id="cfg-sm"></div>
-          <div><label>Author</label><input type="text" id="cfg-author"></div>
         </div>
         <div class="form-grid">
+          <div><label>Author</label><input type="text" id="cfg-author"></div>
           <div><label>Feature Split %</label><input type="number" id="cfg-featsplit" value="95"></div>
+        </div>
+        <div class="form-grid">
           <div><label>Sprints</label><input type="number" id="cfg-sprints" value="6"></div>
         </div>
         <button class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
@@ -1167,8 +1320,15 @@
       <div class="flex gap-8" style="flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="downloadData()">📥 Download Data (JSON)</button>
         <button class="btn btn-primary" onclick="downloadCSV()">📊 Export Capacity Matrix (CSV)</button>
-        <button class="btn btn-primary" onclick="printReport()">🖨️ Print Report (PDF)</button>
+        <button class="btn btn-primary" onclick="printReport()" title="Opens print dialog - select 'Save as PDF' as destination">🖨️ Print Dashboard to PDF</button>
         <button class="btn btn-ghost" onclick="copyReport()">📋 Copy to Clipboard</button>
+      </div>
+      <div style="margin-top:12px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;">
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;">
+          <strong style="color:var(--text);">💡 How to export PDF:</strong> Click "Print Dashboard to PDF" button above. In the print dialog that opens, select 
+          <strong style="color:var(--text);">"Save as PDF"</strong> or <strong style="color:var(--text);">"Microsoft Print to PDF"</strong> as the destination/printer, 
+          then click Save to download your PDF file.
+        </div>
       </div>
     </div>
 
@@ -1183,49 +1343,90 @@
 // ════════════════════════════════════════════
 let state = {
   config: {
-    pi: 'PI-CY26-Q1', project: 'Qorix Developer',
-    configId: '', version: '1.0.0', date: '', status: 'In-Review',
-    ppm: '', po: '', sm: '', author: '',
-    featSplit: 95, sprints: 6
+    pi: 'PI-YYYY-QX',
+    project: 'Project Name',
+    module: '',
+    configId: '',
+    version: '1.0.0',
+    date: '',
+    status: 'Draft',
+    ppm: '',
+    po: '',
+    sm: '',
+    author: '',
+    featSplit: 95,
+    sprints: 6
   },
-  members: [
-    { name:'Janekallu Raghukumar', grade:'F', role:'Architect', exp:'High > 5+ yrs', tech:'C++: 10yrs, AUTOSAR: 8yrs', safety:'No', cybersec:'Yes', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
-    { name:'Mayur Aggarwal',        grade:'C', role:'Developer', exp:'Medium > 3 to 5 yrs', tech:'C++: 5yrs, Python: 3yrs', safety:'No', cybersec:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
-    { name:'Dhanush K',             grade:'C', role:'Developer', exp:'Medium > 3 to 5 yrs', tech:'C++: 4yrs', safety:'No', cybersec:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
-    { name:'Sumegh Thale',          grade:'C', role:'Developer', exp:'Low > 1 to 3 yrs',    tech:'C++: 2yrs', safety:'No', cybersec:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] },
-    { name:'Sudheendra Desai',      grade:'E', role:'Tech Lead', exp:'High > 5+ yrs',        tech:'C++: 8yrs, AUTOSAR: 5yrs', safety:'Yes', cybersec:'Yes', training:'Yes', delivered:'Yes', module:1, s:[0.9,0.9,0.9,0.9,0.9,0.9] },
-    { name:'Rohit Malla',           grade:'C', role:'Developer', exp:'Low > 1 to 3 yrs',     tech:'C++: 2yrs', safety:'No', cybersec:'No', training:'Yes', delivered:'Yes', module:1, s:[0.95,0.95,0.95,0.95,0.95,0.95] }
-  ],
+  members: [],
   capacity: {},
   features: [],
   userStories: [],
-  checklist: Array(25).fill(false)
+  checklist: Array(22).fill(null).map(() => ({ checked: false, comment: '' }))
 };
-
-// Default capacity per member
-state.members.forEach(m => {
-  state.capacity[m.name] = {
-    weeks:12, sat:0, holidays:3,
-    leaves: m.name==='Sumegh Thale'?6 : m.name==='Sudheendra Desai'?6 : 7,
-    misc:   m.name==='Janekallu Raghukumar'?9 : m.name==='Sudheendra Desai'?9 : 7,
-    alloc:1,
-    prepi:  m.name==='Janekallu Raghukumar'||m.name==='Sudheendra Desai'?1:0,
-    allhands:0.18,
-    competency:2, gnc:1, others:0
-  };
-});
 
 // Load from localStorage if available
 function loadState() {
-  const saved = localStorage.getItem('piPlanState');
-  if (saved) {
-    try {
-      state = JSON.parse(saved);
-      toast('Data loaded from browser storage ✓');
-    } catch (e) {
-      console.error('Failed to load state:', e);
-    }
+  // Dashboard starts fresh on every launch - no saved data loaded
+  // Users can use CSV import to restore previous data if needed
+  toast('Dashboard initialized with empty template');
+}
+
+// Reset dashboard to empty template
+function resetDashboard() {
+  const confirmed = confirm(
+    '⚠️ WARNING: This will delete ALL data!\n\n' +
+    'This action will:\n' +
+    '• Remove all team members\n' +
+    '• Clear all capacity data\n' +
+    '• Reset configuration to defaults\n' +
+    '• Clear all checklists\n' +
+    '• Delete saved data from browser storage\n\n' +
+    'This cannot be undone. Continue?'
+  );
+  
+  if (!confirmed) {
+    toast('Reset cancelled');
+    return;
   }
+  
+  // Create empty state template
+  state = {
+    config: {
+      pi: 'PI-YYYY-QX',
+      project: 'Project Name',
+      module: '',
+      configId: '',
+      version: '1.0.0',
+      date: '',
+      status: 'Draft',
+      ppm: '',
+      po: '',
+      sm: '',
+      author: '',
+      featSplit: 95,
+      sprints: 6
+    },
+    members: [],
+    capacity: {},
+    features: [],
+    userStories: [],
+    checklist: Array(22).fill(null).map(() => ({ checked: false, comment: '' }))
+  };
+  
+  // Clear localStorage
+  localStorage.removeItem('piPlanState');
+  
+  // Update UI
+  document.querySelector('.pi-badge').textContent = state.config.pi;
+  renderConfig();
+  renderDashboard();
+  renderKYT();
+  renderCapacity();
+  
+  // Navigate to configuration tab to start setup
+  navigate('config');
+  
+  toast('✓ Dashboard reset! Start by configuring PI details.');
 }
 
 // Save to localStorage
@@ -1271,13 +1472,10 @@ const checklistItems = [
   ['KYT','Ensure productivity factor is planned as "T" (Training) for new joiners.'],
   ['KYT','Ensure productivity factor is planned for available sprints for SNP/PIP candidates.'],
   ['KYT','Verify productivity factor and module allocation for POs and shared resources.'],
-  ['KYT','Hide unused rows for team members.'],
-  ['PI Capacity','Manually update "Weeks in CYxx" if resource is leaving between sprints.'],
   ['PI Capacity','Ensure leaves are considered only after individual discussion.'],
-  ['PI Capacity','3 days module-level training budgeted for all team members unless specific training exists.'],
   ['PI Capacity','CLI training not to be planned for first PI unless module lacks trained personnel.'],
   ['PI Capacity','Verify split between Feature Development and Regression Bug Fixing is correct.'],
-  ['PI Feature','Verify Customer (Honda/Hitachi) inputs are considered in planning.'],
+  ['PI Feature','Verify Customer inputs are considered in planning.'],
   ['PI Feature','Verify internally identified features are planned per "Internal PI Planning Inputs".'],
   ['PI Feature','Verify spillover Features/Bugs/US from previous PI are marked in Light Blue.'],
   ['PI Feature','Verify bugs from Features/US do not have estimation against actual bug.'],
@@ -1289,9 +1487,9 @@ const checklistItems = [
   ['PI US','Verify ordering of US per execution priority of features.'],
   ['PI US','Verify US naming convention is per guideline.'],
   ['PI US','Check US are planned based on required RA/Design/Review capacity.'],
-  ['KAP','Bugs resolved with Feature/US implementation are linked with "follows" relation.'],
-  ['KAP','Verify features/Bugs/US planned in PI plan are correctly imported in KAP.'],
-  ['KAP','Verify planning status in KAP matches PI Planning sheet (Confirmed/Tentative/Planned Later tags).'],
+  ['Jira','Bugs resolved with Feature/US implementation are linked with "follows" relation.'],
+  ['Jira','Verify features/Bugs/US planned in PI plan are correctly imported in Jira.'],
+  ['Jira','Verify planning status in Jira matches PI Planning sheet (Confirmed/Tentative/Planned Later tags).'],
 ];
 
 // ════════════════════════════════════════════
@@ -1363,7 +1561,8 @@ function renderDashboard() {
   // Update dashboard subtitle
   const subtitle = document.getElementById('dashboard-subtitle');
   if (subtitle) {
-    subtitle.textContent = `Program Increment · ${state.config.pi} · ${state.config.project}`;
+    const modulePart = state.config.module ? ` · ${state.config.module}` : '';
+    subtitle.textContent = `Program Increment · ${state.config.pi} · ${state.config.project}${modulePart}`;
   }
 
   // Update header status
@@ -1603,17 +1802,58 @@ function renderKYT() {
 // ════════════════════════════════════════════
 //  CAPACITY
 // ════════════════════════════════════════════
+let currentCapMember = null; // Track currently loaded member
+
 function renderCapacity() {
   const sel = document.getElementById('cap-member-select');
   sel.innerHTML = state.members.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+  currentCapMember = null; // Reset tracking
   loadCapMember();
   renderCapacitySummary();
   renderCapacityMatrix();
   renderTrainingMatrix();
 }
 
+function switchCapMember() {
+  // Save current member's data before switching
+  if (currentCapMember) {
+    saveCurrentCapacityData(currentCapMember);
+  }
+  loadCapMember();
+}
+
+function saveCurrentCapacityData(memberName) {
+  // Save without re-rendering to avoid loops
+  const allocValue = +document.getElementById('cap-alloc').value;
+  
+  state.capacity[memberName] = {
+    weeks: +document.getElementById('cap-weeks').value,
+    sat: +document.getElementById('cap-sat').value,
+    holidays: +document.getElementById('cap-holidays').value,
+    leaves: +document.getElementById('cap-leaves').value,
+    misc: +document.getElementById('cap-misc').value,
+    alloc: allocValue,
+    prepi: +document.getElementById('cap-prepi').value,
+    allhands: +document.getElementById('cap-allhands').value,
+    competency: +document.getElementById('cap-competency').value,
+    gnc: +document.getElementById('cap-gnc').value,
+    others: +document.getElementById('cap-others').value,
+  };
+  
+  // Sync allocation back to KYT module field
+  const member = state.members.find(m => m.name === memberName);
+  if (member) {
+    member.module = allocValue;
+  }
+  
+  autoSave();
+}
+
 function loadCapMember() {
   const name = document.getElementById('cap-member-select').value;
+  if (!name) return;
+  
+  currentCapMember = name; // Track the loaded member
   const c = state.capacity[name] || {};
   document.getElementById('cap-weeks').value = c.weeks||12;
   document.getElementById('cap-sat').value = c.sat||0;
@@ -1630,30 +1870,17 @@ function loadCapMember() {
 
 function saveCapacity() {
   const name = document.getElementById('cap-member-select').value;
-  const allocValue = +document.getElementById('cap-alloc').value;
+  if (!name) return;
   
-  state.capacity[name] = {
-    weeks: +document.getElementById('cap-weeks').value,
-    sat: +document.getElementById('cap-sat').value,
-    holidays: +document.getElementById('cap-holidays').value,
-    leaves: +document.getElementById('cap-leaves').value,
-    misc: +document.getElementById('cap-misc').value,
-    alloc: allocValue,
-    prepi: +document.getElementById('cap-prepi').value,
-    allhands: +document.getElementById('cap-allhands').value,
-    competency: +document.getElementById('cap-competency').value,
-    gnc: +document.getElementById('cap-gnc').value,
-    others: +document.getElementById('cap-others').value,
-  };
+  // Use the helper function to save data
+  saveCurrentCapacityData(name);
   
-  // Sync allocation back to KYT module field
-  const member = state.members.find(m => m.name === name);
-  if (member) {
-    member.module = allocValue;
-  }
+  // Re-render to update all views
+  renderCapacitySummary();
+  renderCapacityMatrix();
+  renderTrainingMatrix();
+  renderKYT(); // Update KYT view with synced allocation
   
-  renderCapacity();
-  autoSave();
   toast('Capacity saved ✓');
 }
 
@@ -1924,7 +2151,7 @@ function renderTrainingMatrix() {
 //  CHECKLIST
 // ════════════════════════════════════════════
 function renderChecklist() {
-  const done = state.checklist.filter(Boolean).length;
+  const done = state.checklist.filter(item => item.checked).length;
   const pct = Math.round(done/checklistItems.length*100);
   document.getElementById('chk-done').textContent = done;
   document.getElementById('chk-sub').textContent = `of ${checklistItems.length} items`;
@@ -1932,20 +2159,46 @@ function renderChecklist() {
   document.getElementById('chk-bar').style.width = pct + '%';
 
   const cont = document.getElementById('chk-container');
-  cont.innerHTML = `<div>${checklistItems.map((item,i) => `
+  cont.innerHTML = `<div>${checklistItems.map((item,i) => {
+    const checkItem = state.checklist[i] || { checked: false, comment: '' };
+    return `
     <div class="check-item">
-      <div class="check-num">${(i+1).toString().padStart(2,'0')}</div>
-      <div class="check-text">
-        <div>${item[1]}</div>
-        <div class="check-cat">${item[0]}</div>
+      <div class="check-item-main">
+        <div class="check-num">${(i+1).toString().padStart(2,'0')}</div>
+        <div class="check-text">
+          <div>${item[1]}</div>
+          <div class="check-cat">${item[0]}</div>
+        </div>
+        <div class="check-toggle ${checkItem.checked?'done':''}" onclick="toggleCheck(${i})">${checkItem.checked?'✓':''}</div>
       </div>
-      <div class="check-toggle ${state.checklist[i]?'done':''}" onclick="toggleCheck(${i})">${state.checklist[i]?'✓':''}</div>
-    </div>`).join('')}</div>`;
+      <div class="check-comment-row">
+        <input 
+          type="text" 
+          class="check-comment-input" 
+          placeholder="Add comment (e.g., reason if not checked or N/A)..." 
+          value="${checkItem.comment}"
+          onblur="saveCheckComment(${i}, this.value)"
+          onkeydown="if(event.key==='Enter') this.blur()"
+        />
+      </div>
+    </div>`;
+  }).join('')}</div>`;
 }
 
 function toggleCheck(i) {
-  state.checklist[i] = !state.checklist[i];
+  if (!state.checklist[i]) {
+    state.checklist[i] = { checked: false, comment: '' };
+  }
+  state.checklist[i].checked = !state.checklist[i].checked;
   renderChecklist();
+  autoSave();
+}
+
+function saveCheckComment(i, comment) {
+  if (!state.checklist[i]) {
+    state.checklist[i] = { checked: false, comment: '' };
+  }
+  state.checklist[i].comment = comment;
   autoSave();
 }
 
@@ -1968,6 +2221,7 @@ function renderConfig() {
   const cfg = state.config;
   document.getElementById('cfg-pi').value = cfg.pi;
   document.getElementById('cfg-project').value = cfg.project;
+  document.getElementById('cfg-module').value = cfg.module || '';
   document.getElementById('cfg-configid').value = cfg.configId || '';
   document.getElementById('cfg-version').value = cfg.version;
   document.getElementById('cfg-date').value = cfg.date || '';
@@ -1984,6 +2238,7 @@ function saveConfig() {
   state.config = {
     pi: document.getElementById('cfg-pi').value,
     project: document.getElementById('cfg-project').value,
+    module: document.getElementById('cfg-module').value,
     configId: document.getElementById('cfg-configid').value,
     version: document.getElementById('cfg-version').value,
     date: document.getElementById('cfg-date').value,
@@ -2000,7 +2255,8 @@ function saveConfig() {
   // Update dashboard subtitle
   const subtitle = document.getElementById('dashboard-subtitle');
   if (subtitle) {
-    subtitle.textContent = `Program Increment · ${state.config.pi} · ${state.config.project}`;
+    const modulePart = state.config.module ? ` · ${state.config.module}` : '';
+    subtitle.textContent = `Program Increment · ${state.config.pi} · ${state.config.project}${modulePart}`;
   }
   
   // Update capacity matrix if it exists (user might be viewing capacity tab)
@@ -2030,7 +2286,7 @@ function renderReport() {
   const cfg = state.config;
   const net = totalCapacity();
   const avail = totalAvailDays();
-  const done = state.checklist.filter(Boolean).length;
+  const done = state.checklist.filter(item => item && item.checked).length;
   const featDays = (net * cfg.featSplit / 100).toFixed(1);
   const bugDays = (net * (100 - cfg.featSplit) / 100).toFixed(1);
   const el = document.getElementById('report-preview');
@@ -2042,6 +2298,7 @@ function renderReport() {
     <div class="section-title">PI Configuration</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;" class="config-grid">
       <div><strong>Project:</strong> ${cfg.project}</div>
+      <div><strong>Module/Team:</strong> ${cfg.module||'—'}</div>
       <div><strong>Status:</strong> <span class="badge ${cfg.status==='Approved'?'badge-green':cfg.status==='Active'?'badge-blue':'badge-orange'}">${cfg.status}</span></div>
       <div><strong>Version:</strong> ${cfg.version}</div>
       <div><strong>Date:</strong> ${cfg.date||'Not set'}</div>
@@ -2138,21 +2395,96 @@ function renderReport() {
 }
 
 function printReport() { 
-  // Ensure we're on the report page and data is fresh
-  navigate('report');
-  // Small delay to ensure rendering completes
-  setTimeout(() => {
-    window.print();
-  }, 100);
+  // Validate configuration before printing
+  if (!validateConfiguration()) {
+    return;
+  }
+  
+  try {
+    // Navigate to dashboard and ensure it's visible
+    navigate('dashboard');
+    
+    // Ensure dashboard is rendered
+    renderDashboard();
+    
+    // Force a small delay to ensure DOM is fully updated
+    setTimeout(() => {
+      try {
+        // Open the browser's print dialog
+        window.print();
+        
+        // If print was successful, show instructions in toast
+        setTimeout(() => {
+          toast('In the print dialog, select "Save as PDF" or "Microsoft Print to PDF" as the destination, then click Save');
+        }, 500);
+        
+      } catch (error) {
+        console.error('Print error:', error);
+        alert('Unable to open print dialog. Please try using Ctrl+P (Windows) or Cmd+P (Mac) to print, then select "Save as PDF".');
+      }
+    }, 500);
+    
+  } catch (error) {
+    console.error('Print report error:', error);
+    alert('Error preparing dashboard for printing. Please try again.');
+  }
+}
+
+function validateConfiguration() {
+  const cfg = state.config;
+  const missing = [];
+  
+  // Check required fields
+  if (!cfg.pi || cfg.pi === 'PI-YYYY-QX') {
+    missing.push('PI Name');
+  }
+  if (!cfg.project || cfg.project === 'Project Name') {
+    missing.push('Project');
+  }
+  if (!cfg.date) {
+    missing.push('Date');
+  }
+  if (!cfg.ppm || cfg.ppm.trim() === '') {
+    missing.push('PPM');
+  }
+  if (!cfg.po || cfg.po.trim() === '') {
+    missing.push('PO');
+  }
+  if (!cfg.sm || cfg.sm.trim() === '') {
+    missing.push('Scrum Master');
+  }
+  if (!cfg.author || cfg.author.trim() === '') {
+    missing.push('Author');
+  }
+  if (!cfg.module || cfg.module.trim() === '') {
+    missing.push('Module/Team Name');
+  }
+  
+  if (missing.length > 0) {
+    alert(
+      '⚠️ Configuration Incomplete\n\n' +
+      'Please fill in the following required fields in Configuration tab:\n\n' +
+      missing.map(f => `• ${f}`).join('\n') +
+      '\n\nGo to Configuration tab to complete these fields before exporting.'
+    );
+    return false;
+  }
+  
+  return true;
 }
 
 function copyReport() {
+  // Validate configuration before copying
+  if (!validateConfiguration()) {
+    return;
+  }
+  
   const cfg = state.config;
   const net = totalCapacity();
   const avail = totalAvailDays();
   const featDays = (net * cfg.featSplit / 100).toFixed(2);
   const bugDays = (net * (100 - cfg.featSplit) / 100).toFixed(2);
-  const done = state.checklist.filter(Boolean).length;
+  const done = state.checklist.filter(item => item && item.checked).length;
   
   // Build detailed capacity breakdown
   const capacityBreakdown = state.members.map(m => {
@@ -2168,6 +2500,7 @@ function copyReport() {
 PI CONFIGURATION
 ${'─'.repeat(78)}
 Project              : ${cfg.project}
+Module/Team          : ${cfg.module||'—'}
 Status               : ${cfg.status}
 Version              : ${cfg.version}
 Date                 : ${cfg.date||'Not set'}
@@ -2219,6 +2552,11 @@ Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeStri
 //  DOWNLOAD DATA
 // ════════════════════════════════════════════
 function downloadData() {
+  // Validate configuration before downloading
+  if (!validateConfiguration()) {
+    return;
+  }
+  
   const dataStr = JSON.stringify(state, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -2234,6 +2572,11 @@ function downloadData() {
 }
 
 function downloadCSV() {
+  // Validate configuration before downloading
+  if (!validateConfiguration()) {
+    return;
+  }
+  
   const cfg = state.config;
   const net = totalCapacity();
   const avail = totalAvailDays();
@@ -2241,8 +2584,9 @@ function downloadCSV() {
   
   let csv = '';
   
-  // Header rows (empty for spacing)
-  csv += ',,,,,,,,,,,\n';
+  // PI Plan header with module/team name
+  const moduleHeader = cfg.module ? ` - ${cfg.module}` : '';
+  csv += `PI Plan: ${cfg.pi} - ${cfg.project}${moduleHeader},,,,,,,,,,\n`;
   csv += ',,,,,,,,,,,\n';
   
   // Team member names row
@@ -2426,6 +2770,11 @@ function downloadCSV() {
 //  COMPLETE BACKUP & RESTORE (CSV)
 // ════════════════════════════════════════════
 function downloadCompleteCSV() {
+  // Validate configuration before downloading
+  if (!validateConfiguration()) {
+    return;
+  }
+  
   const timestamp = new Date().toISOString().slice(0,10);
   let csv = '';
   
@@ -2434,6 +2783,7 @@ function downloadCompleteCSV() {
   csv += 'Field,Value\n';
   csv += `PI Name,${state.config.pi}\n`;
   csv += `Project,${state.config.project}\n`;
+  csv += `Module/Team Name,${state.config.module || ''}\n`;
   csv += `Config ID,${state.config.configId || ''}\n`;
   csv += `Version,${state.config.version}\n`;
   csv += `Date,${state.config.date || ''}\n`;
@@ -2460,6 +2810,15 @@ function downloadCompleteCSV() {
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
     csv += `"${m.name}",${c.weeks||12},${c.sat||0},${c.holidays||3},${c.leaves||0},${c.misc||0},${c.alloc||1},${c.prepi||0},${c.allhands||0},${c.competency||0},${c.gnc||0},${c.others||0}\n`;
+  });
+  csv += '\n';
+  
+  // ===== CHECKLIST SECTION =====
+  csv += '### CHECKLIST ###\n';
+  csv += 'Item #,Category,Description,Checked,Comment\n';
+  checklistItems.forEach((item, i) => {
+    const checkItem = state.checklist[i] || { checked: false, comment: '' };
+    csv += `${i+1},"${item[0]}","${item[1]}",${checkItem.checked ? 'Yes' : 'No'},"${(checkItem.comment || '').replace(/"/g, '""')}"\n`;
   });
   csv += '\n';
   
@@ -2492,7 +2851,7 @@ function uploadCSV(event) {
         capacity: {},
         features: [],
         userStories: [],
-        checklist: state.checklist
+        checklist: Array(22).fill(null).map(() => ({ checked: false, comment: '' }))
       };
       
       for (let i = 0; i < lines.length; i++) {
@@ -2511,6 +2870,10 @@ function uploadCSV(event) {
           section = 'capacity';
           i++; // Skip header row
           continue;
+        } else if (line.includes('### CHECKLIST')) {
+          section = 'checklist';
+          i++; // Skip header row
+          continue;
         }
         
         // Parse data based on section
@@ -2521,6 +2884,7 @@ function uploadCSV(event) {
             const value = parts.slice(1).join(',');
             if (field === 'PI Name') newState.config.pi = value;
             else if (field === 'Project') newState.config.project = value;
+            else if (field === 'Module/Team Name') newState.config.module = value;
             else if (field === 'Config ID') newState.config.configId = value;
             else if (field === 'Version') newState.config.version = value;
             else if (field === 'Date') newState.config.date = value;
@@ -2569,6 +2933,18 @@ function uploadCSV(event) {
               others: +parts[11]
             };
           }
+        } else if (section === 'checklist' && line) {
+          // Parse checklist: Item #,Category,Description,Checked,Comment
+          const parts = parseCSVLine(line);
+          if (parts.length >= 5) {
+            const itemNum = +parts[0] - 1; // Convert to 0-based index
+            if (itemNum >= 0 && itemNum < 22) {
+              newState.checklist[itemNum] = {
+                checked: parts[3].toLowerCase() === 'yes',
+                comment: parts[4] || ''
+              };
+            }
+          }
         }
       }
       
@@ -2576,6 +2952,7 @@ function uploadCSV(event) {
       state.config = newState.config;
       state.members = newState.members;
       state.capacity = newState.capacity;
+      state.checklist = newState.checklist;
       
       // Save and refresh
       saveState();
