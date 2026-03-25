@@ -2407,19 +2407,29 @@ function printReport() {
     // Ensure dashboard is rendered
     renderDashboard();
     
+    // Save original title
+    const originalTitle = document.title;
+    
+    // Set document title for PDF filename
+    const cfg = state.config;
+    const modulePart = cfg.module ? ` - ${cfg.module}` : '';
+    document.title = `${cfg.pi} - ${cfg.project}${modulePart}`;
+    
     // Force a small delay to ensure DOM is fully updated
     setTimeout(() => {
       try {
         // Open the browser's print dialog
         window.print();
         
-        // If print was successful, show instructions in toast
+        // Restore original title after a short delay
         setTimeout(() => {
+          document.title = originalTitle;
           toast('In the print dialog, select "Save as PDF" or "Microsoft Print to PDF" as the destination, then click Save');
         }, 500);
         
       } catch (error) {
         console.error('Print error:', error);
+        document.title = originalTitle; // Restore title on error
         alert('Unable to open print dialog. Please try using Ctrl+P (Windows) or Cmd+P (Mac) to print, then select "Save as PDF".');
       }
     }, 500);
@@ -2562,8 +2572,10 @@ function downloadData() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   const timestamp = new Date().toISOString().slice(0,10);
+  const cfg = state.config;
+  const modulePart = cfg.module ? `-${cfg.module.replace(/\s+/g, '-')}` : '';
   a.href = url;
-  a.download = `PI-Plan-${state.config.pi}-${timestamp}.json`;
+  a.download = `${cfg.pi}-${cfg.project.replace(/\s+/g, '-')}${modulePart}-${timestamp}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -2758,7 +2770,8 @@ function downloadCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${cfg.project.replace(/\s+/g, '-')}-Adaptive-PI-Plan-${cfg.pi.replace('PI-', '')}.csv`;
+  const modulePart = cfg.module ? `-${cfg.module.replace(/\s+/g, '-')}` : '';
+  a.download = `${cfg.pi}-${cfg.project.replace(/\s+/g, '-')}${modulePart}-Capacity.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -2826,7 +2839,8 @@ function downloadCompleteCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `PI-Plan-Complete-Backup-${state.config.pi}-${timestamp}.csv`;
+  const modulePart = state.config.module ? `-${state.config.module.replace(/\s+/g, '-')}` : '';
+  a.download = `${state.config.pi}-${state.config.project.replace(/\s+/g, '-')}${modulePart}-Backup-${timestamp}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
