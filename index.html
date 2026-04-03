@@ -1511,8 +1511,11 @@ const checklistItems = [
 //  CAPACITY HELPERS
 // ════════════════════════════════════════════
 function calcAvgPF(m) {
-  const sum = m.s.reduce((a,b)=>a+b,0);
-  return (sum / m.s.length).toFixed(2);
+  // Only count sprints where PF > 0 (person is available)
+  const nonZeroSprints = m.s.filter(pf => pf > 0);
+  if (nonZeroSprints.length === 0) return '0.00';
+  const sum = nonZeroSprints.reduce((a,b)=>a+b,0);
+  return (sum / nonZeroSprints.length).toFixed(2);
 }
 
 function calcCapacity(name) {
