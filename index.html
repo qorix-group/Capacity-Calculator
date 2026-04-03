@@ -2903,9 +2903,8 @@ function downloadCSV() {
   // Training Days
   csv += ',Training Days,';
   state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const training = (c.prepi||0) + (c.allhands||0) + (c.factory||0) + (c.competency||0) + (c.gnc||0);
-    csv += `${training.toFixed(2)},`;
+    const c = calcCapacity(m.name);
+    csv += `${(c.training||0).toFixed(2)},`;
   });
   csv += ',,,\n';
   
@@ -2944,51 +2943,25 @@ function downloadCSV() {
   csv += ',,,,,,,,,,,\n';
   csv += ',,,,,,,,,,,\n';
   
-  // Training time section
+  // Training time section - export all training types dynamically
   csv += ',Training time in (days),,,,,,,,,,\n';
-  csv += ',Pre-PI,';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    csv += `${(c.prepi||0).toFixed(2)},`;
-  });
-  csv += ',,,\n';
   
-  csv += ',All Hands,';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    csv += `${(c.allhands||0).toFixed(2)},`;
+  state.trainingTypes.forEach(type => {
+    csv += `,${type.name},`;
+    state.members.forEach(m => {
+      const c = state.capacity[m.name] || {};
+      csv += `${(c[type.id]||0).toFixed(2)},`;
+    });
+    csv += ',,,\n';
   });
-  csv += ',,,\n';
-  
-  csv += ',Factory Days,';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    csv += `${(c.factory||0).toFixed(2)},`;
-  });
-  csv += ',,,\n';
-  
-  csv += ',Competency,';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    csv += `${(c.competency||0).toFixed(2)},`;
-  });
-  csv += ',,,\n';
-  
-  csv += ',GNC,';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    csv += `${(c.gnc||0).toFixed(2)},`;
-  });
-  csv += ',,,\n';
   
   csv += ',,,,,,,,,,,\n';
   
   // Training Total
   csv += ',Total,';
   state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const training = (c.prepi||0) + (c.allhands||0) + (c.factory||0) + (c.competency||0) + (c.gnc||0);
-    csv += `${training.toFixed(2)},`;
+    const c = calcCapacity(m.name);
+    csv += `${(c.training||0).toFixed(2)},`;
   });
   csv += '0.00,0.00,0.00,0.00\n';
   
@@ -3061,6 +3034,14 @@ function downloadCompleteCSV() {
   csv += `Sprints,${state.config.sprints}\n`;
   csv += '\n';
   
+  // ===== TRAINING TYPES SECTION =====
+  csv += '### TRAINING TYPES ###\n';
+  csv += 'ID,Name,Editable\n';
+  state.trainingTypes.forEach(type => {
+    csv += `${escapeCSV(type.id)},${escapeCSV(type.name)},${type.editable ? 'Yes' : 'No'}\n`;
+  });
+  csv += '\n';
+  
   // ===== KYT SECTION =====
   csv += '### TEAM MEMBERS (KYT) ###\n';
   csv += 'Name,Grade,Role,Overall Experience,Technologies,Safety Certified,Cybersec Trained,Project Training Done,Delivered Code,Allocation %,S1 PF,S2 PF,S3 PF,S4 PF,S5 PF,S6 PF\n';
@@ -3071,10 +3052,22 @@ function downloadCompleteCSV() {
   
   // ===== CAPACITY SECTION =====
   csv += '### CAPACITY DETAILS ###\n';
-  csv += 'Name,Weeks,Saturdays,Holidays,Leaves,Misc Days,Allocation %,Pre-PI,All Hands,Competency,GNC,Others\n';
+  // Build header dynamically with all training types
+  let capacityHeader = 'Name,Weeks,Saturdays,Holidays,Leaves,Misc Days,Allocation %';
+  state.trainingTypes.forEach(type => {
+    capacityHeader += `,${escapeCSV(type.name)}`;
+  });
+  csv += capacityHeader + '\n';
+  
+  // Export capacity data
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    csv += `${escapeCSV(m.name)},${c.weeks||12},${c.sat||0},${c.holidays||3},${c.leaves||0},${c.misc||0},${c.alloc||1},${c.prepi||0},${c.allhands||0},${c.competency||0},${c.gnc||0},${c.others||0}\n`;
+    let row = `${escapeCSV(m.name)},${c.weeks||12},${c.sat||0},${c.holidays||3},${c.leaves||0},${c.misc||0},${c.alloc||1}`;
+    // Add all training type values
+    state.trainingTypes.forEach(type => {
+      row += `,${c[type.id]||0}`;
+    });
+    csv += row + '\n';
   });
   csv += '\n';
   
@@ -3118,10 +3111,19 @@ function uploadCSV(event) {
         config: { ...state.config },
         members: [],
         capacity: {},
+        trainingTypes: [
+          { id: 'prepi', name: 'Pre-PI', editable: false },
+          { id: 'allhands', name: 'All Hands', editable: false },
+          { id: 'competency', name: 'Competency', editable: false },
+          { id: 'gnc', name: 'GNC', editable: false },
+          { id: 'others', name: 'Others', editable: false }
+        ],
         features: [],
         userStories: [],
         checklist: Array(22).fill(null).map(() => ({ checked: false, comment: '' }))
       };
+      
+      let capacityHeaders = []; // Store capacity headers for dynamic parsing
       
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -3131,13 +3133,21 @@ function uploadCSV(event) {
           section = 'config';
           i++; // Skip header row
           continue;
+        } else if (line.includes('### TRAINING TYPES ###')) {
+          section = 'trainingTypes';
+          i++; // Skip header row
+          continue;
         } else if (line.includes('### TEAM MEMBERS')) {
           section = 'kyt';
           i++; // Skip header row
           continue;
         } else if (line.includes('### CAPACITY DETAILS')) {
           section = 'capacity';
-          i++; // Skip header row
+          // Parse capacity headers to get training type columns dynamically
+          i++; // Move to header row
+          if (i < lines.length) {
+            capacityHeaders = parseCSVLine(lines[i]);
+          }
           continue;
         } else if (line.includes('### CHECKLIST')) {
           section = 'checklist';
@@ -3168,6 +3178,24 @@ function uploadCSV(event) {
             else if (field === 'Feature Split %') newState.config.featSplit = parseFloat(value) || 95;
             else if (field === 'Sprints') newState.config.sprints = parseInt(value) || 6;
           }
+        } else if (section === 'trainingTypes' && line) {
+          // Parse training types: ID,Name,Editable
+          const parts = parseCSVLine(line);
+          if (parts.length >= 3) {
+            const id = parts[0].trim();
+            const name = parts[1].trim();
+            const editable = parts[2].trim().toLowerCase() === 'yes';
+            
+            // Check if this training type already exists in the default list
+            const existingIndex = newState.trainingTypes.findIndex(t => t.id === id);
+            if (existingIndex >= 0) {
+              // Update existing training type name if it was changed
+              newState.trainingTypes[existingIndex].name = name;
+            } else {
+              // Add custom training type
+              newState.trainingTypes.push({ id, name, editable });
+            }
+          }
         } else if (section === 'kyt' && line) {
           // Parse KYT data: Name,Grade,Role,Overall Experience,Technologies,Safety,Cybersec,Training,Delivered,Allocation %,S1-S6
           const parts = parseCSVLine(line);
@@ -3187,23 +3215,33 @@ function uploadCSV(event) {
             });
           }
         } else if (section === 'capacity' && line) {
-          // Parse capacity: Name,Weeks,Saturdays,Holidays,Leaves,Misc,Alloc,Pre-PI,All Hands,Competency,GNC,Others
+          // Parse capacity dynamically based on headers
+          // Expected base columns: Name,Weeks,Saturdays,Holidays,Leaves,Misc Days,Allocation %
+          // Then followed by training type columns
           const parts = parseCSVLine(line);
-          if (parts.length >= 12) {
+          if (parts.length >= 7 && capacityHeaders.length > 0) {
             const name = parts[0];
-            newState.capacity[name] = {
+            const capacityData = {
               weeks: +parts[1],
               sat: +parts[2],
               holidays: +parts[3],
               leaves: +parts[4],
               misc: +parts[5],
-              alloc: +parts[6],
-              prepi: +parts[7],
-              allhands: +parts[8],
-              competency: +parts[9],
-              gnc: +parts[10],
-              others: +parts[11]
+              alloc: +parts[6]
             };
+            
+            // Parse training type values dynamically
+            // Start from index 7 (after the base columns)
+            for (let j = 7; j < capacityHeaders.length && j < parts.length; j++) {
+              const headerName = capacityHeaders[j].trim();
+              // Find the training type with this name
+              const trainingType = newState.trainingTypes.find(t => t.name === headerName);
+              if (trainingType) {
+                capacityData[trainingType.id] = +parts[j] || 0;
+              }
+            }
+            
+            newState.capacity[name] = capacityData;
           }
         } else if (section === 'checklist' && line) {
           // Parse checklist: Item #,Category,Description,Checked,Comment
@@ -3226,6 +3264,7 @@ function uploadCSV(event) {
       state.config = newState.config;
       state.members = newState.members;
       state.capacity = newState.capacity;
+      state.trainingTypes = newState.trainingTypes;
       state.checklist = newState.checklist;
       
       console.log('Applied configuration:', state.config); // Debug logging
@@ -3236,6 +3275,7 @@ function uploadCSV(event) {
       renderConfig(); // Refresh configuration form (updates status dropdown and other fields)
       renderDashboard(); // Refresh dashboard view
       renderKYT(); // Refresh KYT view
+      renderCapacity(); // Refresh capacity view with training types
       renderChecklist(); // Refresh checklist
       toast('Data imported successfully ✓');
       
