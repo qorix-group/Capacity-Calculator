@@ -1534,12 +1534,20 @@ function calcCapacity(name) {
     ];
   }
   
-  const weekdays = c.weeks * 5;
+  // Use !== undefined to properly handle 0 values
+  const weeks = c.weeks !== undefined ? c.weeks : 12;
+  const sat = c.sat !== undefined ? c.sat : 0;
+  const holidays = c.holidays !== undefined ? c.holidays : 3;
+  const leaves = c.leaves !== undefined ? c.leaves : 0;
+  const misc = c.misc !== undefined ? c.misc : 0;
+  const alloc = c.alloc !== undefined ? c.alloc : 1;
+  
+  const weekdays = weeks * 5;
   // Calculate training days dynamically from all training types
   const training = state.trainingTypes.reduce((sum, type) => {
     return sum + (c[type.id] || 0);
   }, 0);
-  const available = (weekdays + c.sat - c.holidays - c.leaves - c.misc - training) * c.alloc;
+  const available = (weekdays + sat - holidays - leaves - misc - training) * alloc;
   const pf = parseFloat(calcAvgPF(m));
   const net = available * pf;
   return { weekdays, training, available: +available.toFixed(3), pf, net: +net.toFixed(3), ...c };
@@ -1916,12 +1924,14 @@ function loadCapMember() {
   
   currentCapMember = name; // Track the loaded member
   const c = state.capacity[name] || {};
-  document.getElementById('cap-weeks').value = c.weeks||12;
-  document.getElementById('cap-sat').value = c.sat||0;
-  document.getElementById('cap-holidays').value = c.holidays||3;
-  document.getElementById('cap-leaves').value = c.leaves||7;
-  document.getElementById('cap-misc').value = c.misc||7;
-  document.getElementById('cap-alloc').value = c.alloc||1;
+  
+  // Use ?? (nullish coalescing) or !== undefined to properly handle 0 values
+  document.getElementById('cap-weeks').value = c.weeks !== undefined ? c.weeks : 12;
+  document.getElementById('cap-sat').value = c.sat !== undefined ? c.sat : 0;
+  document.getElementById('cap-holidays').value = c.holidays !== undefined ? c.holidays : 3;
+  document.getElementById('cap-leaves').value = c.leaves !== undefined ? c.leaves : 7;
+  document.getElementById('cap-misc').value = c.misc !== undefined ? c.misc : 7;
+  document.getElementById('cap-alloc').value = c.alloc !== undefined ? c.alloc : 1;
   
   // Render training fields dynamically
   renderTrainingFieldsInForm();
@@ -1980,7 +1990,8 @@ function renderCapacitySummary() {
   // Calculate gross capacity
   const grossDays = state.members.reduce((sum, m) => {
     const c = state.capacity[m.name] || {};
-    return sum + ((c.weeks||12) * 5);
+    const weeks = c.weeks !== undefined ? c.weeks : 12;
+    return sum + (weeks * 5);
   }, 0);
   const utilPct = ((grossDays - totalAvailDays()) / grossDays * 100).toFixed(1);
   
@@ -2018,7 +2029,7 @@ function renderCapacityMatrix() {
   let totalWeeks = 0;
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    const weeks = c.weeks||12;
+    const weeks = c.weeks !== undefined ? c.weeks : 12;
     totalWeeks += weeks;
     rows += `<td>${weeks}</td>`;
   });
@@ -2049,8 +2060,9 @@ function renderCapacityMatrix() {
   let totalHol = 0;
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    totalHol += c.holidays||3;
-    rows += `<td>${c.holidays||3}</td>`;
+    const holidays = c.holidays !== undefined ? c.holidays : 3;
+    totalHol += holidays;
+    rows += `<td>${holidays}</td>`;
   });
   rows += `<td>${totalHol}</td></tr>`;
   
@@ -2088,7 +2100,8 @@ function renderCapacityMatrix() {
   rows += '<tr><td><strong>% Allocation</strong></td>';
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    rows += `<td>${((c.alloc||1)*100).toFixed(0)}%</td>`;
+    const alloc = c.alloc !== undefined ? c.alloc : 1;
+    rows += `<td>${(alloc*100).toFixed(0)}%</td>`;
   });
   rows += '<td>—</td></tr>';
   
@@ -2859,7 +2872,8 @@ function downloadCSV() {
   csv += `,Weeks in ${cfg.pi},`;
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    csv += `${c.weeks||12},`;
+    const weeks = c.weeks !== undefined ? c.weeks : 12;
+    csv += `${weeks},`;
   });
   csv += ',,,\n';
   
@@ -2883,7 +2897,8 @@ function downloadCSV() {
   csv += ',Company Holidays/Flexi Holiday,';
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    csv += `${c.holidays||3},`;
+    const holidays = c.holidays !== undefined ? c.holidays : 3;
+    csv += `${holidays},`;
   });
   csv += ',,,\n';
   
@@ -2915,7 +2930,8 @@ function downloadCSV() {
   csv += ',% Allocation,';
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    csv += `${((c.alloc||1)*100).toFixed(0)}%,`;
+    const alloc = c.alloc !== undefined ? c.alloc : 1;
+    csv += `${(alloc*100).toFixed(0)}%,`;
   });
   csv += ',,,\n';
   
@@ -2973,7 +2989,8 @@ function downloadCSV() {
   // Summary section
   const grossDays = state.members.reduce((sum, m) => {
     const c = state.capacity[m.name] || {};
-    return sum + ((c.weeks||12) * 5);
+    const weeks = c.weeks !== undefined ? c.weeks : 12;
+    return sum + (weeks * 5);
   }, 0);
   const diffPercent = ((grossDays - avail) / grossDays * 100).toFixed(1);
   
@@ -3065,10 +3082,16 @@ function downloadCompleteCSV() {
   // Export capacity data
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    let row = `${escapeCSV(m.name)},${c.weeks||12},${c.sat||0},${c.holidays||3},${c.leaves||0},${c.misc||0},${c.alloc||1}`;
+    const weeks = c.weeks !== undefined ? c.weeks : 12;
+    const sat = c.sat !== undefined ? c.sat : 0;
+    const holidays = c.holidays !== undefined ? c.holidays : 3;
+    const leaves = c.leaves !== undefined ? c.leaves : 0;
+    const misc = c.misc !== undefined ? c.misc : 0;
+    const alloc = c.alloc !== undefined ? c.alloc : 1;
+    let row = `${escapeCSV(m.name)},${weeks},${sat},${holidays},${leaves},${misc},${alloc}`;
     // Add all training type values
     state.trainingTypes.forEach(type => {
-      row += `,${c[type.id]||0}`;
+      row += `,${c[type.id] !== undefined ? c[type.id] : 0}`;
     });
     csv += row + '\n';
   });
