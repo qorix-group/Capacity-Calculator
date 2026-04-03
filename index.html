@@ -2196,7 +2196,11 @@ function renderTrainingMatrix() {
         renderCapacity();
         renderTrainingFieldsInForm(); // Update individual capacity form
         autoSave();
-        toast(`${field} updated for ${member.split(' ')[0]} ✓`);
+        
+        // Find the training type name from the ID
+        const trainingType = state.trainingTypes.find(t => t.id === field);
+        const fieldName = trainingType ? trainingType.name : field;
+        toast(`${fieldName} updated for ${member.split(' ')[0]} ✓`);
       }
     });
     
