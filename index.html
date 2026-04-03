@@ -1158,6 +1158,10 @@
       <!-- Training Breakdown -->
       <div class="section" style="margin-top:28px;">
         <div class="section-title">Training Days Breakdown <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">(Click cells to edit)</span></div>
+        <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+          <input type="text" id="new-training-type-input" placeholder="Enter new training type name (e.g., CLI Training, Certification...)" style="flex:1;max-width:400px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;" onkeydown="if(event.key==='Enter') addTrainingTypeFromInput()">
+          <button class="btn btn-primary" onclick="addTrainingTypeFromInput()" style="font-size:11px;padding:8px 16px;">➕ Add Training Type</button>
+        </div>
         <div class="table-container">
           <table id="cap-training-table" style="font-size:11px;">
             <thead>
@@ -1195,12 +1199,9 @@
               <div><label>Misc Days</label><input type="number" id="cap-misc"></div>
               <div><label>% Allocation (1.0 = 100%)</label><input type="number" step="0.01" id="cap-alloc"></div>
             </div>
-            <div class="form-grid">
-              <div><label>Pre-PI</label><input type="number" id="cap-prepi"></div>
-              <div><label>All Hands</label><input type="number" step="0.01" id="cap-allhands"></div>
-              <div><label>Competency</label><input type="number" id="cap-competency"></div>
-              <div><label>GNC</label><input type="number" id="cap-gnc"></div>
-              <div><label>Others</label><input type="number" step="0.01" id="cap-others"></div>
+            <div class="form-title" style="margin-top:16px;font-size:12px;">Training Days</div>
+            <div class="form-grid" id="cap-training-fields">
+              <!-- Training fields will be added dynamically -->
             </div>
             <button class="btn btn-primary" onclick="saveCapacity()">Save Capacity</button>
           </div>
@@ -1359,6 +1360,13 @@ let state = {
   },
   members: [],
   capacity: {},
+  trainingTypes: [
+    { id: 'prepi', name: 'Pre-PI', editable: false },
+    { id: 'allhands', name: 'All Hands', editable: false },
+    { id: 'competency', name: 'Competency', editable: false },
+    { id: 'gnc', name: 'GNC', editable: false },
+    { id: 'others', name: 'Others', editable: false }
+  ],
   features: [],
   userStories: [],
   checklist: Array(22).fill(null).map(() => ({ checked: false, comment: '' }))
@@ -1408,6 +1416,13 @@ function resetDashboard() {
     },
     members: [],
     capacity: {},
+    trainingTypes: [
+      { id: 'prepi', name: 'Pre-PI', editable: false },
+      { id: 'allhands', name: 'All Hands', editable: false },
+      { id: 'competency', name: 'Competency', editable: false },
+      { id: 'gnc', name: 'GNC', editable: false },
+      { id: 'others', name: 'Others', editable: false }
+    ],
     features: [],
     userStories: [],
     checklist: Array(22).fill(null).map(() => ({ checked: false, comment: '' }))
@@ -1504,8 +1519,23 @@ function calcCapacity(name) {
   const c = state.capacity[name];
   const m = state.members.find(x=>x.name===name);
   if (!c || !m) return {};
+  
+  // Ensure trainingTypes exists
+  if (!state.trainingTypes || !Array.isArray(state.trainingTypes)) {
+    state.trainingTypes = [
+      { id: 'prepi', name: 'Pre-PI', editable: false },
+      { id: 'allhands', name: 'All Hands', editable: false },
+      { id: 'competency', name: 'Competency', editable: false },
+      { id: 'gnc', name: 'GNC', editable: false },
+      { id: 'others', name: 'Others', editable: false }
+    ];
+  }
+  
   const weekdays = c.weeks * 5;
-  const training = c.prepi + c.allhands + c.competency + c.gnc + (c.others||0);
+  // Calculate training days dynamically from all training types
+  const training = state.trainingTypes.reduce((sum, type) => {
+    return sum + (c[type.id] || 0);
+  }, 0);
   const available = (weekdays + c.sat - c.holidays - c.leaves - c.misc - training) * c.alloc;
   const pf = parseFloat(calcAvgPF(m));
   const net = available * pf;
@@ -1664,7 +1694,29 @@ function saveMember() {
   } else {
     // Add new member
     state.members.push(m);
-    state.capacity[m.name] = { weeks:12,sat:0,holidays:3,leaves:7,misc:7,alloc:allocValue,prepi:0,allhands:0.18,competency:2,gnc:1,others:0 };
+    
+    // Initialize capacity with default values for all training types
+    const capacityInit = {
+      weeks: 12,
+      sat: 0,
+      holidays: 3,
+      leaves: 7,
+      misc: 7,
+      alloc: allocValue
+    };
+    
+    // Add default values for all training types
+    state.trainingTypes.forEach(type => {
+      let defaultValue = 0;
+      if (type.id === 'prepi') defaultValue = 0;
+      else if (type.id === 'allhands') defaultValue = 0.18;
+      else if (type.id === 'competency') defaultValue = 2;
+      else if (type.id === 'gnc') defaultValue = 1;
+      else if (type.id === 'others') defaultValue = 0;
+      capacityInit[type.id] = defaultValue;
+    });
+    
+    state.capacity[m.name] = capacityInit;
     toast('Member added ✓');
   }
   
@@ -1808,6 +1860,7 @@ function renderCapacity() {
   const sel = document.getElementById('cap-member-select');
   sel.innerHTML = state.members.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
   currentCapMember = null; // Reset tracking
+  renderTrainingFieldsInForm(); // Render training fields
   loadCapMember();
   renderCapacitySummary();
   renderCapacityMatrix();
@@ -1826,19 +1879,24 @@ function saveCurrentCapacityData(memberName) {
   // Save without re-rendering to avoid loops
   const allocValue = +document.getElementById('cap-alloc').value;
   
-  state.capacity[memberName] = {
+  const capacityData = {
     weeks: +document.getElementById('cap-weeks').value,
     sat: +document.getElementById('cap-sat').value,
     holidays: +document.getElementById('cap-holidays').value,
     leaves: +document.getElementById('cap-leaves').value,
     misc: +document.getElementById('cap-misc').value,
-    alloc: allocValue,
-    prepi: +document.getElementById('cap-prepi').value,
-    allhands: +document.getElementById('cap-allhands').value,
-    competency: +document.getElementById('cap-competency').value,
-    gnc: +document.getElementById('cap-gnc').value,
-    others: +document.getElementById('cap-others').value,
+    alloc: allocValue
   };
+  
+  // Add all training type values dynamically
+  state.trainingTypes.forEach(type => {
+    const input = document.getElementById(`cap-${type.id}`);
+    if (input) {
+      capacityData[type.id] = +input.value || 0;
+    }
+  });
+  
+  state.capacity[memberName] = capacityData;
   
   // Sync allocation back to KYT module field
   const member = state.members.find(m => m.name === memberName);
@@ -1861,11 +1919,25 @@ function loadCapMember() {
   document.getElementById('cap-leaves').value = c.leaves||7;
   document.getElementById('cap-misc').value = c.misc||7;
   document.getElementById('cap-alloc').value = c.alloc||1;
-  document.getElementById('cap-prepi').value = c.prepi||0;
-  document.getElementById('cap-allhands').value = c.allhands||0.18;
-  document.getElementById('cap-competency').value = c.competency||2;
-  document.getElementById('cap-gnc').value = c.gnc||1;
-  document.getElementById('cap-others').value = c.others||0;
+  
+  // Render training fields dynamically
+  renderTrainingFieldsInForm();
+  
+  // Load training values for this member
+  state.trainingTypes.forEach(type => {
+    const input = document.getElementById(`cap-${type.id}`);
+    if (input) {
+      // Use default values for standard training types
+      let defaultValue = 0;
+      if (type.id === 'prepi') defaultValue = 0;
+      else if (type.id === 'allhands') defaultValue = 0.18;
+      else if (type.id === 'competency') defaultValue = 2;
+      else if (type.id === 'gnc') defaultValue = 1;
+      else if (type.id === 'others') defaultValue = 0;
+      
+      input.value = c[type.id] !== undefined ? c[type.id] : defaultValue;
+    }
+  });
 }
 
 function saveCapacity() {
@@ -2051,75 +2123,64 @@ function renderTrainingMatrix() {
   const table = document.getElementById('cap-training-table');
   const tbody = document.getElementById('cap-training-tbody');
   
+  // Ensure trainingTypes exists
+  if (!state.trainingTypes || !Array.isArray(state.trainingTypes)) {
+    state.trainingTypes = [
+      { id: 'prepi', name: 'Pre-PI', editable: false },
+      { id: 'allhands', name: 'All Hands', editable: false },
+      { id: 'competency', name: 'Competency', editable: false },
+      { id: 'gnc', name: 'GNC', editable: false },
+      { id: 'others', name: 'Others', editable: false }
+    ];
+  }
+  
+  if (!state.members.length) {
+    tbody.innerHTML = '<tr><td colspan="100" style="text-align:center;padding:20px;color:var(--muted);">No team members added yet</td></tr>';
+    return;
+  }
+  
   // Build header
   let headerRow = '<tr><th style="min-width:200px;">Training Type</th>';
   state.members.forEach(m => {
     headerRow += `<th style="min-width:120px;">${m.name.split(' ')[0]}</th>`;
   });
-  headerRow += '<th style="min-width:100px;"><strong>TOTAL</strong></th></tr>';
+  headerRow += '<th style="min-width:100px;"><strong>TOTAL</strong></th><th style="min-width:60px;">Actions</th></tr>';
   table.querySelector('thead').innerHTML = headerRow;
   
   let rows = '';
   
-  // Pre-PI
-  rows += '<tr><td><strong>Pre-PI</strong></td>';
-  let totalPrepi = 0;
-  state.members.forEach((m, idx) => {
-    const c = state.capacity[m.name] || {};
-    totalPrepi += c.prepi||0;
-    rows += `<td contenteditable="true" data-member="${m.name}" data-field="prepi" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${(c.prepi||0).toFixed(2)}</td>`;
+  // Render each training type dynamically
+  state.trainingTypes.forEach((type, typeIdx) => {
+    rows += `<tr><td contenteditable="${type.editable}" data-type-id="${type.id}" class="training-type-name" style="cursor:${type.editable?'text':'default'};font-weight:bold;${type.editable?'background:rgba(79,158,255,0.08);':''}">${type.name}</td>`;
+    
+    let typeTotal = 0;
+    state.members.forEach((m, idx) => {
+      const c = state.capacity[m.name] || {};
+      const value = c[type.id] || 0;
+      typeTotal += value;
+      rows += `<td contenteditable="true" data-member="${m.name}" data-field="${type.id}" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${value.toFixed(2)}</td>`;
+    });
+    
+    const deleteBtn = type.editable ? `<button onclick="deleteTrainingType('${type.id}')" style="background:var(--danger);color:#fff;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:10px;">🗑️ Delete</button>` : '';
+    rows += `<td><strong>${typeTotal.toFixed(2)}</strong></td><td>${deleteBtn}</td></tr>`;
   });
-  rows += `<td><strong>${totalPrepi.toFixed(2)}</strong></td></tr>`;
   
-  // All Hands
-  rows += '<tr><td><strong>All Hands</strong></td>';
-  let totalAllhands = 0;
-  state.members.forEach((m, idx) => {
-    const c = state.capacity[m.name] || {};
-    totalAllhands += c.allhands||0;
-    rows += `<td contenteditable="true" data-member="${m.name}" data-field="allhands" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${(c.allhands||0).toFixed(2)}</td>`;
-  });
-  rows += `<td><strong>${totalAllhands.toFixed(2)}</strong></td></tr>`;
-  
-  // Competency
-  rows += '<tr><td><strong>Competency</strong></td>';
-  let totalComp = 0;
-  state.members.forEach((m, idx) => {
-    const c = state.capacity[m.name] || {};
-    totalComp += c.competency||0;
-    rows += `<td contenteditable="true" data-member="${m.name}" data-field="competency" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${(c.competency||0).toFixed(2)}</td>`;
-  });
-  rows += `<td><strong>${totalComp.toFixed(2)}</strong></td></tr>`;
-  
-  // GNC
-  rows += '<tr><td><strong>GNC</strong></td>';
-  let totalGnc = 0;
-  state.members.forEach((m, idx) => {
-    const c = state.capacity[m.name] || {};
-    totalGnc += c.gnc||0;
-    rows += `<td contenteditable="true" data-member="${m.name}" data-field="gnc" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${(c.gnc||0).toFixed(2)}</td>`;
-  });
-  rows += `<td><strong>${totalGnc.toFixed(2)}</strong></td></tr>`;
-  
-  // Others
-  rows += '<tr><td><strong>Others</strong></td>';
-  let totalOthers = 0;
-  state.members.forEach((m, idx) => {
-    const c = state.capacity[m.name] || {};
-    totalOthers += c.others||0;
-    rows += `<td contenteditable="true" data-member="${m.name}" data-field="others" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${(c.others||0).toFixed(2)}</td>`;
-  });
-  rows += `<td><strong>${totalOthers.toFixed(2)}</strong></td></tr>`;
-  
-  // Total
+  // Total row
   rows += '<tr style="background:var(--surface2);"><td><strong>TOTAL Training Days</strong></td>';
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    const total = (c.prepi||0) + (c.allhands||0) + (c.competency||0) + (c.gnc||0) + (c.others||0);
+    const total = state.trainingTypes.reduce((sum, type) => sum + (c[type.id] || 0), 0);
     rows += `<td><strong>${total.toFixed(2)}</strong></td>`;
   });
-  const grandTotal = totalPrepi + totalAllhands + totalComp + totalGnc + totalOthers;
-  rows += `<td><strong>${grandTotal.toFixed(2)}</strong></td></tr>`;
+  
+  const grandTotal = state.trainingTypes.reduce((sum, type) => {
+    const typeTotal = state.members.reduce((memberSum, m) => {
+      const c = state.capacity[m.name] || {};
+      return memberSum + (c[type.id] || 0);
+    }, 0);
+    return sum + typeTotal;
+  }, 0);
+  rows += `<td><strong>${grandTotal.toFixed(2)}</strong></td><td></td></tr>`;
   
   tbody.innerHTML = rows;
   
@@ -2133,6 +2194,7 @@ function renderTrainingMatrix() {
       if (state.capacity[member]) {
         state.capacity[member][field] = value;
         renderCapacity();
+        renderTrainingFieldsInForm(); // Update individual capacity form
         autoSave();
         toast(`${field} updated for ${member.split(' ')[0]} ✓`);
       }
@@ -2145,6 +2207,181 @@ function renderTrainingMatrix() {
       }
     });
   });
+  
+  // Add event listeners for training type name editing
+  tbody.querySelectorAll('.training-type-name[contenteditable="true"]').forEach(cell => {
+    cell.addEventListener('blur', function() {
+      const typeId = this.getAttribute('data-type-id');
+      const newName = this.textContent.trim();
+      
+      if (newName && newName.length > 0) {
+        const type = state.trainingTypes.find(t => t.id === typeId);
+        if (type) {
+          type.name = newName;
+          renderTrainingFieldsInForm();
+          autoSave();
+          toast(`Training type renamed to "${newName}" ✓`);
+        }
+      } else {
+        // Restore original name if empty
+        const type = state.trainingTypes.find(t => t.id === typeId);
+        if (type) {
+          this.textContent = type.name;
+        }
+      }
+    });
+    
+    cell.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.blur();
+      }
+    });
+  });
+}
+
+// Add new training type from input field
+function addTrainingTypeFromInput() {
+  // Ensure trainingTypes array exists
+  if (!state.trainingTypes) {
+    state.trainingTypes = [
+      { id: 'prepi', name: 'Pre-PI', editable: false },
+      { id: 'allhands', name: 'All Hands', editable: false },
+      { id: 'competency', name: 'Competency', editable: false },
+      { id: 'gnc', name: 'GNC', editable: false },
+      { id: 'others', name: 'Others', editable: false }
+    ];
+  }
+  
+  const input = document.getElementById('new-training-type-input');
+  const name = input.value.trim();
+  
+  if (!name || name === '') {
+    toast('⚠️ Please enter a training type name');
+    input.focus();
+    return;
+  }
+  
+  const id = 'custom_' + Date.now();
+  state.trainingTypes.push({
+    id: id,
+    name: name,
+    editable: true
+  });
+  
+  // Initialize this training type for all members
+  state.members.forEach(m => {
+    if (state.capacity[m.name]) {
+      state.capacity[m.name][id] = 0;
+    }
+  });
+  
+  // Clear the input field
+  input.value = '';
+  
+  renderTrainingMatrix();
+  renderTrainingFieldsInForm();
+  autoSave();
+  toast(`Training type "${name}" added ✓`);
+}
+
+// Add new training type (legacy - using prompt)
+function addTrainingType() {
+  // Ensure trainingTypes array exists
+  if (!state.trainingTypes) {
+    state.trainingTypes = [
+      { id: 'prepi', name: 'Pre-PI', editable: false },
+      { id: 'allhands', name: 'All Hands', editable: false },
+      { id: 'competency', name: 'Competency', editable: false },
+      { id: 'gnc', name: 'GNC', editable: false },
+      { id: 'others', name: 'Others', editable: false }
+    ];
+  }
+  
+  const name = prompt('Enter training type name (e.g., "CLI Training", "Certification", etc.):');
+  if (!name || name.trim() === '') {
+    toast('Training type name cannot be empty');
+    return;
+  }
+  
+  const id = 'custom_' + Date.now();
+  state.trainingTypes.push({
+    id: id,
+    name: name.trim(),
+    editable: true
+  });
+  
+  // Initialize this training type for all members
+  state.members.forEach(m => {
+    if (state.capacity[m.name]) {
+      state.capacity[m.name][id] = 0;
+    }
+  });
+  
+  renderTrainingMatrix();
+  renderTrainingFieldsInForm();
+  autoSave();
+  toast(`Training type "${name.trim()}" added ✓`);
+}
+
+// Delete training type
+function deleteTrainingType(typeId) {
+  const type = state.trainingTypes.find(t => t.id === typeId);
+  if (!type) return;
+  
+  const confirmed = confirm(`Delete training type "${type.name}"?\n\nThis will remove all "${type.name}" data for all team members. This cannot be undone.`);
+  if (!confirmed) return;
+  
+  // Remove from trainingTypes array
+  state.trainingTypes = state.trainingTypes.filter(t => t.id !== typeId);
+  
+  // Remove from all member capacity data
+  state.members.forEach(m => {
+    if (state.capacity[m.name]) {
+      delete state.capacity[m.name][typeId];
+    }
+  });
+  
+  renderTrainingMatrix();
+  renderTrainingFieldsInForm();
+  renderCapacity(); // Recalculate capacities
+  autoSave();
+  toast(`Training type "${type.name}" deleted ✓`);
+}
+
+// Render training fields dynamically in individual capacity form
+function renderTrainingFieldsInForm() {
+  const container = document.getElementById('cap-training-fields');
+  if (!container) return;
+  
+  // Ensure trainingTypes exists
+  if (!state.trainingTypes || !Array.isArray(state.trainingTypes)) {
+    state.trainingTypes = [
+      { id: 'prepi', name: 'Pre-PI', editable: false },
+      { id: 'allhands', name: 'All Hands', editable: false },
+      { id: 'competency', name: 'Competency', editable: false },
+      { id: 'gnc', name: 'GNC', editable: false },
+      { id: 'others', name: 'Others', editable: false }
+    ];
+  }
+  
+  let html = '';
+  state.trainingTypes.forEach(type => {
+    html += `<div><label>${type.name}</label><input type="number" step="0.01" id="cap-${type.id}"></div>`;
+  });
+  
+  container.innerHTML = html;
+  
+  // If a member is currently loaded, populate the values
+  if (currentCapMember) {
+    const c = state.capacity[currentCapMember] || {};
+    state.trainingTypes.forEach(type => {
+      const input = document.getElementById(`cap-${type.id}`);
+      if (input) {
+        input.value = c[type.id] || 0;
+      }
+    });
+  }
 }
 
 // ════════════════════════════════════════════
@@ -3070,6 +3307,18 @@ updateClock();
 //  INIT
 // ════════════════════════════════════════════
 loadState();
+
+// Ensure trainingTypes is always initialized
+if (!state.trainingTypes || !Array.isArray(state.trainingTypes)) {
+  state.trainingTypes = [
+    { id: 'prepi', name: 'Pre-PI', editable: false },
+    { id: 'allhands', name: 'All Hands', editable: false },
+    { id: 'competency', name: 'Competency', editable: false },
+    { id: 'gnc', name: 'GNC', editable: false },
+    { id: 'others', name: 'Others', editable: false }
+  ];
+}
+
 document.querySelector('.pi-badge').textContent = state.config.pi;
 renderDashboard();
 </script>
