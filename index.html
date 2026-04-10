@@ -1389,25 +1389,9 @@ let state = {
 
 // Load from localStorage if available
 function loadState() {
-  // Try to load saved state from localStorage
-  const saved = localStorage.getItem('piPlanState');
-  if (saved) {
-    try {
-      const loadedState = JSON.parse(saved);
-      // Merge loaded state with default state to handle new fields
-      state.config = { ...state.config, ...loadedState.config };
-      state.members = loadedState.members || [];
-      state.capacity = loadedState.capacity || {};
-      state.checklist = loadedState.checklist || state.checklist;
-      state.trainingTypes = loadedState.trainingTypes || state.trainingTypes;
-      toast('Dashboard data loaded from browser storage');
-    } catch (e) {
-      console.error('Error loading saved state:', e);
-      toast('Dashboard initialized with empty template');
-    }
-  } else {
-    toast('Dashboard initialized with empty template');
-  }
+  // Clear any previously saved data to start fresh
+  localStorage.removeItem('piPlanState');
+  toast('Dashboard initialized with empty template');
 }
 
 // Reset dashboard to empty template
