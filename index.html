@@ -1010,7 +1010,7 @@
       <div class="page-title">PI Plan Overview</div>
       <div class="page-sub" id="dashboard-subtitle">Program Increment · PI-YYYY-QX · Project Name</div>
 
-      <div class="stat-grid">
+      <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
         <div class="stat-card" style="--accent-color: var(--accent);">
           <div class="stat-label">Team Size</div>
           <div class="stat-value" id="stat-members">6</div>
@@ -1031,7 +1031,11 @@
           <div class="stat-value" id="stat-bugfix">0</div>
           <div class="stat-sub">Days allocated</div>
         </div>
-
+        <div class="stat-card" style="--accent-color: var(--accent3);">
+          <div class="stat-label">Unplanned</div>
+          <div class="stat-value" id="stat-unplanned">0</div>
+          <div class="stat-sub">Days allocated</div>
+        </div>
       </div>
 
       <!-- Capacity by member -->
@@ -1092,15 +1096,15 @@
           <div><label>Delivered Code</label><select id="kyt-delivered"><option>No</option><option selected>Yes</option></select></div>
         </div>
         <div class="form-grid">
-          <div><label>% Allocation (1.0 = 100%, 0.5 = 50%)</label><input type="number" step="0.01" id="kyt-module" value="1"></div>
+          <div><label>% Allocation (1.0 = 100%, 0.5 = 50%)</label><input type="number" step="0.01" min="0" max="1" id="kyt-module" value="1"></div>
         </div>
         <div class="form-grid" style="grid-template-columns:repeat(6,1fr);">
-          <div><label>S1 PF</label><input type="number" step="0.01" id="kyt-s1" value="0.95"></div>
-          <div><label>S2 PF</label><input type="number" step="0.01" id="kyt-s2" value="0.95"></div>
-          <div><label>S3 PF</label><input type="number" step="0.01" id="kyt-s3" value="0.95"></div>
-          <div><label>S4 PF</label><input type="number" step="0.01" id="kyt-s4" value="0.95"></div>
-          <div><label>S5 PF</label><input type="number" step="0.01" id="kyt-s5" value="0.95"></div>
-          <div><label>S6 PF</label><input type="number" step="0.01" id="kyt-s6" value="0.95"></div>
+          <div><label>S1 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s1" value="0.95"></div>
+          <div><label>S2 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s2" value="0.95"></div>
+          <div><label>S3 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s3" value="0.95"></div>
+          <div><label>S4 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s4" value="0.95"></div>
+          <div><label>S5 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s5" value="0.95"></div>
+          <div><label>S6 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s6" value="0.95"></div>
         </div>
         <button class="btn btn-primary" id="kyt-submit-btn" onclick="saveMember()">+ Add Member</button>
         <button class="btn btn-ghost" id="kyt-cancel-btn" onclick="cancelEdit()" style="display:none;margin-left:8px;">Cancel</button>
@@ -1116,7 +1120,7 @@
       <div class="page-sub">Comprehensive capacity calculation with all team members</div>
 
       <!-- Capacity Summary Cards -->
-      <div class="stat-grid" style="margin-bottom:28px;">
+      <div class="stat-grid" style="margin-bottom:28px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
         <div class="stat-card" style="--accent-color:var(--accent2);">
           <div class="stat-label">Total Net Capacity</div>
           <div class="stat-value" id="cap-total-net">0</div>
@@ -1133,6 +1137,11 @@
           <div class="stat-sub" id="cap-bug-pct">5% of capacity</div>
         </div>
         <div class="stat-card" style="--accent-color:var(--accent3);">
+          <div class="stat-label">Unplanned Activity</div>
+          <div class="stat-value" id="cap-unplanned-days">0</div>
+          <div class="stat-sub" id="cap-unplanned-pct">0% of capacity</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--danger);">
           <div class="stat-label">Capacity Utilization</div>
           <div class="stat-value" id="cap-util-pct">0%</div>
           <div class="stat-sub">Gross vs Net</div>
@@ -1190,14 +1199,14 @@
               <select id="cap-member-select" onchange="switchCapMember()"></select>
             </div>
             <div class="form-grid-3 form-grid">
-              <div><label>Weeks in PI</label><input type="number" id="cap-weeks"></div>
-              <div><label>Saturdays</label><input type="number" id="cap-sat"></div>
-              <div><label>Holidays</label><input type="number" id="cap-holidays"></div>
+              <div><label>Weeks in PI</label><input type="number" min="0" id="cap-weeks"></div>
+              <div><label>Saturdays</label><input type="number" min="0" id="cap-sat"></div>
+              <div><label>Holidays</label><input type="number" min="0" id="cap-holidays"></div>
             </div>
             <div class="form-grid-3 form-grid">
-              <div><label>Leaves</label><input type="number" id="cap-leaves"></div>
-              <div><label>Misc Days</label><input type="number" id="cap-misc"></div>
-              <div><label>% Allocation (1.0 = 100%)</label><input type="number" step="0.01" id="cap-alloc"></div>
+              <div><label>Leaves</label><input type="number" min="0" step="0.01" id="cap-leaves"></div>
+              <div><label>Misc Days</label><input type="number" min="0" step="0.01" id="cap-misc"></div>
+              <div><label>% Allocation (1.0 = 100%)</label><input type="number" step="0.01" min="0" max="1" id="cap-alloc"></div>
             </div>
             <div class="form-title" style="margin-top:16px;font-size:12px;">Training Days</div>
             <div class="form-grid" id="cap-training-fields">
@@ -1279,11 +1288,15 @@
         </div>
         <div class="form-grid">
           <div><label>Author</label><input type="text" id="cfg-author"></div>
-          <div><label>Feature Split %</label><input type="number" id="cfg-featsplit" value="95"></div>
+          <div><label>Sprints</label><input type="number" min="1" max="10" id="cfg-sprints" value="6"></div>
         </div>
-        <div class="form-grid">
-          <div><label>Sprints</label><input type="number" id="cfg-sprints" value="6"></div>
+        <div class="form-title" style="margin-top:16px;font-size:13px;">Capacity Distribution (%)</div>
+        <div class="form-grid-3 form-grid">
+          <div><label>Feature Development %</label><input type="number" min="0" max="100" step="0.1" id="cfg-featsplit" value="95" oninput="validateCapacityPercentages()" onchange="validateCapacityPercentages()"></div>
+          <div><label>Bug Fixing %</label><input type="number" min="0" max="100" step="0.1" id="cfg-bugsplit" value="5" oninput="validateCapacityPercentages()" onchange="validateCapacityPercentages()"></div>
+          <div><label>Unplanned Activity %</label><input type="number" min="0" max="100" step="0.1" id="cfg-unplannedsplit" value="0" oninput="validateCapacityPercentages()" onchange="validateCapacityPercentages()"></div>
         </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:12px;">Note: Total should equal 100%. Unplanned includes regression testing, re-testing bugs, impediments, etc.</div>
         <button class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
       </div>
     </div>
@@ -1356,6 +1369,8 @@ let state = {
     sm: '',
     author: '',
     featSplit: 95,
+    bugSplit: 5,
+    unplannedSplit: 0,
     sprints: 6
   },
   members: [],
@@ -1374,9 +1389,25 @@ let state = {
 
 // Load from localStorage if available
 function loadState() {
-  // Dashboard starts fresh on every launch - no saved data loaded
-  // Users can use CSV import to restore previous data if needed
-  toast('Dashboard initialized with empty template');
+  // Try to load saved state from localStorage
+  const saved = localStorage.getItem('piPlanState');
+  if (saved) {
+    try {
+      const loadedState = JSON.parse(saved);
+      // Merge loaded state with default state to handle new fields
+      state.config = { ...state.config, ...loadedState.config };
+      state.members = loadedState.members || [];
+      state.capacity = loadedState.capacity || {};
+      state.checklist = loadedState.checklist || state.checklist;
+      state.trainingTypes = loadedState.trainingTypes || state.trainingTypes;
+      toast('Dashboard data loaded from browser storage');
+    } catch (e) {
+      console.error('Error loading saved state:', e);
+      toast('Dashboard initialized with empty template');
+    }
+  } else {
+    toast('Dashboard initialized with empty template');
+  }
 }
 
 // Reset dashboard to empty template
@@ -1412,6 +1443,8 @@ function resetDashboard() {
       sm: '',
       author: '',
       featSplit: 95,
+      bugSplit: 5,
+      unplannedSplit: 0,
       sprints: 6
     },
     members: [],
@@ -1586,7 +1619,13 @@ function renderPage(id) {
   if (id==='capacity') renderCapacity();
   if (id==='checklist') renderChecklist();
   if (id==='guidelines') renderGuidelines();
-  if (id==='config') renderConfig();
+  if (id==='config') {
+    // Only render config on first load, not on subsequent visits
+    // This prevents resetting form values when user hasn't saved yet
+    if (!document.getElementById('cfg-pi').value) {
+      renderConfig();
+    }
+  }
   if (id==='report') renderReport();
 }
 
@@ -1596,8 +1635,9 @@ function renderPage(id) {
 function renderDashboard() {
   const total = totalCapacity();
   const avail = totalAvailDays();
-  const featDays = (total * state.config.featSplit / 100).toFixed(1);
-  const bugDays = (total * (100-state.config.featSplit) / 100).toFixed(1);
+  const featDays = (total * (state.config.featSplit !== undefined ? state.config.featSplit : 95) / 100).toFixed(1);
+  const bugDays = (total * (state.config.bugSplit !== undefined ? state.config.bugSplit : 5) / 100).toFixed(1);
+  const unplannedDays = (total * (state.config.unplannedSplit !== undefined ? state.config.unplannedSplit : 0) / 100).toFixed(1);
 
   // Update dashboard subtitle
   const subtitle = document.getElementById('dashboard-subtitle');
@@ -1628,6 +1668,7 @@ function renderDashboard() {
   document.getElementById('stat-cap').textContent = total.toFixed(1);
   document.getElementById('stat-featuredev').textContent = featDays;
   document.getElementById('stat-bugfix').textContent = bugDays;
+  document.getElementById('stat-unplanned').textContent = unplannedDays;
 
   // Capacity cards
   const ccEl = document.getElementById('cap-cards');
@@ -1984,8 +2025,9 @@ function toggleCapForm() {
 function renderCapacitySummary() {
   const cfg = state.config;
   const net = totalCapacity();
-  const featDays = (net * cfg.featSplit / 100).toFixed(1);
-  const bugDays = (net * (100 - cfg.featSplit) / 100).toFixed(1);
+  const featDays = (net * (cfg.featSplit !== undefined ? cfg.featSplit : 95) / 100).toFixed(1);
+  const bugDays = (net * (cfg.bugSplit !== undefined ? cfg.bugSplit : 5) / 100).toFixed(1);
+  const unplannedDays = (net * (cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0) / 100).toFixed(1);
   
   // Calculate gross capacity
   const grossDays = state.members.reduce((sum, m) => {
@@ -1997,9 +2039,11 @@ function renderCapacitySummary() {
   
   document.getElementById('cap-total-net').textContent = net.toFixed(1);
   document.getElementById('cap-feature-days').textContent = featDays;
-  document.getElementById('cap-feature-pct').textContent = `${cfg.featSplit}% of capacity`;
+  document.getElementById('cap-feature-pct').textContent = `${cfg.featSplit !== undefined ? cfg.featSplit : 95}% of capacity`;
   document.getElementById('cap-bug-days').textContent = bugDays;
-  document.getElementById('cap-bug-pct').textContent = `${100-cfg.featSplit}% of capacity`;
+  document.getElementById('cap-bug-pct').textContent = `${cfg.bugSplit !== undefined ? cfg.bugSplit : 5}% of capacity`;
+  document.getElementById('cap-unplanned-days').textContent = unplannedDays;
+  document.getElementById('cap-unplanned-pct').textContent = `${cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0}% of capacity`;
   document.getElementById('cap-util-pct').textContent = `${utilPct}%`;
 }
 
@@ -2387,7 +2431,7 @@ function renderTrainingFieldsInForm() {
   
   let html = '';
   state.trainingTypes.forEach(type => {
-    html += `<div><label>${type.name}</label><input type="number" step="0.01" id="cap-${type.id}"></div>`;
+    html += `<div><label>${type.name}</label><input type="number" step="0.01" min="0" id="cap-${type.id}"></div>`;
   });
   
   container.innerHTML = html;
@@ -2474,6 +2518,59 @@ function renderGuidelines() {
 // ════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════
+function validateCapacityPercentages() {
+  const featSplit = +document.getElementById('cfg-featsplit').value || 0;
+  const bugSplit = +document.getElementById('cfg-bugsplit').value || 0;
+  const unplannedSplit = +document.getElementById('cfg-unplannedsplit').value || 0;
+  const total = featSplit + bugSplit + unplannedSplit;
+  
+  // Show warning if total is not 100
+  const existingWarning = document.getElementById('capacity-percentage-warning');
+  if (existingWarning) {
+    existingWarning.remove();
+  }
+  
+  if (Math.abs(total - 100) > 0.1) {
+    const warningDiv = document.createElement('div');
+    warningDiv.id = 'capacity-percentage-warning';
+    warningDiv.style.cssText = 'color:var(--danger);font-size:11px;margin-top:4px;font-weight:600;';
+    warningDiv.textContent = `⚠️ Warning: Total is ${total.toFixed(1)}% (should be 100%)`;
+    document.getElementById('cfg-unplannedsplit').parentElement.parentElement.insertAdjacentElement('afterend', warningDiv);
+  }
+  
+  // Auto-save the capacity percentages to state
+  autoSaveCapacityPercentages();
+}
+
+function autoSaveCapacityPercentages() {
+  // Save the capacity percentages immediately to state
+  state.config.featSplit = +document.getElementById('cfg-featsplit').value || 95;
+  state.config.bugSplit = +document.getElementById('cfg-bugsplit').value || 5;
+  state.config.unplannedSplit = +document.getElementById('cfg-unplannedsplit').value || 0;
+  
+  // Update all tabs that display capacity calculations
+  // Dashboard
+  if (document.getElementById('stat-featuredev')) {
+    const total = totalCapacity();
+    const featDays = (total * (state.config.featSplit !== undefined ? state.config.featSplit : 95) / 100).toFixed(1);
+    const bugDays = (total * (state.config.bugSplit !== undefined ? state.config.bugSplit : 5) / 100).toFixed(1);
+    const unplannedDays = (total * (state.config.unplannedSplit !== undefined ? state.config.unplannedSplit : 0) / 100).toFixed(1);
+    document.getElementById('stat-featuredev').textContent = featDays;
+    document.getElementById('stat-bugfix').textContent = bugDays;
+    if (document.getElementById('stat-unplanned')) {
+      document.getElementById('stat-unplanned').textContent = unplannedDays;
+    }
+  }
+  
+  // Capacity tab
+  if (document.getElementById('cap-feature-days')) {
+    renderCapacitySummary();
+  }
+  
+  // Save to localStorage
+  autoSave();
+}
+
 function renderConfig() {
   const cfg = state.config;
   document.getElementById('cfg-pi').value = cfg.pi;
@@ -2487,11 +2584,24 @@ function renderConfig() {
   document.getElementById('cfg-po').value = cfg.po || '';
   document.getElementById('cfg-sm').value = cfg.sm || '';
   document.getElementById('cfg-author').value = cfg.author || '';
-  document.getElementById('cfg-featsplit').value = cfg.featSplit;
+  document.getElementById('cfg-featsplit').value = cfg.featSplit !== undefined ? cfg.featSplit : 95;
+  document.getElementById('cfg-bugsplit').value = cfg.bugSplit !== undefined ? cfg.bugSplit : 5;
+  document.getElementById('cfg-unplannedsplit').value = cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0;
   document.getElementById('cfg-sprints').value = cfg.sprints;
 }
 
 function saveConfig() {
+  // Validate capacity percentages before saving
+  const featSplit = +document.getElementById('cfg-featsplit').value || 0;
+  const bugSplit = +document.getElementById('cfg-bugsplit').value || 0;
+  const unplannedSplit = +document.getElementById('cfg-unplannedsplit').value || 0;
+  const total = featSplit + bugSplit + unplannedSplit;
+  
+  if (Math.abs(total - 100) > 0.1) {
+    alert(`❌ Cannot Save Configuration!\n\nCapacity Distribution Error:\n\nFeature Development: ${featSplit}%\nBug Fixing: ${bugSplit}%\nUnplanned Activity: ${unplannedSplit}%\n\nTotal: ${total.toFixed(1)}%\n\n⚠️ The total must equal exactly 100%.\nPlease adjust the percentages and try again.`);
+    return;
+  }
+  
   state.config = {
     pi: document.getElementById('cfg-pi').value,
     project: document.getElementById('cfg-project').value,
@@ -2504,7 +2614,9 @@ function saveConfig() {
     po: document.getElementById('cfg-po').value,
     sm: document.getElementById('cfg-sm').value,
     author: document.getElementById('cfg-author').value,
-    featSplit: +document.getElementById('cfg-featsplit').value,
+    featSplit: featSplit,
+    bugSplit: bugSplit,
+    unplannedSplit: unplannedSplit,
     sprints: +document.getElementById('cfg-sprints').value,
   };
   document.querySelector('.pi-badge').textContent = state.config.pi;
@@ -2519,6 +2631,11 @@ function saveConfig() {
   // Update capacity matrix if it exists (user might be viewing capacity tab)
   if (document.getElementById('cap-matrix-tbody')) {
     renderCapacityMatrix();
+  }
+  
+  // Update capacity summary if visible
+  if (document.getElementById('cap-feature-days')) {
+    renderCapacitySummary();
   }
   
   // Update dashboard to reflect status change
@@ -2544,8 +2661,9 @@ function renderReport() {
   const net = totalCapacity();
   const avail = totalAvailDays();
   const done = state.checklist.filter(item => item && item.checked).length;
-  const featDays = (net * cfg.featSplit / 100).toFixed(1);
-  const bugDays = (net * (100 - cfg.featSplit) / 100).toFixed(1);
+  const featDays = (net * (cfg.featSplit !== undefined ? cfg.featSplit : 95) / 100).toFixed(1);
+  const bugDays = (net * (cfg.bugSplit !== undefined ? cfg.bugSplit : 5) / 100).toFixed(1);
+  const unplannedDays = (net * (cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0) / 100).toFixed(1);
   const el = document.getElementById('report-preview');
   
   el.innerHTML = `
@@ -2564,16 +2682,17 @@ function renderReport() {
       <div><strong>Scrum Master:</strong> ${cfg.sm||'—'}</div>
       <div><strong>Author:</strong> ${cfg.author||'—'}</div>
       <div><strong>Sprints:</strong> ${cfg.sprints}</div>
-      <div><strong>Feature/Bug Split:</strong> ${cfg.featSplit}% / ${100-cfg.featSplit}%</div>
+      <div><strong>Capacity Split:</strong> Feature ${cfg.featSplit !== undefined ? cfg.featSplit : 95}% | Bug ${cfg.bugSplit !== undefined ? cfg.bugSplit : 5}% | Unplanned ${cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0}%</div>
     </div>
 
     <!-- Dashboard Overview -->
     <div class="section-title">Dashboard Overview</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px;">
       <div class="stat-card" style="--accent-color:var(--accent);"><div class="stat-label">Team Size</div><div class="stat-value">${state.members.length}</div><div class="stat-sub">Active members</div></div>
       <div class="stat-card" style="--accent-color:var(--accent2);"><div class="stat-label">Net Capacity</div><div class="stat-value">${net.toFixed(1)}</div><div class="stat-sub">Total days</div></div>
       <div class="stat-card" style="--accent-color:var(--accent);"><div class="stat-label">Feature Dev</div><div class="stat-value">${featDays}</div><div class="stat-sub">Days allocated</div></div>
       <div class="stat-card" style="--accent-color:var(--accent4);"><div class="stat-label">Bug Fix</div><div class="stat-value">${bugDays}</div><div class="stat-sub">Days allocated</div></div>
+      <div class="stat-card" style="--accent-color:var(--accent3);"><div class="stat-label">Unplanned</div><div class="stat-value">${unplannedDays}</div><div class="stat-sub">Days allocated</div></div>
     </div>
 
     <!-- Team Members Details -->
@@ -2749,8 +2868,9 @@ function copyReport() {
   const cfg = state.config;
   const net = totalCapacity();
   const avail = totalAvailDays();
-  const featDays = (net * cfg.featSplit / 100).toFixed(2);
-  const bugDays = (net * (100 - cfg.featSplit) / 100).toFixed(2);
+  const featDays = (net * (cfg.featSplit !== undefined ? cfg.featSplit : 95) / 100).toFixed(2);
+  const bugDays = (net * (cfg.bugSplit !== undefined ? cfg.bugSplit : 5) / 100).toFixed(2);
+  const unplannedDays = (net * (cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0) / 100).toFixed(2);
   const done = state.checklist.filter(item => item && item.checked).length;
   
   // Build detailed capacity breakdown
@@ -2776,14 +2896,15 @@ PO                   : ${cfg.po||'—'}
 Scrum Master         : ${cfg.sm||'—'}
 Author               : ${cfg.author||'—'}
 Sprints              : ${cfg.sprints}
-Feature/Bug Split    : ${cfg.featSplit}% / ${100-cfg.featSplit}%
+Capacity Split       : Feature ${cfg.featSplit !== undefined ? cfg.featSplit : 95}% | Bug ${cfg.bugSplit !== undefined ? cfg.bugSplit : 5}% | Unplanned ${cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0}%
 
 DASHBOARD OVERVIEW
 ${'─'.repeat(78)}
 Team Size            : ${state.members.length} members
 Net Capacity         : ${net.toFixed(2)} days
-Feature Development  : ${featDays} days (${cfg.featSplit}%)
-Regression Bug Fix   : ${bugDays} days (${100-cfg.featSplit}%)
+Feature Development  : ${featDays} days (${cfg.featSplit !== undefined ? cfg.featSplit : 95}%)
+Bug Fixing           : ${bugDays} days (${cfg.bugSplit !== undefined ? cfg.bugSplit : 5}%)
+Unplanned Activity   : ${unplannedDays} days (${cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0}%)
 Available Days       : ${avail.toFixed(2)} days
 
 TEAM MEMBERS
