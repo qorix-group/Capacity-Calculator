@@ -2133,8 +2133,7 @@ function renderCapacityMatrix() {
   rows += `<tr><td><strong>Weeks in ${cfg.pi}</strong></td>`;
   let totalWeeks = 0;
   state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const weeks = c.weeks !== undefined ? c.weeks : 12;
+    const weeks = Array.isArray(m.s) ? m.s.filter(pf => +pf > 0).length * 2 : 0;
     totalWeeks += weeks;
     rows += `<td>${weeks}</td>`;
   });
@@ -2144,9 +2143,10 @@ function renderCapacityMatrix() {
   rows += `<tr><td><strong>Weekdays in ${cfg.pi}</strong></td>`;
   let totalWeekdays = 0;
   state.members.forEach(m => {
-    const c = calcCapacity(m.name);
-    totalWeekdays += c.weekdays||0;
-    rows += `<td>${c.weekdays||0}</td>`;
+    const weeks = Array.isArray(m.s) ? m.s.filter(pf => +pf > 0).length * 2 : 0;
+    const weekdays = weeks * 5;
+    totalWeekdays += weekdays;
+    rows += `<td>${weekdays}</td>`;
   });
   rows += `<td>${totalWeekdays}</td></tr>`;
   
@@ -3053,8 +3053,7 @@ function downloadCSV() {
   // Weeks in PI
   csv += `,Weeks in ${cfg.pi},`;
   state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const weeks = c.weeks !== undefined ? c.weeks : 12;
+    const weeks = Array.isArray(m.s) ? m.s.filter(pf => +pf > 0).length * 2 : 0;
     csv += `${weeks},`;
   });
   csv += ',,,\n';
@@ -3264,7 +3263,7 @@ function downloadCompleteCSV() {
   // Export capacity data
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    const weeks = c.weeks !== undefined ? c.weeks : 12;
+    const weeks = Array.isArray(m.s) ? m.s.filter(pf => +pf > 0).length * 2 : 0;
     const sat = c.sat !== undefined ? c.sat : 0;
     const holidays = c.holidays !== undefined ? c.holidays : 3;
     const leaves = c.leaves !== undefined ? c.leaves : 0;
