@@ -1276,7 +1276,7 @@
               <select id="cap-member-select" onchange="switchCapMember()"></select>
             </div>
             <div class="form-grid-3 form-grid">
-              <div><label>Weeks in PI</label><input type="number" min="0" id="cap-weeks"></div>
+              <div><label>Weeks in PI <small style="opacity:0.6;">(auto, from Sprint PF)</small></label><input type="number" min="0" id="cap-weeks" readonly disabled style="opacity:0.6;cursor:not-allowed;"></div>
               <div><label>Saturdays</label><input type="number" min="0" id="cap-sat"></div>
               <div><label>Holidays</label><input type="number" min="0" id="cap-holidays"></div>
             </div>
@@ -1612,10 +1612,17 @@ function calcAvgPF(m) {
   return (sum / nonZeroSprints.length).toFixed(2);
 }
 
+function calcWeeksFromSprints(m) {
+  // Weeks in PI = (count of non-zero Sprint PF values) * 2
+  if (!m || !Array.isArray(m.s)) return 0;
+  const nonZeroCount = m.s.filter(pf => pf > 0).length;
+  return nonZeroCount * 2;
+}
+
 function calcCapacity(name) {
-  const c = state.capacity[name];
+  const c = state.capacity[name] || {};
   const m = state.members.find(x=>x.name===name);
-  if (!c || !m) return {};
+  if (!m) return {};
   
   // Ensure trainingTypes exists
   if (!state.trainingTypes || !Array.isArray(state.trainingTypes)) {
@@ -1628,8 +1635,9 @@ function calcCapacity(name) {
     ];
   }
   
-  // Use !== undefined to properly handle 0 values
-  const weeks = c.weeks !== undefined ? c.weeks : 12;
+  // Weeks in PI is derived from Sprint PF data (count of non-zero sprints * 2),
+  // not manually entered. Use !== undefined for the rest to properly handle 0 values.
+  const weeks = calcWeeksFromSprints(m);
   const sat = c.sat !== undefined ? c.sat : 0;
   const holidays = c.holidays !== undefined ? c.holidays : 3;
   const leaves = c.leaves !== undefined ? c.leaves : 0;
@@ -1644,7 +1652,9 @@ function calcCapacity(name) {
   const available = (weekdays + sat - holidays - leaves - misc - training) * alloc;
   const pf = parseFloat(calcAvgPF(m));
   const net = available * pf;
-  return { weekdays, training, available: +available.toFixed(3), pf, net: +net.toFixed(3), ...c };
+  // Spread stored capacity first, then override with the computed weeks/weekdays
+  // so a stale/legacy stored value never wins over the Sprint-PF-derived numbers.
+  return { ...c, weekdays, training, available: +available.toFixed(3), pf, net: +net.toFixed(3), weeks };
 }
 
 function totalCapacity() {
@@ -1993,7 +2003,6 @@ function saveCurrentCapacityData(memberName) {
   const allocValue = +document.getElementById('cap-alloc').value;
   
   const capacityData = {
-    weeks: +document.getElementById('cap-weeks').value,
     sat: +document.getElementById('cap-sat').value,
     holidays: +document.getElementById('cap-holidays').value,
     leaves: +document.getElementById('cap-leaves').value,
@@ -2027,8 +2036,9 @@ function loadCapMember() {
   currentCapMember = name; // Track the loaded member
   const c = state.capacity[name] || {};
   
-  // Use ?? (nullish coalescing) or !== undefined to properly handle 0 values
-  document.getElementById('cap-weeks').value = c.weeks !== undefined ? c.weeks : 12;
+  // Weeks in PI is now auto-derived from Sprint PF data (see calcWeeksFromSprints)
+  const member = state.members.find(x => x.name === name);
+  document.getElementById('cap-weeks').value = calcWeeksFromSprints(member);
   document.getElementById('cap-sat').value = c.sat !== undefined ? c.sat : 0;
   document.getElementById('cap-holidays').value = c.holidays !== undefined ? c.holidays : 3;
   document.getElementById('cap-leaves').value = c.leaves !== undefined ? c.leaves : 7;
@@ -2090,11 +2100,9 @@ function renderCapacitySummary() {
   const bugDays = (net * (cfg.bugSplit !== undefined ? cfg.bugSplit : 5) / 100).toFixed(1);
   const unplannedDays = (net * (cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0) / 100).toFixed(1);
   
-  // Calculate gross capacity
+  // Calculate gross capacity (Weeks/Weekdays now derived from Sprint PF data)
   const grossDays = state.members.reduce((sum, m) => {
-    const c = state.capacity[m.name] || {};
-    const weeks = c.weeks !== undefined ? c.weeks : 12;
-    return sum + (weeks * 5);
+    return sum + (calcWeeksFromSprints(m) * 5);
   }, 0);
   const utilPct = ((grossDays - totalAvailDays()) / grossDays * 100).toFixed(1);
   
@@ -2129,12 +2137,11 @@ function renderCapacityMatrix() {
   state.members.forEach(m => rows += `<td>${m.role}</td>`);
   rows += '<td>—</td></tr>';
   
-  // Weeks in PI
+  // Weeks in PI (derived from count of non-zero Sprint PF values * 2)
   rows += `<tr><td><strong>Weeks in ${cfg.pi}</strong></td>`;
   let totalWeeks = 0;
   state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const weeks = c.weeks !== undefined ? c.weeks : 12;
+    const weeks = calcWeeksFromSprints(m);
     totalWeeks += weeks;
     rows += `<td>${weeks}</td>`;
   });
@@ -3050,12 +3057,10 @@ function downloadCSV() {
   state.members.forEach(m => csv += `${m.role},`);
   csv += ',,,\n';
   
-  // Weeks in PI
+  // Weeks in PI (derived from count of non-zero Sprint PF values * 2)
   csv += `,Weeks in ${cfg.pi},`;
   state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const weeks = c.weeks !== undefined ? c.weeks : 12;
-    csv += `${weeks},`;
+    csv += `${calcWeeksFromSprints(m)},`;
   });
   csv += ',,,\n';
   
@@ -3168,11 +3173,9 @@ function downloadCSV() {
   
   csv += ',,,,,,,,,,,\n';
   
-  // Summary section
+  // Summary section (Weeks/Weekdays derived from Sprint PF data)
   const grossDays = state.members.reduce((sum, m) => {
-    const c = state.capacity[m.name] || {};
-    const weeks = c.weeks !== undefined ? c.weeks : 12;
-    return sum + (weeks * 5);
+    return sum + (calcWeeksFromSprints(m) * 5);
   }, 0);
   const diffPercent = ((grossDays - avail) / grossDays * 100).toFixed(1);
   
@@ -3261,10 +3264,10 @@ function downloadCompleteCSV() {
   });
   csv += capacityHeader + '\n';
   
-  // Export capacity data
+  // Export capacity data (Weeks is derived from Sprint PF data, not stored)
   state.members.forEach(m => {
     const c = state.capacity[m.name] || {};
-    const weeks = c.weeks !== undefined ? c.weeks : 12;
+    const weeks = calcWeeksFromSprints(m);
     const sat = c.sat !== undefined ? c.sat : 0;
     const holidays = c.holidays !== undefined ? c.holidays : 3;
     const leaves = c.leaves !== undefined ? c.leaves : 0;
