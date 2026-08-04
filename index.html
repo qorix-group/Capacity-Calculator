@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PI Plan Capacity Calculator</title>
+<title>Sprint Capacity Calculator</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -31,9 +31,10 @@
     color: var(--text);
     min-height: 100vh;
     font-size: 13px;
+    zoom: 90%;
   }
 
-  /* ─── TOP HEADER ─── */
+  /* ─── HEADER ─── */
   header {
     display: flex;
     align-items: center;
@@ -41,8 +42,11 @@
     padding: 18px 32px;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
-    position: sticky; top: 0; z-index: 100;
+    position: sticky;
+    top: 0;
+    z-index: 100;
   }
+
   .logo {
     font-family: 'Syne', sans-serif;
     font-weight: 800;
@@ -50,8 +54,10 @@
     letter-spacing: -0.5px;
     color: var(--text);
   }
+
   .logo span { color: var(--accent); }
-  .pi-badge {
+
+  .sprint-badge {
     font-size: 11px;
     background: var(--accent);
     color: #000;
@@ -59,15 +65,44 @@
     border-radius: 20px;
     font-weight: 500;
     letter-spacing: 1px;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+
   .header-meta {
-    display: flex; align-items: center; gap: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
   }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header-reset {
+    padding: 7px 12px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
   .status-pill {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 11px; color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
   }
-  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent2); }
+
+  .status-dot { 
+    width: 7px; 
+    height: 7px; 
+    border-radius: 50%; 
+    background: var(--accent2); 
+  }
 
   /* ─── LAYOUT ─── */
   .shell {
@@ -86,6 +121,7 @@
     flex-direction: column;
     gap: 2px;
   }
+
   .nav-section {
     font-size: 10px;
     letter-spacing: 1.5px;
@@ -93,8 +129,11 @@
     padding: 12px 20px 6px;
     text-transform: uppercase;
   }
+
   .nav-item {
-    display: flex; align-items: center; gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 9px 20px;
     cursor: pointer;
     color: var(--muted);
@@ -102,13 +141,23 @@
     border-left: 3px solid transparent;
     font-size: 12px;
   }
-  .nav-item:hover { color: var(--text); background: var(--surface2); }
+
+  .nav-item:hover { 
+    color: var(--text); 
+    background: var(--surface2); 
+  }
+
   .nav-item.active {
     color: var(--accent);
     border-left-color: var(--accent);
     background: rgba(79,158,255,0.07);
   }
-  .nav-icon { font-size: 14px; width: 16px; text-align: center; }
+
+  .nav-icon { 
+    font-size: 14px; 
+    width: 16px; 
+    text-align: center; 
+  }
 
   /* ─── MAIN ─── */
   main {
@@ -117,16 +166,25 @@
     padding: 28px 32px;
   }
 
-  /* ─── PAGE TITLES ─── */
-  .page { display: none; }
-  .page.active { display: block; }
+  .page { 
+    display: none; 
+  }
+
+  .page.active { 
+    display: block; 
+  }
+
   .page-title {
     font-family: 'Syne', sans-serif;
     font-size: 22px;
     font-weight: 700;
     margin-bottom: 6px;
   }
-  .page-sub { color: var(--muted); margin-bottom: 28px; }
+
+  .page-sub { 
+    color: var(--muted); 
+    margin-bottom: 28px; 
+  }
 
   /* ─── STAT CARDS ─── */
   .stat-grid {
@@ -135,6 +193,7 @@
     gap: 14px;
     margin-bottom: 28px;
   }
+
   .stat-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -143,41 +202,150 @@
     position: relative;
     overflow: hidden;
   }
+
   .stat-card::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 2px;
     background: var(--accent-color, var(--accent));
   }
-  .stat-label { font-size: 10px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
-  .stat-value { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; }
-  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .stat-label { 
+    font-size: 10px; 
+    letter-spacing: 1px; 
+    color: var(--muted); 
+    text-transform: uppercase; 
+    margin-bottom: 8px; 
+  }
+
+  .stat-value { 
+    font-family: 'Syne', sans-serif; 
+    font-size: 26px; 
+    font-weight: 700; 
+  }
+
+  .stat-sub { 
+    font-size: 11px; 
+    color: var(--muted); 
+    margin-top: 4px; 
+  }
+
+  #dashboard-meta {
+    gap: 10px;
+  }
+
+  #dashboard-meta .stat-card {
+    padding: 14px 16px;
+  }
+
+  #dashboard-meta .stat-label {
+    font-size: 9px;
+  }
+
+  #dashboard-meta .stat-value {
+    font-size: 18px;
+  }
+
+  #dashboard-meta .stat-sub {
+    font-size: 10px;
+  }
+
+  #capacity-table {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  #capacity-table th,
+  #capacity-table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  #capacity-table tfoot td {
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    padding: 12px 12px;
+    vertical-align: middle;
+  }
+
+  .total-row-label {
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .total-row-label strong {
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .total-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: flex-start;
+  }
+
+  .total-metric span {
+    font-size: 10px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--muted);
+  }
+
+  .total-metric strong {
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+  }
 
   /* ─── SECTION ─── */
-  .section { margin-bottom: 28px; }
+  .section { 
+    margin-bottom: 28px; 
+  }
+
   .section-title {
     font-family: 'Syne', sans-serif;
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 14px;
-    display: flex; align-items: center; gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 1px;
   }
+
   .section-title::after {
-    content: ''; flex: 1;
-    height: 1px; background: var(--border);
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
   }
 
   /* ─── TABLE ─── */
-  .table-wrap { overflow-x: auto; }
+  .table-wrap { 
+    overflow-x: auto; 
+  }
+
   table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
   }
+
   th {
     background: var(--surface2);
     padding: 9px 12px;
@@ -189,15 +357,28 @@
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
   }
+
   td {
     padding: 9px 12px;
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
   }
-  tr:hover td { background: var(--surface2); }
-  tr:last-child td { border-bottom: none; }
-  tfoot { background: var(--surface2); font-weight: 600; }
-  tfoot td { font-weight: 600; }
+
+  tr:hover td { 
+    background: var(--surface2); 
+  }
+
+  tr:last-child td { 
+    border-bottom: none; 
+  }
+
+  tfoot { 
+    background: var(--surface2); 
+  }
+  tfoot td { 
+    font-weight: 600; 
+  }
+
   .table-container {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -206,7 +387,72 @@
     overflow-y: visible;
   }
 
-  /* ─── TAGS / BADGES ─── */
+  /* ─── FORM ELEMENTS ─── */
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: 12px;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(79, 158, 255, 0.1);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ─── BUTTONS ─── */
+  button {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    transition: all 0.15s;
+  }
+
+  button:hover {
+    background: #6bb4ff;
+  }
+
+  button.secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  button.secondary:hover {
+    background: var(--border);
+  }
+
+  /* ─── BADGES ─── */
   .badge {
     display: inline-block;
     padding: 2px 9px;
@@ -215,3367 +461,1541 @@
     font-weight: 500;
     letter-spacing: 0.5px;
   }
-  .badge-blue { background: rgba(79,158,255,0.15); color: var(--accent); }
-  .badge-green { background: rgba(0,229,160,0.12); color: var(--accent2); }
-  .badge-orange { background: rgba(245,166,35,0.12); color: var(--accent4); }
-  .badge-red { background: rgba(255,107,107,0.12); color: var(--accent3); }
-  .badge-purple { background: rgba(167,139,250,0.12); color: #a78bfa; }
 
-  /* ─── PRODUCTIVITY BAR ─── */
-  .pf-bar-wrap { display: flex; align-items: center; gap: 8px; }
-  .pf-bar {
-    flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+  .badge-green { 
+    background: rgba(0, 229, 160, 0.12); 
+    color: var(--accent2); 
   }
-  .pf-fill { height: 100%; border-radius: 3px; background: var(--accent2); transition: width 0.4s; }
-  .pf-val { font-size: 11px; color: var(--muted); width: 32px; text-align: right; }
 
-  /* ─── CAPACITY RING ─── */
-  .capacity-row {
+  .badge-orange { 
+    background: rgba(245, 166, 35, 0.12); 
+    color: var(--accent4); 
+  }
+
+  .badge-red { 
+    background: rgba(255, 107, 107, 0.12); 
+    color: var(--accent3); 
+  }
+
+  .badge-blue { 
+    background: rgba(79, 158, 255, 0.12); 
+    color: var(--accent); 
+  }
+
+  /* ─── CAPACITY BAR ─── */
+  .capacity-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bar {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: var(--accent2);
+    transition: width 0.3s, background 0.3s;
+  }
+
+  .bar-fill.warning {
+    background: var(--accent4);
+  }
+
+  .bar-fill.danger {
+    background: var(--accent3);
+  }
+
+  .bar-val {
+    font-size: 11px;
+    color: var(--muted);
+    width: 45px;
+    text-align: right;
+  }
+
+  /* ─── UTILS ─── */
+  .mt-20 { margin-top: 20px; }
+  .mb-20 { margin-bottom: 20px; }
+  .text-center { text-align: center; }
+  .text-muted { color: var(--muted); }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  .modal.show { display: flex; }
+
+  .modal-content {
+    background-color: var(--surface);
+    margin: auto;
+    padding: 24px;
+    width: 90%;
+    max-width: 500px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    background: var(--accent2);
+    color: #000;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1001;
+  }
+
+  .toast.show {
+    opacity: 1;
+  }
+
+  .stats-row {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 14px;
     margin-bottom: 20px;
   }
-  .cap-card {
+
+  .info-box {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  .info-box.warning {
+    border-left-color: var(--accent4);
+  }
+
+  .info-box.danger {
+    border-left-color: var(--accent3);
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .day-status-select {
+    width: 100%;
+    min-width: 92px;
+    padding: 6px 8px;
+    font-size: 11px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--surface2);
+    color: var(--text);
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    color-scheme: dark;
+  }
+
+  .day-status-select option {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  .day-status-select.status-working { background: rgba(0, 229, 160, 0.12); }
+  .day-status-select.status-half { background: rgba(245, 166, 35, 0.14); }
+  .day-status-select.status-leave { background: rgba(255, 107, 107, 0.14); }
+  .day-status-select.status-holiday { background: rgba(79, 158, 255, 0.14); }
+
+  td.status-working { background: rgba(0, 229, 160, 0.08) !important; }
+  td.status-half { background: rgba(245, 166, 35, 0.10) !important; }
+  td.status-leave { background: rgba(255, 107, 107, 0.10) !important; }
+  td.status-holiday { background: rgba(79, 158, 255, 0.10) !important; }
+
+  .planner-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+
+  .planner-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .planner-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface2);
+  }
+
+  .schedule-summary {
+    margin-top: 18px;
+  }
+
+  .schedule-summary-card,
+  .report-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 16px 18px;
   }
-  .cap-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-  .cap-role { font-size: 10px; color: var(--muted); margin-bottom: 12px; }
-  .cap-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; color: var(--muted); }
-  .cap-row strong { color: var(--text); }
-  .cap-bar-wrap { margin-top: 10px; }
-  .cap-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .cap-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
 
-  /* ─── FEATURE TABLE ─── */
-  .feature-status {
-    display: inline-block;
-    width: 8px; height: 8px; border-radius: 50%;
-    margin-right: 6px;
-  }
-  .fs-confirmed { background: var(--confirmed); }
-  .fs-tentative { background: var(--tentative); }
-  .fs-planned { background: var(--planned-later); }
-
-  /* ─── SPRINT CELLS ─── */
-  .sprint-cell {
-    text-align: center;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-  }
-  .sprint-val {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    min-width: 36px;
-    text-align: center;
-    background: rgba(79,158,255,0.1);
-    color: var(--accent);
-  }
-  .sprint-val.high { background: rgba(0,229,160,0.12); color: var(--accent2); }
-  .sprint-val.training { background: rgba(245,166,35,0.1); color: var(--accent4); letter-spacing: 1px; }
-
-  /* ─── TEAM MEMBER CARDS ─── */
-  .member-grid {
+  .schedule-summary-grid,
+  .report-hero {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 12px;
   }
-  .member-card {
-    background: var(--surface);
+
+  .schedule-summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .report-hero {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-bottom: 18px;
+  }
+
+  .report-meta-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px;
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 16px;
-    position: relative;
-    transition: all 0.2s;
+    background: var(--surface);
+    margin-bottom: 18px;
+    font-size: 11px;
+    color: var(--muted);
   }
-  .member-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+  .report-meta-bar strong {
+    color: var(--text);
   }
-  .member-header {
+
+  .summary-chip {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .member-info h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    margin: 0 0 4px 0;
-    color: var(--text);
-  }
-  .member-meta {
-    font-size: 11px;
-    color: var(--muted);
-    display: flex;
     gap: 8px;
-    align-items: center;
-  }
-  .member-actions {
-    display: flex;
-    gap: 6px;
-  }
-  .member-details {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .member-detail-item {
-    font-size: 11px;
-  }
-  .member-detail-label {
-    color: var(--muted);
-    text-transform: uppercase;
-    font-size: 9px;
-    letter-spacing: 0.5px;
-    margin-bottom: 3px;
-  }
-  .member-detail-value {
-    color: var(--text);
-    font-weight: 500;
-  }
-  .member-tech {
-    font-size: 10px;
-    color: var(--muted);
-    margin-bottom: 10px;
-    padding: 6px 8px;
-    background: var(--surface2);
-    border-radius: 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .member-certs {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-  }
-  .cert-icon {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: 500;
-  }
-  .cert-icon.yes {
-    background: rgba(0,229,160,0.12);
-    color: var(--accent2);
-  }
-  .cert-icon.no {
-    background: rgba(245,166,35,0.1);
-    color: var(--accent4);
-  }
-  .member-sprints {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 4px;
-  }
-  .sprint-mini {
-    text-align: center;
-    padding: 4px 2px;
-    background: var(--surface2);
-    border-radius: 4px;
-    font-size: 10px;
-  }
-  .sprint-mini-label {
-    font-size: 8px;
-    color: var(--muted);
-    margin-bottom: 2px;
-  }
-  .sprint-mini-value {
-    font-weight: 600;
-    color: var(--text);
-  }
-  .sprint-mini-value.high { color: var(--accent2); }
-  .sprint-mini-value.training { color: var(--accent4); }
-
-  /* ─── US PLANNING ─── */
-  .tshirt {
-    display: inline-block;
-    padding: 1px 8px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 600;
-    background: var(--surface2);
-    color: var(--accent);
+    padding: 8px 10px;
     border: 1px solid var(--border);
-  }
-
-  /* ─── EDITABLE CELLS ─── */
-  .editable-cell {
-    transition: all 0.15s;
-    border: 1px solid transparent !important;
-  }
-  .editable-cell:hover {
-    background: rgba(79,158,255,0.12) !important;
-    border: 1px solid var(--accent) !important;
-  }
-  .editable-cell:focus {
-    outline: none;
-    background: rgba(79,158,255,0.15) !important;
-    border: 1px solid var(--accent) !important;
-  }
-
-  /* ─── CHECKLIST ─── */
-  .check-item {
-    display: flex; gap: 12px; align-items: flex-start;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-  .check-item-main {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    flex: 1;
-    min-width: 100%;
-  }
-  .check-comment-row {
-    flex: 1;
-    min-width: 100%;
-    margin-top: 8px;
-    padding-left: 40px;
-  }
-  .check-comment-input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 6px 10px;
-    font-size: 11px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    outline: none;
-    transition: all 0.15s;
-  }
-  .check-comment-input:focus {
-    border-color: var(--accent);
-    color: var(--text);
-  }
-  .check-comment-input::placeholder {
-    color: var(--muted);
-    opacity: 0.5;
-  }
-  .check-item:last-child { border-bottom: none; }
-  .check-num { color: var(--muted); min-width: 28px; font-size: 11px; }
-  .check-text { flex: 1; line-height: 1.5; }
-  .check-cat { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 0.5px; }
-  .check-toggle {
-    width: 18px; height: 18px; min-width: 18px;
-    border: 1.5px solid var(--border);
-    border-radius: 4px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; color: transparent;
-    transition: all 0.15s;
-  }
-  .check-toggle.done {
-    background: var(--accent2);
-    border-color: var(--accent2);
-    color: #000;
-  }
-
-  /* ─── FORMS ─── */
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-  .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-  label { display: block; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-  input, select, textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px 12px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-  textarea { resize: vertical; min-height: 70px; }
-  select option { background: var(--surface); }
-
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 18px;
-    border-radius: 6px;
-    border: none;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-weight: 500;
-  }
-  .btn-primary { background: var(--accent); color: #000; }
-  .btn-primary:hover { opacity: 0.88; }
-  .btn-ghost { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-  .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
-  .btn-danger { background: rgba(255,107,107,0.12); color: var(--accent3); border: 1px solid rgba(255,107,107,0.2); }
-
-  .form-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 22px 24px;
-    margin-bottom: 20px;
-  }
-  .form-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 18px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  /* ─── PROGRESS ─── */
-  .progress-wrap { background: var(--border); border-radius: 4px; overflow: hidden; height: 8px; }
-  .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
-
-  /* ─── SPRINT PLANNER ─── */
-  .sprint-grid {
-    display: grid;
-    grid-template-columns: 180px repeat(6, 1fr);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    background: var(--surface);
-  }
-  .sg-header {
-    background: var(--surface2);
-    padding: 10px 12px;
-    font-size: 10px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    border-right: 1px solid var(--border);
-    display: flex; align-items: center;
-  }
-  .sg-cell {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
-    border-right: 1px solid var(--border);
-    font-size: 12px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .sg-cell.name { justify-content: flex-start; font-weight: 500; }
-  .sg-cell:last-child { border-right: none; }
-  .sg-row:last-child .sg-cell { border-bottom: none; }
-
-  /* ─── UTILS ─── */
-  .flex { display: flex; }
-  .items-center { align-items: center; }
-  .gap-8 { gap: 8px; }
-  .gap-12 { gap: 12px; }
-  .mb-16 { margin-bottom: 16px; }
-  .ml-auto { margin-left: auto; }
-  .text-muted { color: var(--muted); }
-  .text-accent { color: var(--accent); }
-  .text-green { color: var(--accent2); }
-  .text-orange { color: var(--accent4); }
-  .text-red { color: var(--accent3); }
-  .fw-600 { font-weight: 600; }
-  .font-syne { font-family: 'Syne', sans-serif; }
-
-  /* ─── SCROLLBAR ─── */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-  
-  /* Table container scrollbar - slightly larger for better visibility */
-  .table-container::-webkit-scrollbar { height: 8px; }
-  .table-container::-webkit-scrollbar-track { background: var(--surface2); }
-  .table-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
-  .table-container::-webkit-scrollbar-thumb:hover { background: var(--accent2); }
-
-  /* ─── TOAST ─── */
-  #toast {
-    position: fixed; bottom: 24px; right: 24px;
-    background: var(--surface);
-    border: 1px solid var(--accent2);
-    color: var(--accent2);
-    padding: 12px 20px;
     border-radius: 8px;
-    font-size: 12px;
-    z-index: 999;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.25s;
-    pointer-events: none;
+    background: var(--surface2);
+    font-size: 11px;
   }
-  #toast.show { opacity: 1; transform: translateY(0); }
 
-  /* ─── ANIMATIONS ─── */
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .page.active { animation: fadeIn 0.25s ease; }
+  .summary-chip strong {
+    display: inline-flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
 
-  /* ─── PRINT STYLES ─── */
+  .report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
   @media print {
-    * { 
-      -webkit-print-color-adjust: exact !important; 
-      print-color-adjust: exact !important;
-    }
-    
-    /* Remove fixed heights so content can expand */
-    body, html {
-      height: auto !important;
-      overflow: visible !important;
-      background: white !important;
-      color: #000 !important;
-    }
-    
-    /* Page size and margins */
-    @page {
-      size: A4;
-      margin: 15mm 10mm 15mm 10mm; /* top right bottom left */
-    }
-    
-    /* Hide unnecessary elements */
-    header, nav, .btn, #toast, .flex.gap-8, .no-print { 
-      display: none !important; 
-    }
-    
-    /* Make containers auto-height and visible */
-    main, #page-dashboard, .dashboard-container, .main-content {
-      height: auto !important;
-      max-height: none !important;
-      overflow: visible !important;
-      padding: 20px !important;
-      width: 100% !important;
-    }
-    
-    /* Hide all pages except dashboard during print */
+    header, nav, .no-print, #toast, .modal { display: none !important; }
+    body { background: #fff !important; color: #000 !important; }
+    main { padding: 0 !important; overflow: visible !important; }
     .page { display: none !important; }
-    #page-dashboard { display: block !important; }
-    
-    /* Page styling for dashboard */
-    #page-dashboard .page-title {
-      text-align: center !important;
-      font-size: 24px !important;
-      color: #000 !important;
-      margin-bottom: 10px !important;
-    }
-    
-    #page-dashboard .page-sub {
-      text-align: center !important;
-      font-size: 14px !important;
-      color: #666 !important;
-      margin-bottom: 25px !important;
-      padding-bottom: 15px !important;
-      border-bottom: 2px solid #000 !important;
-    }
-    
-    /* Report card styling */
-    .form-card { 
-      border: none !important;
-      padding: 0 !important;
-      margin-bottom: 20px !important;
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-      background: white !important;
-      height: auto !important;
-      overflow: visible !important;
-    }
-    
-    .form-title { 
-      color: #000 !important; 
-      font-size: 20px !important;
-      font-weight: bold !important;
-      border-bottom: 3px solid #000 !important;
-      padding-bottom: 10px !important;
-      margin-bottom: 20px !important;
-      text-align: center !important;
-    }
-    
-    .section-title { 
-      color: #000 !important; 
-      font-weight: bold !important;
-      margin: 25px 0 12px 0 !important;
-      font-size: 14px !important;
-      text-transform: uppercase !important;
-      border-bottom: 2px solid #333 !important;
-      padding-bottom: 5px !important;
-      background: none !important;
-      page-break-after: avoid !important; /* Keep with next element */
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-    }
-    .section-title::after { display: none !important; }
-    .section-title:first-of-type { margin-top: 0 !important; }
-    .section-title + * { 
-      page-break-before: avoid !important;
-      break-before: avoid !important;
-    }
-    
-    /* Configuration grid */
-    .config-grid,
-    #report-preview > div[style*="display:grid"] {
-      display: grid !important;
-      background: white !important;
-      border: 1px solid #ccc !important;
-      padding: 15px !important;
-      margin-bottom: 20px !important;
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-      height: auto !important;
-      overflow: visible !important;
-    }
-    
-    .config-grid > div,
-    #report-preview > div[style*="display:grid"] > div {
-      color: #000 !important;
-      background: white !important;
-      padding: 8px !important;
-      line-height: 1.6 !important;
-      border-bottom: 1px dotted #ddd !important;
-    }
-    
-    #report-preview strong { 
-      color: #000 !important; 
-      font-weight: bold !important;
-    }
-    
-    /* Tables */
-    .table-container { 
-      border: 2px solid #000 !important;
-      margin-bottom: 20px !important;
-      page-break-inside: auto !important;
-      background: white !important;
-      overflow: visible !important;
-      height: auto !important;
-    }
-    
-    table { 
-      width: 100% !important; 
-      border-collapse: collapse !important;
-      background: white !important;
-      page-break-inside: auto !important;
-    }
-    
-    thead { 
-      display: table-header-group !important; /* Repeat header on each page */
-    }
-    
-    tfoot {
-      display: table-footer-group !important;
-    }
-    
-    tbody {
-      page-break-inside: auto !important;
-    }
-    
-    tr {
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-      page-break-after: auto !important;
-    }
-    
-    th { 
-      background: #e0e0e0 !important; 
-      color: #000 !important; 
-      border: 1px solid #000 !important;
-      padding: 8px !important;
-      font-weight: bold !important;
-      text-align: left !important;
-    }
-    
-    td { 
-      border: 1px solid #666 !important;
-      padding: 8px !important;
-      color: #000 !important;
-      background: white !important;
-    }
-    
-    tbody tr:nth-child(even) td {
-      background: #f9f9f9 !important;
-    }
-    
-    tfoot td {
-      background: #e0e0e0 !important;
-      font-weight: bold !important;
-      border: 2px solid #000 !important;
-      color: #000 !important;
-    }
-    
-    /* Stat cards */
-    .stat-card { 
-      border: 2px solid #333 !important; 
-      padding: 12px !important;
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-      background: white !important;
-      min-height: auto !important;
-      height: auto !important;
-    }
-    .stat-card::before { display: none !important; }
-    
-    .stat-label { 
-      color: #666 !important; 
-      font-weight: bold !important;
-      font-size: 10px !important;
-      text-transform: uppercase !important;
-      margin-bottom: 5px !important;
-    }
-    
-    .stat-value { 
-      color: #000 !important; 
-      font-size: 24px !important;
-      font-weight: bold !important;
-    }
-    
-    .stat-sub { 
-      color: #666 !important;
-      font-size: 10px !important;
-    }
-    
-    /* Badges */
-    .badge { 
-      border: 1px solid #000 !important;
-      padding: 3px 8px !important;
-      background: white !important;
-      color: #000 !important;
-      font-weight: bold !important;
-      display: inline-block !important;
-    }
-    
-    .badge-green { 
-      background: #e8f5e9 !important;
-      border-color: #2e7d32 !important;
-    }
-    
-    .badge-orange { 
-      background: #fff3e0 !important;
-      border-color: #f57c00 !important;
-    }
-    
-    .badge-blue { 
-      background: #e3f2fd !important;
-      border-color: #1976d2 !important;
-    }
-    
-    .badge-purple {
-      background: #f3e5f5 !important;
-      border-color: #7b1fa2 !important;
-    }
-    
-    /* Dashboard capacity cards */
-    .capacity-row {
-      display: grid !important;
-      grid-template-columns: repeat(3, 1fr) !important;
-      gap: 10px !important;
-      margin-bottom: 20px !important;
-      page-break-inside: auto !important;
-      height: auto !important;
-      overflow: visible !important;
-    }
-    
-    .cap-card {
-      border: 1px solid #333 !important;
-      padding: 10px !important;
-      background: white !important;
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-      height: auto !important;
-    }
-    
-    .cap-name {
-      font-weight: bold !important;
-      color: #000 !important;
-      margin-bottom: 5px !important;
-    }
-    
-    .cap-role {
-      font-size: 10px !important;
-      color: #666 !important;
-      margin-bottom: 8px !important;
-    }
-    
-    .cap-row {
-      display: flex !important;
-      justify-content: space-between !important;
-      font-size: 10px !important;
-      margin-bottom: 3px !important;
-      color: #000 !important;
-    }
-    
-    .cap-bar-wrap {
-      margin-top: 8px !important;
-      border: 1px solid #ccc !important;
-      height: 8px !important;
-      background: #f0f0f0 !important;
-    }
-    
-    .cap-fill {
-      background: #333 !important;
-      height: 100% !important;
-    }
-    
-    /* Dashboard stat grid */
-    .stat-grid {
-      display: grid !important;
-      grid-template-columns: repeat(4, 1fr) !important;
-      gap: 10px !important;
-      margin-bottom: 25px !important;
-      page-break-inside: auto !important;
-      height: auto !important;
-      overflow: visible !important;
-    }
-    
-    /* Dashboard section titles and content */
-    #page-dashboard .section {
-      page-break-inside: auto !important;
-      margin-bottom: 25px !important;
-      height: auto !important;
-      overflow: visible !important;
-    }
-    
-    #page-dashboard .section-title {
-      color: #000 !important;
-      font-weight: bold !important;
-      font-size: 14px !important;
-      text-transform: uppercase !important;
-      margin-top: 20px !important;
-      margin-bottom: 15px !important;
-      border-bottom: 2px solid #333 !important;
-      padding-bottom: 5px !important;
-      page-break-after: avoid !important; /* Keep title with content */
-      page-break-inside: avoid !important; /* Don't break the title itself */
-      break-inside: avoid !important;
-      break-after: avoid !important;
-    }
-    
-    /* Ensure first element after section title stays with it */
-    #page-dashboard .section-title + * {
-      page-break-before: avoid !important;
-      break-before: avoid !important;
-    }
-    
-    /* PF bar styling */
-    .pf-bar-wrap {
-      display: flex !important;
-      align-items: center !important;
-      gap: 8px !important;
-    }
-    
-    .pf-bar {
-      flex: 1 !important;
-      height: 12px !important;
-      border: 1px solid #ccc !important;
-      background: #f0f0f0 !important;
-    }
-    
-    .pf-fill {
-      background: #333 !important;
-      height: 100% !important;
-    }
-    
-    .pf-val {
-      font-size: 11px !important;
-      color: #000 !important;
-      font-weight: bold !important;
-    }
-    
-    /* Progress bars */
-    .progress-wrap { 
-      border: 1px solid #000 !important;
-      background: #f0f0f0 !important;
-      height: 20px !important;
-      border-radius: 0 !important;
-    }
-    
-    .progress-fill { 
-      background: #333 !important;
-      height: 100% !important;
-    }
-    
-    /* Text colors - ensure everything is readable */
-    .text-green, 
-    .text-accent, 
-    .text-muted,
-    [class*="text-"] { 
-      color: #000 !important; 
-    }
-    
-    /* Remove any dark backgrounds */
-    [style*="background"],
-    [style*="var(--surface)"],
-    [style*="var(--border)"] {
-      background: white !important;
-    }
-    
-    /* Page settings */
-    @page { 
-      margin: 1.5cm;
-      size: A4 portrait;
-    }
-    
-    /* Ensure divs with inline styles are visible */
-    div { 
-      color: #000 !important;
-    }
+    #report { display: block !important; }
+    #report .report-card,
+    #report .table-container { background: #fff !important; }
+    #report * { color: #000 !important; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="flex items-center gap-12">
-    <div class="logo">PI Capacity<span>.</span>Calculator</div>
-    <span class="pi-badge">PI-CY26-Q1</span>
-  </div>
+  <div class="logo">QORIX SPRINT CAPACITY CALCULATOR <span>⚡</span></div>
+  <span class="sprint-badge" id="sprint-badge">S-01</span>
   <div class="header-meta">
-    <button class="btn btn-danger" onclick="resetDashboard()" style="margin-right:12px;padding:6px 14px;font-size:12px;" title="Reset all data and start with empty template">
-      ⟲ Reset
-    </button>
-    <div class="status-pill" id="header-status"><span class="status-dot"></span> <span id="header-status-text">In-Review</span></div>
-    <div class="status-pill" id="clock" style="margin-left:8px;"></div>
+    <div class="status-pill">
+    <div class="header-actions">
+      <button class="secondary header-reset" onclick="resetConfiguration()">Reset</button>
+    </div>
+      <div class="status-dot"></div>
+      <span id="clock">00:00</span>
+    </div>
   </div>
 </header>
 
 <div class="shell">
-  <!-- ─── SIDEBAR ─── -->
   <nav>
-    <div class="nav-section">Overview</div>
+    <div class="nav-section">Menu</div>
     <div class="nav-item active" onclick="navigate('dashboard')">
-      <span class="nav-icon">◈</span> Dashboard
+      <span class="nav-icon">📊</span>
+      Dashboard
     </div>
-
-    <div class="nav-section">Planning</div>
-    <div class="nav-item" onclick="navigate('kyt')">
-      <span class="nav-icon">◉</span> KYT
+    <div class="nav-item" onclick="navigate('config')">
+      <span class="nav-icon">⚙️</span>
+      Configuration
     </div>
     <div class="nav-item" onclick="navigate('capacity')">
-      <span class="nav-icon">▦</span> Capacity
+      <span class="nav-icon">👥</span>
+      Team Capacity
     </div>
-
-    <div class="nav-section">Process</div>
-    <div class="nav-item" onclick="navigate('checklist')">
-      <span class="nav-icon">✓</span> Checklist
-    </div>
-    <div class="nav-item" onclick="navigate('guidelines')">
-      <span class="nav-icon">≡</span> Guidelines
-    </div>
-
-    <div class="nav-section">Config</div>
-    <div class="nav-item" onclick="navigate('config')">
-      <span class="nav-icon">⚙</span> Configuration
+    <div class="nav-section">Tools</div>
+    <div class="nav-item" onclick="exportData()">
+      <span class="nav-icon">💾</span>
+      Export CSV
     </div>
     <div class="nav-item" onclick="navigate('report')">
-      <span class="nav-icon">⬇</span> Export Report
+      <span class="nav-icon">🖨️</span>
+      Export PDF
+    </div>
+    <div class="nav-item" onclick="importData()">
+      <span class="nav-icon">📤</span>
+      Import CSV
     </div>
   </nav>
 
-  <!-- ─── MAIN CONTENT ─── -->
   <main>
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="dashboard">
+      <div class="page-title">Sprint Capacity Calculator</div>
+      <div class="page-sub">Real-time capacity and utilization overview</div>
 
-    <!-- ══════════════ DASHBOARD ══════════════ -->
-    <div class="page active" id="page-dashboard">
-      <div class="page-title">PI Plan Overview</div>
-      <div class="page-sub" id="dashboard-subtitle">Program Increment · PI-YYYY-QX · Project Name</div>
-
-      <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
-        <div class="stat-card" style="--accent-color: var(--accent);">
-          <div class="stat-label">Team Size</div>
-          <div class="stat-value" id="stat-members">6</div>
-          <div class="stat-sub">Active members</div>
-        </div>
-        <div class="stat-card" style="--accent-color: var(--accent2);">
-          <div class="stat-label">Net Capacity</div>
-          <div class="stat-value" id="stat-cap">0</div>
-          <div class="stat-sub">Total days available</div>
-        </div>
-        <div class="stat-card" style="--accent-color: var(--accent);">
-          <div class="stat-label">Feature Dev</div>
-          <div class="stat-value" id="stat-featuredev">0</div>
-          <div class="stat-sub">Days allocated</div>
-        </div>
-        <div class="stat-card" style="--accent-color: var(--accent4);">
-          <div class="stat-label">Bug Fix</div>
-          <div class="stat-value" id="stat-bugfix">0</div>
-          <div class="stat-sub">Days allocated</div>
-        </div>
-        <div class="stat-card" style="--accent-color: var(--accent3);">
-          <div class="stat-label">Unplanned</div>
-          <div class="stat-value" id="stat-unplanned">0</div>
-          <div class="stat-sub">Days allocated</div>
-        </div>
-      </div>
-
-      <!-- Capacity by member -->
       <div class="section">
-        <div class="section-title">Capacity Distribution</div>
-        <div class="capacity-row" id="cap-cards"></div>
+        <div class="section-title">Sprint Details Overview</div>
+        <div class="stat-grid" id="dashboard-meta">
+          <div class="stat-card" style="--accent-color: var(--accent2)">
+            <div class="stat-label">Program / Project</div>
+            <div class="stat-value" id="dash-project">—</div>
+            <div class="stat-sub">Required field</div>
+          </div>
+          <div class="stat-card" style="--accent-color: var(--accent)">
+            <div class="stat-label">Team / Module</div>
+            <div class="stat-value" id="dash-module">—</div>
+            <div class="stat-sub">Required field</div>
+          </div>
+          <div class="stat-card" style="--accent-color: var(--accent4)">
+            <div class="stat-label">Sprint Number / Sprint Name</div>
+            <div class="stat-value" id="dash-sprint-info">—</div>
+            <div class="stat-sub">Required field</div>
+          </div>
+        </div>
       </div>
 
-      <!-- Sprint utilization -->
+      <div class="stat-grid" id="dashboard-stats">
+        <div class="stat-card" style="--accent-color: var(--accent2)">
+          <div class="stat-label">Total Team Members</div>
+          <div class="stat-value" id="stat-members">0</div>
+          <div class="stat-sub">Active resources</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--accent)">
+          <div class="stat-label">Total Capacity (Days)</div>
+          <div class="stat-value" id="stat-total-days">0.0</div>
+          <div class="stat-sub">Available work days</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--accent)">
+          <div class="stat-label">Total Capacity (Hours)</div>
+          <div class="stat-value" id="stat-total-hours">0.0</div>
+          <div class="stat-sub">Hours available</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--accent4)">
+          <div class="stat-label">Avg Daily Capacity</div>
+          <div class="stat-value" id="stat-avg-daily">0.0</div>
+          <div class="stat-sub">Hours per day</div>
+        </div>
+        <div class="stat-card" style="--accent-color: var(--accent2)">
+          <div class="stat-label">Productivity Factor</div>
+          <div class="stat-value" id="stat-productivity">0.0%</div>
+          <div class="stat-sub">Productive hours / total available hours</div>
+        </div>
+      </div>
+
       <div class="section">
-        <div class="section-title">Team Summary</div>
+        <div class="section-title">Team Utilization</div>
         <div class="table-container">
-          <table>
-            <thead>
-              <tr><th>Name</th><th>Grade</th><th>Role</th><th>Module</th><th>Avg PF</th></tr>
-            </thead>
-            <tbody id="kyt-summary-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════════ KYT ══════════════ -->
-    <div class="page" id="page-kyt">
-      <div class="page-title">Know Your Team</div>
-      <div class="page-sub">Member profiles, experience & productivity factor planning per sprint</div>
-
-      <div class="form-card mb-16">
-        <div class="form-title" id="kyt-form-title">Add Team Member</div>
-        <input type="hidden" id="kyt-edit-index" value="-1">
-        <div class="form-grid">
-          <div><label>Name</label><input type="text" id="kyt-name"></div>
-          <div><label>Grade</label>
-            <select id="kyt-grade">
-              <option>Intern</option><option>A</option><option>B</option><option selected>C</option><option>D</option><option>E</option><option>F</option><option>G</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-grid">
-          <div><label>Role</label>
-            <select id="kyt-role">
-              <option>Architect</option><option>Tech Lead</option><option selected>Developer</option><option>Tester</option>
-            </select>
-          </div>
-          <div><label>Overall Experience</label>
-            <select id="kyt-exp">
-              <option>Low > 1 to 3 yrs</option><option selected>Medium > 3 to 5 yrs</option><option>High > 5+ yrs</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-grid">
-          <div style="grid-column: span 2;"><label>Technologies & Experience (e.g., "C++: 5yrs, Python: 3yrs, AUTOSAR: 2yrs")</label><input type="text" id="kyt-tech" placeholder="Technology: Years, Technology: Years..."></div>
-        </div>
-        <div class="form-grid" style="grid-template-columns: repeat(4, 1fr);">
-          <div><label>Safety Certified</label><select id="kyt-safety"><option selected>No</option><option>Yes</option></select></div>
-          <div><label>Cybersec Trained</label><select id="kyt-cybersec"><option selected>No</option><option>Yes</option></select></div>
-          <div><label>Project Training Done?</label><select id="kyt-training"><option>No</option><option selected>Yes</option></select></div>
-          <div><label>Delivered Code</label><select id="kyt-delivered"><option>No</option><option selected>Yes</option></select></div>
-        </div>
-        <div class="form-grid">
-          <div><label>% Allocation (1.0 = 100%, 0.5 = 50%)</label><input type="number" step="0.01" min="0" max="1" id="kyt-module" value="1"></div>
-        </div>
-        <div class="form-grid" style="grid-template-columns:repeat(6,1fr);">
-          <div><label>S1 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s1" value="0.95"></div>
-          <div><label>S2 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s2" value="0.95"></div>
-          <div><label>S3 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s3" value="0.95"></div>
-          <div><label>S4 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s4" value="0.95"></div>
-          <div><label>S5 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s5" value="0.95"></div>
-          <div><label>S6 PF</label><input type="number" step="0.01" min="0" max="1" id="kyt-s6" value="0.95"></div>
-        </div>
-        <button class="btn btn-primary" id="kyt-submit-btn" onclick="saveMember()">+ Add Member</button>
-        <button class="btn btn-ghost" id="kyt-cancel-btn" onclick="cancelEdit()" style="display:none;margin-left:8px;">Cancel</button>
-      </div>
-
-      <div class="section-title">Team Members (<span id="kyt-count">0</span>)</div>
-      <div class="member-grid" id="kyt-members-grid"></div>
-    </div>
-
-    <!-- ══════════════ CAPACITY ══════════════ -->
-    <div class="page" id="page-capacity">
-      <div class="page-title">PI Capacity Dashboard</div>
-      <div class="page-sub">Comprehensive capacity calculation with all team members</div>
-
-      <!-- Capacity Summary Cards -->
-      <div class="stat-grid" style="margin-bottom:28px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
-        <div class="stat-card" style="--accent-color:var(--accent2);">
-          <div class="stat-label">Total Net Capacity</div>
-          <div class="stat-value" id="cap-total-net">0</div>
-          <div class="stat-sub">Days</div>
-        </div>
-        <div class="stat-card" style="--accent-color:var(--accent);">
-          <div class="stat-label">Feature Development</div>
-          <div class="stat-value" id="cap-feature-days">0</div>
-          <div class="stat-sub" id="cap-feature-pct">95% of capacity</div>
-        </div>
-        <div class="stat-card" style="--accent-color:var(--accent4);">
-          <div class="stat-label">Bug Fixing</div>
-          <div class="stat-value" id="cap-bug-days">0</div>
-          <div class="stat-sub" id="cap-bug-pct">5% of capacity</div>
-        </div>
-        <div class="stat-card" style="--accent-color:var(--accent3);">
-          <div class="stat-label">Unplanned Activity</div>
-          <div class="stat-value" id="cap-unplanned-days">0</div>
-          <div class="stat-sub" id="cap-unplanned-pct">0% of capacity</div>
-        </div>
-        <div class="stat-card" style="--accent-color:var(--danger);">
-          <div class="stat-label">Capacity Utilization</div>
-          <div class="stat-value" id="cap-util-pct">0%</div>
-          <div class="stat-sub">Gross vs Net</div>
-        </div>
-      </div>
-
-      <!-- Main Capacity Table (Horizontal Layout) -->
-      <div class="section-title">Capacity Calculation Matrix</div>
-      <div class="table-container">
-        <table id="cap-matrix-table" style="font-size:11px;">
-          <thead>
-            <tr>
-              <th style="min-width:200px;">Parameter</th>
-              <!-- Team member columns will be added dynamically -->
-            </tr>
-          </thead>
-          <tbody id="cap-matrix-tbody">
-            <!-- Rows will be added dynamically -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Training Breakdown -->
-      <div class="section" style="margin-top:28px;">
-        <div class="section-title">Training Days Breakdown <span style="font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;">(Click cells to edit)</span></div>
-        <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-          <input type="text" id="new-training-type-input" placeholder="Enter new training type name (e.g., CLI Training, Certification...)" style="flex:1;max-width:400px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:inherit;" onkeydown="if(event.key==='Enter') addTrainingTypeFromInput()">
-          <button class="btn btn-primary" onclick="addTrainingTypeFromInput()" style="font-size:11px;padding:8px 16px;">➕ Add Training Type</button>
-        </div>
-        <div class="table-container">
-          <table id="cap-training-table" style="font-size:11px;">
+          <table id="utilization-table">
             <thead>
               <tr>
-                <th style="min-width:200px;">Training Type</th>
-                <!-- Team member columns will be added dynamically -->
+                <th>Team Member</th>
+                <th>Role</th>
+                <th>Working Days</th>
+                <th>Capacity (Days)</th>
+                <th>Capacity (Hours)</th>
+                <th>Utilization</th>
               </tr>
             </thead>
-            <tbody id="cap-training-tbody">
-              <!-- Rows will be added dynamically -->
+            <tbody id="utilization-tbody">
             </tbody>
           </table>
         </div>
       </div>
-
-      <!-- Edit Capacity Form (Collapsible) -->
-      <div class="section" style="margin-top:28px;">
-        <div class="section-title" style="cursor:pointer;" onclick="toggleCapForm()">
-          📝 Edit Individual Capacity <span id="cap-form-toggle">(Click to expand)</span>
-        </div>
-        <div id="cap-edit-form" style="display:none;">
-          <div class="form-card">
-            <div class="form-title">Capacity Configuration</div>
-            <div style="margin-bottom:14px;">
-              <label>Select Member</label>
-              <select id="cap-member-select" onchange="switchCapMember()"></select>
-            </div>
-            <div class="form-grid-3 form-grid">
-              <div><label>Weeks in PI <small style="opacity:0.6;">(auto, from Sprint PF)</small></label><input type="number" min="0" id="cap-weeks" readonly disabled style="opacity:0.6;cursor:not-allowed;"></div>
-              <div><label>Saturdays</label><input type="number" min="0" id="cap-sat"></div>
-              <div><label>Holidays</label><input type="number" min="0" id="cap-holidays"></div>
-            </div>
-            <div class="form-grid-3 form-grid">
-              <div><label>Leaves</label><input type="number" min="0" step="0.01" id="cap-leaves"></div>
-              <div><label>Misc Days</label><input type="number" min="0" step="0.01" id="cap-misc"></div>
-              <div><label>% Allocation (1.0 = 100%)</label><input type="number" step="0.01" min="0" max="1" id="cap-alloc"></div>
-            </div>
-            <div class="form-title" style="margin-top:16px;font-size:12px;">Training Days</div>
-            <div class="form-grid" id="cap-training-fields">
-              <!-- Training fields will be added dynamically -->
-            </div>
-            <button class="btn btn-primary" onclick="saveCapacity()">Save Capacity</button>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <!-- ══════════════ CHECKLIST ══════════════ -->
-    <div class="page" id="page-checklist">
-      <div class="page-title">Review Checklist</div>
-      <div class="page-sub">Verify all quality gates before PI Plan submission</div>
+    <!-- CONFIGURATION PAGE -->
+    <div class="page" id="config">
+      <div class="page-title">Sprint Configuration</div>
+      <div class="page-sub">Set up sprint details and team information</div>
 
-      <div class="stat-grid" style="max-width:400px;margin-bottom:24px;">
-        <div class="stat-card" style="--accent-color:var(--accent2);">
-          <div class="stat-label">Completed</div>
-          <div class="stat-value" id="chk-done">0</div>
-          <div class="stat-sub" id="chk-sub">of 25 items</div>
-        </div>
-        <div class="stat-card" style="--accent-color:var(--accent);">
-          <div class="stat-label">Progress</div>
-          <div class="stat-value" id="chk-pct">0%</div>
-          <div class="stat-sub">
-            <div class="progress-wrap" style="margin-top:8px;">
-              <div class="progress-fill" id="chk-bar" style="width:0%;"></div>
-            </div>
-          </div>
-        </div>
+      <div class="info-box">
+        💡 Configure your sprint parameters and team details here. Changes are saved automatically.
       </div>
 
-      <div class="table-container" id="chk-container"></div>
-    </div>
-
-    <!-- ══════════════ GUIDELINES ══════════════ -->
-    <div class="page" id="page-guidelines">
-      <div class="page-title">Productivity Guidelines</div>
-      <div class="page-sub">Reference: suggested productivity factors per scenario</div>
-      <div class="table-container">
-        <table>
-          <thead><tr><th>Scenario</th><th>PF</th><th>Notes</th></tr></thead>
-          <tbody id="guide-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ══════════════ CONFIG ══════════════ -->
-    <div class="page" id="page-config">
-      <div class="page-title">Configuration</div>
-      <div class="page-sub">PI metadata, document details & project settings</div>
-
-      <div class="form-card">
-        <div class="form-title">PI Configuration</div>
-        <div class="form-grid">
-          <div><label>PI Name</label><input type="text" id="cfg-pi" value="PI-CY26-Q1"></div>
-          <div><label>Project</label><input type="text" id="cfg-project" value="Project Name"></div>
-        </div>
-        <div class="form-grid">
-          <div><label>Module/Team Name</label><input type="text" id="cfg-module"></div>
-          <div><label>Config ID</label><input type="text" id="cfg-configid"></div>
-        </div>
-        <div class="form-grid">
-          <div><label>Version</label><input type="text" id="cfg-version" value="1.0.0"></div>
-          <div><label>Date</label><input type="date" id="cfg-date"></div>
-        </div>
-        <div class="form-grid">
-          <div><label>Status</label>
-            <select id="cfg-status" onchange="updateStatusRealtime()">
-              <option>Draft</option><option>In-Review</option><option>Approved</option><option>Active</option>
-            </select>
-          </div>
-          <div><label>PPM</label><input type="text" id="cfg-ppm"></div>
-        </div>
-        <div class="form-grid">
-          <div><label>PO</label><input type="text" id="cfg-po"></div>
-          <div><label>Scrum Master</label><input type="text" id="cfg-sm"></div>
-        </div>
-        <div class="form-grid">
-          <div><label>Author</label><input type="text" id="cfg-author"></div>
-          <div><label>Sprints</label><input type="number" min="1" max="10" id="cfg-sprints" value="6"></div>
-        </div>
-        <div class="form-title" style="margin-top:16px;font-size:13px;">Capacity Distribution (%)</div>
-        <div class="form-grid-3 form-grid">
-          <div><label>Feature Development %</label><input type="number" min="0" max="100" step="0.1" id="cfg-featsplit" value="95" oninput="validateCapacityPercentages()" onchange="validateCapacityPercentages()"></div>
-          <div><label>Bug Fixing %</label><input type="number" min="0" max="100" step="0.1" id="cfg-bugsplit" value="5" oninput="validateCapacityPercentages()" onchange="validateCapacityPercentages()"></div>
-          <div><label>Unplanned Activity %</label><input type="number" min="0" max="100" step="0.1" id="cfg-unplannedsplit" value="0" oninput="validateCapacityPercentages()" onchange="validateCapacityPercentages()"></div>
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-bottom:12px;">Note: Total should equal 100%. Unplanned includes regression testing, re-testing bugs, impediments, etc.</div>
-        <button class="btn btn-primary" onclick="saveConfig()">Save Configuration</button>
-      </div>
-    </div>
-
-    <!-- ══════════════ REPORT ══════════════ -->
-    <div class="page" id="page-report">
-      <div class="page-title">Export Report</div>
-      <div class="page-sub">Generate a PI plan summary for distribution</div>
-
-      <div class="form-card" id="report-preview">
-        <div class="form-title">Loading report...</div>
-      </div>
-      
-      <!-- Backup & Restore Section -->
-      <div class="section" style="margin-top:24px;">
-        <div class="section-title">Backup & Restore</div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:18px;">
-          <div style="margin-bottom:16px;">
-            <label style="display:block;margin-bottom:8px;font-size:12px;color:var(--text);">Upload Complete Backup (CSV)</label>
-            <input type="file" id="csv-upload" accept=".csv" style="display:none;" onchange="uploadCSV(event)">
-            <button class="btn btn-primary" onclick="document.getElementById('csv-upload').click()">📤 Upload CSV Backup</button>
-            <span style="margin-left:12px;font-size:11px;color:var(--muted);">Upload a previously saved backup to restore all data</span>
-          </div>
-          <div>
-            <button class="btn btn-primary" onclick="downloadCompleteCSV()">💾 Download Complete Backup (CSV)</button>
-            <span style="margin-left:12px;font-size:11px;color:var(--muted);">Save all dashboard data for backup or editing in Excel</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Export Options -->
       <div class="section">
-        <div class="section-title">Export Options</div>
-      </div>
-      <div class="flex gap-8" style="flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="downloadData()">📥 Download Data (JSON)</button>
-        <button class="btn btn-primary" onclick="downloadCSV()">📊 Export Capacity Matrix (CSV)</button>
-        <button class="btn btn-primary" onclick="printReport()" title="Opens print dialog - select 'Save as PDF' as destination">🖨️ Print Dashboard to PDF</button>
-        <button class="btn btn-ghost" onclick="copyReport()">📋 Copy to Clipboard</button>
-      </div>
-      <div style="margin-top:12px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;">
-        <div style="font-size:11px;color:var(--muted);line-height:1.6;">
-          <strong style="color:var(--text);">💡 How to export PDF:</strong> Click "Print Dashboard to PDF" button above. In the print dialog that opens, select 
-          <strong style="color:var(--text);">"Save as PDF"</strong> or <strong style="color:var(--text);">"Microsoft Print to PDF"</strong> as the destination/printer, 
-          then click Save to download your PDF file.
+        <div class="section-title">Sprint Details</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Program / Project Name</label>
+            <input type="text" id="config-project-name" placeholder="Enter program or project name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Team / Module Name</label>
+            <input type="text" id="config-module-name" placeholder="Enter team or module name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sprint Number / Sprint Name</label>
+            <input type="text" id="config-sprint-info" placeholder="e.g., S-01 / Sprint 1" value="S-01 / Sprint 1" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Start Date</label>
+            <input type="date" id="config-start-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Date</label>
+            <input type="date" id="config-end-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Working Days in Sprint</label>
+            <input type="number" id="config-working-days" min="1" max="30" value="10" step="0.5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hours per Day</label>
+            <input type="number" id="config-hours-per-day" min="1" max="12" value="8.5" step="0.5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Scrum Master</label>
+            <input type="text" id="config-sm" placeholder="Name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Product Owner</label>
+            <input type="text" id="config-po" placeholder="Name">
+          </div>
         </div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">
+        <button onclick="saveConfig()">Save Configuration</button>
+        <button class="secondary" onclick="resetConfiguration()">Reset</button>
       </div>
     </div>
 
+    <!-- CAPACITY PAGE -->
+    <div class="page" id="capacity">
+      <div class="page-title">Team Capacity Analysis</div>
+      <div class="page-sub">Detailed capacity breakdown and availability metrics</div>
+
+      <div class="section">
+        <div class="section-title">Team Setup</div>
+        <div class="table-container mt-20" id="team-planner-container"></div>
+        <button onclick="addTeamMember()" class="mt-20">+ Add Team Member</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Capacity Details by Team Member</div>
+        <div class="table-container">
+          <table id="capacity-table">
+            <thead>
+              <tr>
+                <th>Actions</th>
+                <th>Team Member</th>
+                <th>Role</th>
+                <th>Allocation %</th>
+                <th>Sprint Working Days</th>
+                <th>Misc</th>
+                <th>Training</th>
+                <th>Holidays</th>
+                <th>Leaves</th>
+                <th>Available Days</th>
+                <th>Available Hours</th>
+                <th>Hours/Day</th>
+              </tr>
+            </thead>
+            <tbody id="capacity-tbody">
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="9" class="total-row-label"><strong>TOTAL</strong><span>Capacity summary</span></td>
+                <td id="total-available-days"><div class="total-metric"><span>Available Days</span><strong>0.0</strong></div></td>
+                <td id="total-available-hours"><div class="total-metric"><span>Available Hours</span><strong>0.0</strong></div></td>
+                <td class="text-muted" style="text-align:center;">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Capacity Visualization</div>
+        <div id="capacity-viz"></div>
+      </div>
+    </div>
+
+    <!-- REPORT PAGE -->
+    <div class="page" id="report">
+      <div class="page-title">Export Report</div>
+      <div class="page-sub">Print a clean PDF view of dashboard data, capacity details, and capacity visualization</div>
+
+      <div class="report-meta-bar" id="report-meta-bar"></div>
+
+      <div class="section">
+          <div class="section-title">Dashboard Data</div>
+          <div class="stat-grid" id="report-dashboard-stats"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Capacity Details by Team Member</div>
+          <div class="table-container" id="report-capacity-table"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Capacity Visualization</div>
+          <div id="report-capacity-viz"></div>
+      </div>
+
+      <div class="report-actions no-print">
+        <button onclick="printReport()">🖨️ Print / Save as PDF</button>
+        <button class="secondary" onclick="exportData()">💾 Export CSV</button>
+      </div>
+    </div>
   </main>
 </div>
 
-<div id="toast"></div>
+<!-- Add Team Member Modal -->
+<div class="modal" id="member-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="member-modal-title">Add Team Member</div>
+      <button class="close-btn" onclick="closeMemberModal()">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input type="text" id="member-name" placeholder="Full name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Role</label>
+      <select id="member-role">
+        <option value="Developer">Developer</option>
+        <option value="Tech Lead">Tech Lead</option>
+        <option value="Architect">Architect</option>
+        <option value="QA">QA</option>
+        <option value="DevOps">DevOps</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Allocation %</label>
+      <input type="number" id="member-allocation" min="0" max="100" value="100" step="5">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Productivity Factor (0 - 0.95)</label>
+      <input type="number" id="member-productivity" min="0" max="0.95" value="0.95" step="0.05">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Miscellaneous Activities (Days)</label>
+      <input type="number" id="member-misc" min="0" max="30" value="0" step="0.5">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Training Activities (Days)</label>
+      <input type="number" id="member-training" min="0" max="30" value="0" step="0.5">
+    </div>
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button onclick="saveTeamMember()" id="member-save-btn">Save</button>
+      <button class="secondary" onclick="closeMemberModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal" id="import-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">Import CSV Data</div>
+      <button class="close-btn" onclick="closeImportModal()">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Select CSV File</label>
+      <input type="file" id="import-file" accept=".csv">
+    </div>
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button onclick="processImport()">Import</button>
+      <button class="secondary" onclick="closeImportModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<input type="file" id="csv-import" style="display:none;" accept=".csv">
 
 <script>
 // ════════════════════════════════════════════
-//  STATE & LOCAL STORAGE
+// STATE MANAGEMENT
 // ════════════════════════════════════════════
-let state = {
+const state = {
   config: {
-    pi: 'PI-YYYY-QX',
-    project: 'Project Name',
-    module: '',
-    configId: '',
-    version: '1.0.0',
-    date: '',
-    status: 'Draft',
-    ppm: '',
-    po: '',
+    projectName: '',
+    moduleName: '',
+    sprintInfo: 'S-01 / Sprint 1',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    workingDays: 10,
+    hoursPerDay: 8.5,
     sm: '',
-    author: '',
-    featSplit: 95,
-    bugSplit: 5,
-    unplannedSplit: 0,
-    sprints: 6
+    po: ''
   },
-  members: [],
-  capacity: {},
-  trainingTypes: [
-    { id: 'prepi', name: 'Pre-PI', editable: false },
-    { id: 'allhands', name: 'All Hands', editable: false },
-    { id: 'competency', name: 'Competency', editable: false },
-    { id: 'gnc', name: 'GNC', editable: false },
-    { id: 'others', name: 'Others', editable: false }
-  ],
-  features: [],
-  userStories: [],
-  checklist: Array(22).fill(null).map(() => ({ checked: false, comment: '' }))
+  members: []
 };
 
-// Load from localStorage if available
-function loadState() {
-  // Clear any previously saved data to start fresh
-  localStorage.removeItem('piPlanState');
-  toast('Dashboard initialized with empty template');
-}
+let editingMemberIndex = null;
 
-// Reset dashboard to empty template
-function resetDashboard() {
-  const confirmed = confirm(
-    '⚠️ WARNING: This will delete ALL data!\n\n' +
-    'This action will:\n' +
-    '• Remove all team members\n' +
-    '• Clear all capacity data\n' +
-    '• Reset configuration to defaults\n' +
-    '• Clear all checklists\n' +
-    '• Delete saved data from browser storage\n\n' +
-    'This cannot be undone. Continue?'
-  );
-  
-  if (!confirmed) {
-    toast('Reset cancelled');
-    return;
-  }
-  
-  // Create empty state template
-  state = {
-    config: {
-      pi: 'PI-YYYY-QX',
-      project: 'Project Name',
-      module: '',
-      configId: '',
-      version: '1.0.0',
-      date: '',
-      status: 'Draft',
-      ppm: '',
-      po: '',
-      sm: '',
-      author: '',
-      featSplit: 95,
-      bugSplit: 5,
-      unplannedSplit: 0,
-      sprints: 6
-    },
-    members: [],
-    capacity: {},
-    trainingTypes: [
-      { id: 'prepi', name: 'Pre-PI', editable: false },
-      { id: 'allhands', name: 'All Hands', editable: false },
-      { id: 'competency', name: 'Competency', editable: false },
-      { id: 'gnc', name: 'GNC', editable: false },
-      { id: 'others', name: 'Others', editable: false }
-    ],
-    features: [],
-    userStories: [],
-    checklist: Array(22).fill(null).map(() => ({ checked: false, comment: '' }))
-  };
-  
-  // Clear localStorage
-  localStorage.removeItem('piPlanState');
-  
-  // Update UI
-  document.querySelector('.pi-badge').textContent = state.config.pi;
+// ════════════════════════════════════════════
+// INITIALIZATION
+// ════════════════════════════════════════════
+function init() {
+  loadState();
   renderConfig();
   renderDashboard();
-  renderKYT();
-  renderCapacity();
+  updateClock();
+  setInterval(updateClock, 1000);
   
-  // Navigate to configuration tab to start setup
-  navigate('config');
-  
-  toast('✓ Dashboard reset! Start by configuring PI details.');
+  // Set default dates
+  const today = new Date().toISOString().split('T')[0];
+  const twoWeeksLater = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  document.getElementById('config-start-date').value = today;
+  document.getElementById('config-end-date').value = twoWeeksLater;
 }
 
-// Save to localStorage
+// ════════════════════════════════════════════
+// LOCAL STORAGE
+// ════════════════════════════════════════════
 function saveState() {
-  localStorage.setItem('piPlanState', JSON.stringify(state));
+  localStorage.setItem('sprintCapacityState', JSON.stringify(state));
 }
 
-// Auto-save on any change
-function autoSave() {
-  saveState();
+function normalizeMember(member) {
+  let productivityFactor = Number.isFinite(parseFloat(member.productivityFactor)) ? parseFloat(member.productivityFactor) : 0.95;
+  if (productivityFactor > 1) productivityFactor /= 100; // migrate legacy percentage values (0-95) to decimal (0-0.95)
+  return {
+    name: member.name || '',
+    role: member.role || 'Developer',
+    allocation: Number.isFinite(parseFloat(member.allocation)) ? parseFloat(member.allocation) : 100,
+    productivityFactor: Math.min(Math.max(productivityFactor, 0), 0.95),
+    holidays: Number.isFinite(parseFloat(member.holidays)) ? parseFloat(member.holidays) : 0,
+    leaves: Number.isFinite(parseFloat(member.leaves)) ? parseFloat(member.leaves) : 0,
+    saturdays: Number.isFinite(parseFloat(member.saturdays)) ? parseFloat(member.saturdays) : 0,
+    training: Number.isFinite(parseFloat(member.training)) ? parseFloat(member.training) : 0,
+    misc: Number.isFinite(parseFloat(member.misc)) ? parseFloat(member.misc) : 0,
+    dayPlan: member.dayPlan || {}
+  };
 }
 
-const guidelines = [
-  ['First 2 sprints fresh engineer (A grade)','0','Training only'],
-  ['3rd sprint fresh engineer','0.25',''],
-  ['4th sprint fresh engineer','0.35',''],
-  ['5th sprint fresh engineer','0.5',''],
-  ['6th sprint fresh engineer','0.6',''],
-  ['7th sprint fresh engineer','0.75',''],
-  ['8th sprint onwards','0.75–0.95',''],
-  ['1st sprint new joiner B grade (C++)','0',''],
-  ['2nd sprint new joiner B grade (C++)','0.2',''],
-  ['3rd sprint new joiner B grade (C++)','0.4',''],
-  ['4th sprint new joiner B grade (C++)','0.6',''],
-  ['5th sprint new joiner B grade (C++)','0.75–0.95',''],
-  ['1st sprint new joiner C grade (C++)','0',''],
-  ['2nd sprint new joiner C grade (C++)','0.25',''],
-  ['3rd sprint new joiner C grade (C++)','0.5',''],
-  ['4th sprint new joiner C grade (C++)','0.75',''],
-  ['5th sprint new joiner C grade (C++)','0.95',''],
-  ['Tech lead managing 1 member','0.1 reduction','10% on mentoring'],
-  ['Tech lead managing 2 members','0.2 reduction','20% on mentoring'],
-  ['Tech lead managing 3 members','0.3 reduction',''],
-  ['Tech lead managing 4 members','0.4 reduction',''],
-  ['Architect managing 1 module','0.8',''],
-  ['Architect managing 2 modules','0.6 per module',''],
-  ['Architect managing 3 modules','0.45 per module',''],
-  ['Max for developer role','0.95',''],
-];
-
-const checklistItems = [
-  ['General','Verify formatting. Correct formatting on all tabs as per template.'],
-  ['KYT','Ensure productivity factor is planned as "T" (Training) for new joiners.'],
-  ['KYT','Ensure productivity factor is planned for available sprints for SNP/PIP candidates.'],
-  ['KYT','Verify productivity factor and module allocation for POs and shared resources.'],
-  ['PI Capacity','Ensure leaves are considered only after individual discussion.'],
-  ['PI Capacity','CLI training not to be planned for first PI unless module lacks trained personnel.'],
-  ['PI Capacity','Verify split between Feature Development and Regression Bug Fixing is correct.'],
-  ['PI Feature','Verify Customer inputs are considered in planning.'],
-  ['PI Feature','Verify internally identified features are planned per "Internal PI Planning Inputs".'],
-  ['PI Feature','Verify spillover Features/Bugs/US from previous PI are marked in Light Blue.'],
-  ['PI Feature','Verify bugs from Features/US do not have estimation against actual bug.'],
-  ['PI Feature','Verify ordering of Features is maintained per execution priority.'],
-  ['PI Feature','Commitment on external dependencies documented with sprint number.'],
-  ['PI Feature','Verify Feature naming convention is per guideline.'],
-  ['PI Feature','Required Capacity ≤ Capacity available; otherwise mark feature as Tentative.'],
-  ['PI Feature','Ensure Unplanned topics from "Internal PI Planning Inputs" are listed.'],
-  ['PI US','Verify ordering of US per execution priority of features.'],
-  ['PI US','Verify US naming convention is per guideline.'],
-  ['PI US','Check US are planned based on required RA/Design/Review capacity.'],
-  ['Jira','Bugs resolved with Feature/US implementation are linked with "follows" relation.'],
-  ['Jira','Verify features/Bugs/US planned in PI plan are correctly imported in Jira.'],
-  ['Jira','Verify planning status in Jira matches PI Planning sheet (Confirmed/Tentative/Planned Later tags).'],
-];
-
-// ════════════════════════════════════════════
-//  CAPACITY HELPERS
-// ════════════════════════════════════════════
-function calcAvgPF(m) {
-  // Only count sprints where PF > 0 (person is available)
-  const nonZeroSprints = m.s.filter(pf => pf > 0);
-  if (nonZeroSprints.length === 0) return '0.00';
-  const sum = nonZeroSprints.reduce((a,b)=>a+b,0);
-  return (sum / nonZeroSprints.length).toFixed(2);
-}
-
-function calcWeeksFromSprints(m) {
-  // Weeks in PI = (count of non-zero Sprint PF values) * 2
-  if (!m || !Array.isArray(m.s)) return 0;
-  const nonZeroCount = m.s.filter(pf => pf > 0).length;
-  return nonZeroCount * 2;
-}
-
-function calcCapacity(name) {
-  const c = state.capacity[name] || {};
-  const m = state.members.find(x=>x.name===name);
-  if (!m) return {};
-  
-  // Ensure trainingTypes exists
-  if (!state.trainingTypes || !Array.isArray(state.trainingTypes)) {
-    state.trainingTypes = [
-      { id: 'prepi', name: 'Pre-PI', editable: false },
-      { id: 'allhands', name: 'All Hands', editable: false },
-      { id: 'competency', name: 'Competency', editable: false },
-      { id: 'gnc', name: 'GNC', editable: false },
-      { id: 'others', name: 'Others', editable: false }
-    ];
+function loadState() {
+  const saved = localStorage.getItem('sprintCapacityState');
+  if (saved) {
+    const loaded = JSON.parse(saved);
+    state.config = loaded.config || state.config;
+    if (!state.config.sprintInfo) {
+      const sprintNumber = state.config.sprintNum || 'S-01';
+      const sprintName = state.config.sprintName || 'Sprint 1';
+      state.config.sprintInfo = `${sprintNumber} / ${sprintName}`;
+    }
+    state.members = (loaded.members || []).map(normalizeMember);
   }
-  
-  // Weeks in PI is derived from Sprint PF data (count of non-zero sprints * 2),
-  // not manually entered. Use !== undefined for the rest to properly handle 0 values.
-  const weeks = calcWeeksFromSprints(m);
-  const sat = c.sat !== undefined ? c.sat : 0;
-  const holidays = c.holidays !== undefined ? c.holidays : 3;
-  const leaves = c.leaves !== undefined ? c.leaves : 0;
-  const misc = c.misc !== undefined ? c.misc : 0;
-  const alloc = c.alloc !== undefined ? c.alloc : 1;
-  
-  const weekdays = weeks * 5;
-  // Calculate training days dynamically from all training types
-  const training = state.trainingTypes.reduce((sum, type) => {
-    return sum + (c[type.id] || 0);
-  }, 0);
-  const available = (weekdays + sat - holidays - leaves - misc - training) * alloc;
-  const pf = parseFloat(calcAvgPF(m));
-  const net = available * pf;
-  // Spread stored capacity first, then override with the computed weeks/weekdays
-  // so a stale/legacy stored value never wins over the Sprint-PF-derived numbers.
-  return { ...c, weekdays, training, available: +available.toFixed(3), pf, net: +net.toFixed(3), weeks };
-}
-
-function totalCapacity() {
-  return state.members.reduce((sum, m) => {
-    const c = calcCapacity(m.name);
-    return sum + (c.net || 0);
-  }, 0);
-}
-
-function totalAvailDays() {
-  return state.members.reduce((sum, m) => {
-    const c = calcCapacity(m.name);
-    return sum + (c.available || 0);
-  }, 0);
 }
 
 // ════════════════════════════════════════════
-//  NAVIGATION
+// NAVIGATION
 // ════════════════════════════════════════════
-function navigate(id) {
+function navigate(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.getAttribute('onclick')?.includes(id)) n.classList.add('active');
-  });
-  renderPage(id);
-}
+  document.getElementById(page).classList.add('active');
+  
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+  event.target.closest('.nav-item')?.classList.add('active');
 
-function renderPage(id) {
-  if (id==='dashboard') renderDashboard();
-  if (id==='kyt') renderKYT();
-  if (id==='capacity') renderCapacity();
-  if (id==='checklist') renderChecklist();
-  if (id==='guidelines') renderGuidelines();
-  if (id==='config') {
-    // Only render config on first load, not on subsequent visits
-    // This prevents resetting form values when user hasn't saved yet
-    if (!document.getElementById('cfg-pi').value) {
-      renderConfig();
-    }
-  }
-  if (id==='report') renderReport();
+  if (page === 'dashboard') renderDashboard();
+  else if (page === 'capacity') renderCapacity();
+  else if (page === 'report') renderReport();
+  else if (page === 'config') renderConfig();
 }
 
 // ════════════════════════════════════════════
-//  DASHBOARD
+// CONFIG PAGE
 // ════════════════════════════════════════════
-function renderDashboard() {
-  const total = totalCapacity();
-  const avail = totalAvailDays();
-  const featDays = (total * (state.config.featSplit !== undefined ? state.config.featSplit : 95) / 100).toFixed(1);
-  const bugDays = (total * (state.config.bugSplit !== undefined ? state.config.bugSplit : 5) / 100).toFixed(1);
-  const unplannedDays = (total * (state.config.unplannedSplit !== undefined ? state.config.unplannedSplit : 0) / 100).toFixed(1);
-
-  // Update dashboard subtitle
-  const subtitle = document.getElementById('dashboard-subtitle');
-  if (subtitle) {
-    const modulePart = state.config.module ? ` · ${state.config.module}` : '';
-    subtitle.textContent = `Program Increment · ${state.config.pi} · ${state.config.project}${modulePart}`;
-  }
-
-  // Update header status
-  const statusText = document.getElementById('header-status-text');
-  const statusPill = document.getElementById('header-status');
-  if (statusText && statusPill) {
-    statusText.textContent = state.config.status;
-    // Update status dot color based on status
-    if (state.config.status === 'Approved') {
-      statusPill.style.borderColor = 'var(--green)';
-      statusPill.querySelector('.status-dot').style.backgroundColor = 'var(--green)';
-    } else if (state.config.status === 'Active') {
-      statusPill.style.borderColor = 'var(--accent2)';
-      statusPill.querySelector('.status-dot').style.backgroundColor = 'var(--accent2)';
-    } else {
-      statusPill.style.borderColor = 'var(--orange)';
-      statusPill.querySelector('.status-dot').style.backgroundColor = 'var(--orange)';
-    }
-  }
-
-  document.getElementById('stat-members').textContent = state.members.length;
-  document.getElementById('stat-cap').textContent = total.toFixed(1);
-  document.getElementById('stat-featuredev').textContent = featDays;
-  document.getElementById('stat-bugfix').textContent = bugDays;
-  document.getElementById('stat-unplanned').textContent = unplannedDays;
-
-  // Capacity cards
-  const ccEl = document.getElementById('cap-cards');
-  ccEl.innerHTML = state.members.map(m => {
-    const c = calcCapacity(m.name);
-    const pct = Math.min(100, ((c.net||0)/total*100)).toFixed(0);
-    return `
-    <div class="cap-card">
-      <div class="cap-name">${m.name.split(' ')[0]} ${m.name.split(' ').slice(1).join(' ')}</div>
-      <div class="cap-role"><span class="badge badge-blue">${m.role}</span> &nbsp; Grade ${m.grade}</div>
-      <div class="cap-row"><span>Available</span><strong>${c.available||0} days</strong></div>
-      <div class="cap-row"><span>Net Capacity</span><strong class="text-green">${c.net||0} days</strong></div>
-      <div class="cap-row"><span>Avg PF</span><strong>${calcAvgPF(m)}</strong></div>
-      <div class="cap-bar-wrap"><div class="cap-bar"><div class="cap-fill" style="width:${pct}%"></div></div></div>
-    </div>`;
-  }).join('');
-
-  // KYT summary
-  const tbody = document.getElementById('kyt-summary-tbody');
-  tbody.innerHTML = state.members.map(m => `
-    <tr>
-      <td><strong>${m.name}</strong></td>
-      <td><span class="badge badge-purple">${m.grade}</span></td>
-      <td>${m.role}</td>
-      <td>${m.module}</td>
-      <td><div class="pf-bar-wrap"><div class="pf-bar"><div class="pf-fill" style="width:${calcAvgPF(m)*100}%"></div></div><span class="pf-val">${calcAvgPF(m)}</span></div></td>
-    </tr>`).join('');
-}
-
-// ════════════════════════════════════════════
-//  KYT
-// ════════════════════════════════════════════
-function saveMember() {
-  const name = document.getElementById('kyt-name').value.trim();
-  if (!name) { toast('Name is required'); return; }
-  
-  const m = {
-    name,
-    grade: document.getElementById('kyt-grade').value,
-    role: document.getElementById('kyt-role').value,
-    exp: document.getElementById('kyt-exp').value,
-    tech: document.getElementById('kyt-tech').value.trim(),
-    safety: document.getElementById('kyt-safety').value,
-    cybersec: document.getElementById('kyt-cybersec').value,
-    training: document.getElementById('kyt-training').value,
-    delivered: document.getElementById('kyt-delivered').value,
-    module: +document.getElementById('kyt-module').value,
-    s: [
-      +document.getElementById('kyt-s1').value,
-      +document.getElementById('kyt-s2').value,
-      +document.getElementById('kyt-s3').value,
-      +document.getElementById('kyt-s4').value,
-      +document.getElementById('kyt-s5').value,
-      +document.getElementById('kyt-s6').value
-    ]
-  };
-  
-  const editIndex = +document.getElementById('kyt-edit-index').value;
-  const allocValue = m.module; // Use module as allocation percentage
-  
-  if (editIndex >= 0) {
-    // Update existing member
-    const oldName = state.members[editIndex].name;
-    if (oldName !== name && state.capacity[oldName]) {
-      // Transfer capacity data to new name if name changed
-      state.capacity[name] = state.capacity[oldName];
-      delete state.capacity[oldName];
-    }
-    state.members[editIndex] = m;
-    // Sync allocation from KYT to capacity
-    if (state.capacity[name]) {
-      state.capacity[name].alloc = allocValue;
-    }
-    toast('Member updated ✓');
-  } else {
-    // Add new member
-    state.members.push(m);
-    
-    // Initialize capacity with default values for all training types
-    const capacityInit = {
-      weeks: 12,
-      sat: 0,
-      holidays: 3,
-      leaves: 7,
-      misc: 7,
-      alloc: allocValue
-    };
-    
-    // Add default values for all training types
-    state.trainingTypes.forEach(type => {
-      let defaultValue = 0;
-      if (type.id === 'prepi') defaultValue = 0;
-      else if (type.id === 'allhands') defaultValue = 0.18;
-      else if (type.id === 'competency') defaultValue = 2;
-      else if (type.id === 'gnc') defaultValue = 1;
-      else if (type.id === 'others') defaultValue = 0;
-      capacityInit[type.id] = defaultValue;
-    });
-    
-    state.capacity[m.name] = capacityInit;
-    toast('Member added ✓');
-  }
-  
-  clearKytForm();
-  renderKYT();
-  autoSave();
-}
-
-function editMember(i) {
-  const m = state.members[i];
-  const currentAlloc = state.capacity[m.name]?.alloc || m.module || 1;
-  
-  document.getElementById('kyt-name').value = m.name;
-  document.getElementById('kyt-grade').value = m.grade;
-  document.getElementById('kyt-role').value = m.role;
-  document.getElementById('kyt-exp').value = m.exp;
-  document.getElementById('kyt-tech').value = m.tech || '';
-  document.getElementById('kyt-safety').value = m.safety;
-  document.getElementById('kyt-cybersec').value = m.cybersec || 'No';
-  document.getElementById('kyt-training').value = m.training;
-  document.getElementById('kyt-delivered').value = m.delivered;
-  document.getElementById('kyt-module').value = currentAlloc; // Load from capacity allocation
-  document.getElementById('kyt-s1').value = m.s[0];
-  document.getElementById('kyt-s2').value = m.s[1];
-  document.getElementById('kyt-s3').value = m.s[2];
-  document.getElementById('kyt-s4').value = m.s[3];
-  document.getElementById('kyt-s5').value = m.s[4];
-  document.getElementById('kyt-s6').value = m.s[5];
-  document.getElementById('kyt-edit-index').value = i;
-  
-  // Update UI
-  document.getElementById('kyt-form-title').textContent = 'Edit Team Member';
-  document.getElementById('kyt-submit-btn').textContent = '💾 Update Member';
-  document.getElementById('kyt-cancel-btn').style.display = 'inline-flex';
-  
-  // Scroll to form
-  document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  toast('Editing ' + m.name.split(' ')[0]);
-}
-
-function cancelEdit() {
-  clearKytForm();
-  toast('Edit cancelled');
-}
-
-function removeMember(i) {
-  delete state.capacity[state.members[i].name];
-  state.members.splice(i,1);
-  renderKYT();
-  autoSave();
-  toast('Member removed');
-}
-
-function clearKytForm() {
-  ['kyt-name', 'kyt-tech'].forEach(id => document.getElementById(id).value='');
-  ['kyt-s1','kyt-s2','kyt-s3','kyt-s4','kyt-s5','kyt-s6'].forEach(id => document.getElementById(id).value='0.95');
-  document.getElementById('kyt-edit-index').value = '-1';
-  document.getElementById('kyt-form-title').textContent = 'Add Team Member';
-  document.getElementById('kyt-submit-btn').textContent = '+ Add Member';
-  document.getElementById('kyt-cancel-btn').style.display = 'none';
-  
-  // Reset dropdowns to defaults
-  document.getElementById('kyt-grade').value = 'C';
-  document.getElementById('kyt-role').value = 'Developer';
-  document.getElementById('kyt-exp').value = 'Medium > 3 to 5 yrs';
-  document.getElementById('kyt-safety').value = 'No';
-  document.getElementById('kyt-cybersec').value = 'No';
-  document.getElementById('kyt-training').value = 'Yes';
-  document.getElementById('kyt-delivered').value = 'Yes';
-  document.getElementById('kyt-module').value = '1';
-}
-
-function renderKYT() {
-  const grid = document.getElementById('kyt-members-grid');
-  const count = document.getElementById('kyt-count');
-  count.textContent = state.members.length;
-  
-  grid.innerHTML = state.members.map((m,i) => `
-    <div class="member-card">
-      <div class="member-header">
-        <div class="member-info">
-          <h3>${m.name}</h3>
-          <div class="member-meta">
-            <span class="badge badge-purple">${m.grade}</span>
-            <span>${m.role}</span>
-            <span class="badge badge-blue">${m.exp}</span>
-          </div>
-        </div>
-        <div class="member-actions">
-          <button class="btn btn-primary" style="padding:4px 10px;font-size:11px;" onclick="editMember(${i})">Edit</button>
-          <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="removeMember(${i})">×</button>
-        </div>
-      </div>
-      
-      ${m.tech ? `<div class="member-tech" title="${m.tech}">🔧 ${m.tech}</div>` : ''}
-      
-      <div class="member-details">
-        <div class="member-detail-item">
-          <div class="member-detail-label">Allocation</div>
-          <div class="member-detail-value">${(m.module * 100).toFixed(0)}%</div>
-        </div>
-        <div class="member-detail-item">
-          <div class="member-detail-label">Avg PF</div>
-          <div class="member-detail-value">${calcAvgPF(m)}</div>
-        </div>
-      </div>
-      
-      <div class="member-certs">
-        <span class="cert-icon ${m.safety==='Yes'?'yes':'no'}">
-          ${m.safety==='Yes'?'✓':'×'} Safety
-        </span>
-        <span class="cert-icon ${(m.cybersec||'No')==='Yes'?'yes':'no'}">
-          ${(m.cybersec||'No')==='Yes'?'✓':'×'} Cybersec
-        </span>
-        <span class="cert-icon ${m.training==='Yes'?'yes':'no'}">
-          ${m.training==='Yes'?'✓':'×'} Training
-        </span>
-        <span class="cert-icon ${m.delivered==='Yes'?'yes':'no'}">
-          ${m.delivered==='Yes'?'✓':'×'} Delivered
-        </span>
-      </div>
-      
-      <div class="member-sprints">
-        ${m.s.map((val, idx) => `
-          <div class="sprint-mini">
-            <div class="sprint-mini-label">S${idx+1}</div>
-            <div class="sprint-mini-value ${val=='T'?'training':val>=0.9?'high':''}">${val}</div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
-}
-
-// ════════════════════════════════════════════
-//  CAPACITY
-// ════════════════════════════════════════════
-let currentCapMember = null; // Track currently loaded member
-
-function renderCapacity() {
-  const sel = document.getElementById('cap-member-select');
-  sel.innerHTML = state.members.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
-  currentCapMember = null; // Reset tracking
-  renderTrainingFieldsInForm(); // Render training fields
-  loadCapMember();
-  renderCapacitySummary();
-  renderCapacityMatrix();
-  renderTrainingMatrix();
-}
-
-function switchCapMember() {
-  // Save current member's data before switching
-  if (currentCapMember) {
-    saveCurrentCapacityData(currentCapMember);
-  }
-  loadCapMember();
-}
-
-function saveCurrentCapacityData(memberName) {
-  // Save without re-rendering to avoid loops
-  const allocValue = +document.getElementById('cap-alloc').value;
-  
-  const capacityData = {
-    sat: +document.getElementById('cap-sat').value,
-    holidays: +document.getElementById('cap-holidays').value,
-    leaves: +document.getElementById('cap-leaves').value,
-    misc: +document.getElementById('cap-misc').value,
-    alloc: allocValue
-  };
-  
-  // Add all training type values dynamically
-  state.trainingTypes.forEach(type => {
-    const input = document.getElementById(`cap-${type.id}`);
-    if (input) {
-      capacityData[type.id] = +input.value || 0;
-    }
-  });
-  
-  state.capacity[memberName] = capacityData;
-  
-  // Sync allocation back to KYT module field
-  const member = state.members.find(m => m.name === memberName);
-  if (member) {
-    member.module = allocValue;
-  }
-  
-  autoSave();
-}
-
-function loadCapMember() {
-  const name = document.getElementById('cap-member-select').value;
-  if (!name) return;
-  
-  currentCapMember = name; // Track the loaded member
-  const c = state.capacity[name] || {};
-  
-  // Weeks in PI is now auto-derived from Sprint PF data (see calcWeeksFromSprints)
-  const member = state.members.find(x => x.name === name);
-  document.getElementById('cap-weeks').value = calcWeeksFromSprints(member);
-  document.getElementById('cap-sat').value = c.sat !== undefined ? c.sat : 0;
-  document.getElementById('cap-holidays').value = c.holidays !== undefined ? c.holidays : 3;
-  document.getElementById('cap-leaves').value = c.leaves !== undefined ? c.leaves : 7;
-  document.getElementById('cap-misc').value = c.misc !== undefined ? c.misc : 7;
-  document.getElementById('cap-alloc').value = c.alloc !== undefined ? c.alloc : 1;
-  
-  // Render training fields dynamically
-  renderTrainingFieldsInForm();
-  
-  // Load training values for this member
-  state.trainingTypes.forEach(type => {
-    const input = document.getElementById(`cap-${type.id}`);
-    if (input) {
-      // Use default values for standard training types
-      let defaultValue = 0;
-      if (type.id === 'prepi') defaultValue = 0;
-      else if (type.id === 'allhands') defaultValue = 0.18;
-      else if (type.id === 'competency') defaultValue = 2;
-      else if (type.id === 'gnc') defaultValue = 1;
-      else if (type.id === 'others') defaultValue = 0;
-      
-      input.value = c[type.id] !== undefined ? c[type.id] : defaultValue;
-    }
-  });
-}
-
-function saveCapacity() {
-  const name = document.getElementById('cap-member-select').value;
-  if (!name) return;
-  
-  // Use the helper function to save data
-  saveCurrentCapacityData(name);
-  
-  // Re-render to update all views
-  renderCapacitySummary();
-  renderCapacityMatrix();
-  renderTrainingMatrix();
-  renderKYT(); // Update KYT view with synced allocation
-  
-  toast('Capacity saved ✓');
-}
-
-function toggleCapForm() {
-  const form = document.getElementById('cap-edit-form');
-  const toggle = document.getElementById('cap-form-toggle');
-  if (form.style.display === 'none') {
-    form.style.display = 'block';
-    toggle.textContent = '(Click to collapse)';
-  } else {
-    form.style.display = 'none';
-    toggle.textContent = '(Click to expand)';
-  }
-}
-
-function renderCapacitySummary() {
-  const cfg = state.config;
-  const net = totalCapacity();
-  const featDays = (net * (cfg.featSplit !== undefined ? cfg.featSplit : 95) / 100).toFixed(1);
-  const bugDays = (net * (cfg.bugSplit !== undefined ? cfg.bugSplit : 5) / 100).toFixed(1);
-  const unplannedDays = (net * (cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0) / 100).toFixed(1);
-  
-  // Calculate gross capacity (Weeks/Weekdays now derived from Sprint PF data)
-  const grossDays = state.members.reduce((sum, m) => {
-    return sum + (calcWeeksFromSprints(m) * 5);
-  }, 0);
-  const utilPct = ((grossDays - totalAvailDays()) / grossDays * 100).toFixed(1);
-  
-  document.getElementById('cap-total-net').textContent = net.toFixed(1);
-  document.getElementById('cap-feature-days').textContent = featDays;
-  document.getElementById('cap-feature-pct').textContent = `${cfg.featSplit !== undefined ? cfg.featSplit : 95}% of capacity`;
-  document.getElementById('cap-bug-days').textContent = bugDays;
-  document.getElementById('cap-bug-pct').textContent = `${cfg.bugSplit !== undefined ? cfg.bugSplit : 5}% of capacity`;
-  document.getElementById('cap-unplanned-days').textContent = unplannedDays;
-  document.getElementById('cap-unplanned-pct').textContent = `${cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0}% of capacity`;
-  document.getElementById('cap-util-pct').textContent = `${utilPct}%`;
-}
-
-function renderCapacityMatrix() {
-  const cfg = state.config;
-  const table = document.getElementById('cap-matrix-table');
-  const tbody = document.getElementById('cap-matrix-tbody');
-  
-  // Build header with team member names
-  let headerRow = '<tr><th style="min-width:200px;">Parameter</th>';
-  state.members.forEach(m => {
-    headerRow += `<th style="min-width:120px;"><strong>${m.name.split(' ')[0]}</strong><br/><small>${m.name.split(' ').slice(1).join(' ')}</small></th>`;
-  });
-  headerRow += '<th style="min-width:100px;"><strong>TOTAL</strong></th></tr>';
-  table.querySelector('thead').innerHTML = headerRow;
-  
-  // Build rows
-  let rows = '';
-  
-  // Role
-  rows += '<tr style="background:var(--surface2);"><td><strong>Role</strong></td>';
-  state.members.forEach(m => rows += `<td>${m.role}</td>`);
-  rows += '<td>—</td></tr>';
-  
-  // Weeks in PI (derived from count of non-zero Sprint PF values * 2)
-  rows += `<tr><td><strong>Weeks in ${cfg.pi}</strong></td>`;
-  let totalWeeks = 0;
-  state.members.forEach(m => {
-    const weeks = calcWeeksFromSprints(m);
-    totalWeeks += weeks;
-    rows += `<td>${weeks}</td>`;
-  });
-  rows += `<td>${totalWeeks}</td></tr>`;
-  
-  // Weekdays
-  rows += `<tr><td><strong>Weekdays in ${cfg.pi}</strong></td>`;
-  let totalWeekdays = 0;
-  state.members.forEach(m => {
-    const c = calcCapacity(m.name);
-    totalWeekdays += c.weekdays||0;
-    rows += `<td>${c.weekdays||0}</td>`;
-  });
-  rows += `<td>${totalWeekdays}</td></tr>`;
-  
-  // Sat Working
-  rows += '<tr><td><strong>Sat Working</strong></td>';
-  let totalSat = 0;
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    totalSat += c.sat||0;
-    rows += `<td>${c.sat||0}</td>`;
-  });
-  rows += `<td>${totalSat}</td></tr>`;
-  
-  // Holidays
-  rows += '<tr><td><strong>Company Holidays/Flexi Holiday</strong></td>';
-  let totalHol = 0;
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const holidays = c.holidays !== undefined ? c.holidays : 3;
-    totalHol += holidays;
-    rows += `<td>${holidays}</td>`;
-  });
-  rows += `<td>${totalHol}</td></tr>`;
-  
-  // Leaves
-  rows += '<tr><td><strong>Leaves</strong></td>';
-  let totalLeaves = 0;
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    totalLeaves += c.leaves||0;
-    rows += `<td>${(c.leaves||0).toFixed(2)}</td>`;
-  });
-  rows += `<td>${totalLeaves.toFixed(2)}</td></tr>`;
-  
-  // Misc Days
-  rows += '<tr><td><strong>Misc / Non Training Activities</strong></td>';
-  let totalMisc = 0;
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    totalMisc += c.misc||0;
-    rows += `<td>${(c.misc||0).toFixed(2)}</td>`;
-  });
-  rows += `<td>${totalMisc.toFixed(2)}</td></tr>`;
-  
-  // Training Days
-  rows += '<tr><td><strong>Training Days</strong></td>';
-  let totalTraining = 0;
-  state.members.forEach(m => {
-    const c = calcCapacity(m.name);
-    totalTraining += c.training||0;
-    rows += `<td>${(c.training||0).toFixed(2)}</td>`;
-  });
-  rows += `<td>${totalTraining.toFixed(2)}</td></tr>`;
-  
-  // Allocation %
-  rows += '<tr><td><strong>% Allocation</strong></td>';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const alloc = c.alloc !== undefined ? c.alloc : 1;
-    rows += `<td>${(alloc*100).toFixed(0)}%</td>`;
-  });
-  rows += '<td>—</td></tr>';
-  
-  // Available Days
-  rows += '<tr style="background:var(--surface2);"><td><strong>Available Days</strong></td>';
-  let totalAvail = 0;
-  state.members.forEach(m => {
-    const c = calcCapacity(m.name);
-    totalAvail += c.available||0;
-    rows += `<td><strong>${(c.available||0).toFixed(1)}</strong></td>`;
-  });
-  rows += `<td><strong>${totalAvail.toFixed(1)}</strong></td></tr>`;
-  
-  // KYT Productivity Factor
-  rows += '<tr><td><strong>KYT Productivity Factor</strong></td>';
-  state.members.forEach(m => {
-    rows += `<td>${calcAvgPF(m)}</td>`;
-  });
-  rows += '<td>—</td></tr>';
-  
-  // Total Available Capacity
-  rows += '<tr style="background:var(--accent2);color:#000;"><td><strong>Total Available Capacity (days)</strong></td>';
-  let totalNet = 0;
-  state.members.forEach(m => {
-    const c = calcCapacity(m.name);
-    totalNet += c.net||0;
-    rows += `<td><strong>${(c.net||0).toFixed(1)}</strong></td>`;
-  });
-  rows += `<td><strong>${totalNet.toFixed(1)}</strong></td></tr>`;
-  
-  tbody.innerHTML = rows;
-}
-
-function renderTrainingMatrix() {
-  const table = document.getElementById('cap-training-table');
-  const tbody = document.getElementById('cap-training-tbody');
-  
-  // Ensure trainingTypes exists
-  if (!state.trainingTypes || !Array.isArray(state.trainingTypes)) {
-    state.trainingTypes = [
-      { id: 'prepi', name: 'Pre-PI', editable: false },
-      { id: 'allhands', name: 'All Hands', editable: false },
-      { id: 'competency', name: 'Competency', editable: false },
-      { id: 'gnc', name: 'GNC', editable: false },
-      { id: 'others', name: 'Others', editable: false }
-    ];
-  }
-  
-  if (!state.members.length) {
-    tbody.innerHTML = '<tr><td colspan="100" style="text-align:center;padding:20px;color:var(--muted);">No team members added yet</td></tr>';
-    return;
-  }
-  
-  // Build header
-  let headerRow = '<tr><th style="min-width:200px;">Training Type</th>';
-  state.members.forEach(m => {
-    headerRow += `<th style="min-width:120px;">${m.name.split(' ')[0]}</th>`;
-  });
-  headerRow += '<th style="min-width:100px;"><strong>TOTAL</strong></th><th style="min-width:60px;">Actions</th></tr>';
-  table.querySelector('thead').innerHTML = headerRow;
-  
-  let rows = '';
-  
-  // Render each training type dynamically
-  state.trainingTypes.forEach((type, typeIdx) => {
-    rows += `<tr><td contenteditable="${type.editable}" data-type-id="${type.id}" class="training-type-name" style="cursor:${type.editable?'text':'default'};font-weight:bold;${type.editable?'background:rgba(79,158,255,0.08);':''}">${type.name}</td>`;
-    
-    let typeTotal = 0;
-    state.members.forEach((m, idx) => {
-      const c = state.capacity[m.name] || {};
-      const value = c[type.id] || 0;
-      typeTotal += value;
-      rows += `<td contenteditable="true" data-member="${m.name}" data-field="${type.id}" class="editable-cell" style="cursor:text;background:rgba(79,158,255,0.05);">${value.toFixed(2)}</td>`;
-    });
-    
-    const deleteBtn = type.editable ? `<button onclick="deleteTrainingType('${type.id}')" style="background:var(--danger);color:#fff;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:10px;">🗑️ Delete</button>` : '';
-    rows += `<td><strong>${typeTotal.toFixed(2)}</strong></td><td>${deleteBtn}</td></tr>`;
-  });
-  
-  // Total row
-  rows += '<tr style="background:var(--surface2);"><td><strong>TOTAL Training Days</strong></td>';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const total = state.trainingTypes.reduce((sum, type) => sum + (c[type.id] || 0), 0);
-    rows += `<td><strong>${total.toFixed(2)}</strong></td>`;
-  });
-  
-  const grandTotal = state.trainingTypes.reduce((sum, type) => {
-    const typeTotal = state.members.reduce((memberSum, m) => {
-      const c = state.capacity[m.name] || {};
-      return memberSum + (c[type.id] || 0);
-    }, 0);
-    return sum + typeTotal;
-  }, 0);
-  rows += `<td><strong>${grandTotal.toFixed(2)}</strong></td><td></td></tr>`;
-  
-  tbody.innerHTML = rows;
-  
-  // Add event listeners for editable cells
-  tbody.querySelectorAll('.editable-cell').forEach(cell => {
-    cell.addEventListener('blur', function() {
-      const member = this.getAttribute('data-member');
-      const field = this.getAttribute('data-field');
-      const value = parseFloat(this.textContent) || 0;
-      
-      if (state.capacity[member]) {
-        state.capacity[member][field] = value;
-        renderCapacity();
-        renderTrainingFieldsInForm(); // Update individual capacity form
-        autoSave();
-        
-        // Find the training type name from the ID
-        const trainingType = state.trainingTypes.find(t => t.id === field);
-        const fieldName = trainingType ? trainingType.name : field;
-        toast(`${fieldName} updated for ${member.split(' ')[0]} ✓`);
-      }
-    });
-    
-    cell.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        this.blur();
-      }
-    });
-  });
-  
-  // Add event listeners for training type name editing
-  tbody.querySelectorAll('.training-type-name[contenteditable="true"]').forEach(cell => {
-    cell.addEventListener('blur', function() {
-      const typeId = this.getAttribute('data-type-id');
-      const newName = this.textContent.trim();
-      
-      if (newName && newName.length > 0) {
-        const type = state.trainingTypes.find(t => t.id === typeId);
-        if (type) {
-          type.name = newName;
-          renderTrainingFieldsInForm();
-          autoSave();
-          toast(`Training type renamed to "${newName}" ✓`);
-        }
-      } else {
-        // Restore original name if empty
-        const type = state.trainingTypes.find(t => t.id === typeId);
-        if (type) {
-          this.textContent = type.name;
-        }
-      }
-    });
-    
-    cell.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        this.blur();
-      }
-    });
-  });
-}
-
-// Add new training type from input field
-function addTrainingTypeFromInput() {
-  // Ensure trainingTypes array exists
-  if (!state.trainingTypes) {
-    state.trainingTypes = [
-      { id: 'prepi', name: 'Pre-PI', editable: false },
-      { id: 'allhands', name: 'All Hands', editable: false },
-      { id: 'competency', name: 'Competency', editable: false },
-      { id: 'gnc', name: 'GNC', editable: false },
-      { id: 'others', name: 'Others', editable: false }
-    ];
-  }
-  
-  const input = document.getElementById('new-training-type-input');
-  const name = input.value.trim();
-  
-  if (!name || name === '') {
-    toast('⚠️ Please enter a training type name');
-    input.focus();
-    return;
-  }
-  
-  const id = 'custom_' + Date.now();
-  state.trainingTypes.push({
-    id: id,
-    name: name,
-    editable: true
-  });
-  
-  // Initialize this training type for all members
-  state.members.forEach(m => {
-    if (state.capacity[m.name]) {
-      state.capacity[m.name][id] = 0;
-    }
-  });
-  
-  // Clear the input field
-  input.value = '';
-  
-  renderTrainingMatrix();
-  renderTrainingFieldsInForm();
-  autoSave();
-  toast(`Training type "${name}" added ✓`);
-}
-
-// Add new training type (legacy - using prompt)
-function addTrainingType() {
-  // Ensure trainingTypes array exists
-  if (!state.trainingTypes) {
-    state.trainingTypes = [
-      { id: 'prepi', name: 'Pre-PI', editable: false },
-      { id: 'allhands', name: 'All Hands', editable: false },
-      { id: 'competency', name: 'Competency', editable: false },
-      { id: 'gnc', name: 'GNC', editable: false },
-      { id: 'others', name: 'Others', editable: false }
-    ];
-  }
-  
-  const name = prompt('Enter training type name (e.g., "CLI Training", "Certification", etc.):');
-  if (!name || name.trim() === '') {
-    toast('Training type name cannot be empty');
-    return;
-  }
-  
-  const id = 'custom_' + Date.now();
-  state.trainingTypes.push({
-    id: id,
-    name: name.trim(),
-    editable: true
-  });
-  
-  // Initialize this training type for all members
-  state.members.forEach(m => {
-    if (state.capacity[m.name]) {
-      state.capacity[m.name][id] = 0;
-    }
-  });
-  
-  renderTrainingMatrix();
-  renderTrainingFieldsInForm();
-  autoSave();
-  toast(`Training type "${name.trim()}" added ✓`);
-}
-
-// Delete training type
-function deleteTrainingType(typeId) {
-  const type = state.trainingTypes.find(t => t.id === typeId);
-  if (!type) return;
-  
-  const confirmed = confirm(`Delete training type "${type.name}"?\n\nThis will remove all "${type.name}" data for all team members. This cannot be undone.`);
-  if (!confirmed) return;
-  
-  // Remove from trainingTypes array
-  state.trainingTypes = state.trainingTypes.filter(t => t.id !== typeId);
-  
-  // Remove from all member capacity data
-  state.members.forEach(m => {
-    if (state.capacity[m.name]) {
-      delete state.capacity[m.name][typeId];
-    }
-  });
-  
-  renderTrainingMatrix();
-  renderTrainingFieldsInForm();
-  renderCapacity(); // Recalculate capacities
-  autoSave();
-  toast(`Training type "${type.name}" deleted ✓`);
-}
-
-// Render training fields dynamically in individual capacity form
-function renderTrainingFieldsInForm() {
-  const container = document.getElementById('cap-training-fields');
-  if (!container) return;
-  
-  // Ensure trainingTypes exists
-  if (!state.trainingTypes || !Array.isArray(state.trainingTypes)) {
-    state.trainingTypes = [
-      { id: 'prepi', name: 'Pre-PI', editable: false },
-      { id: 'allhands', name: 'All Hands', editable: false },
-      { id: 'competency', name: 'Competency', editable: false },
-      { id: 'gnc', name: 'GNC', editable: false },
-      { id: 'others', name: 'Others', editable: false }
-    ];
-  }
-  
-  let html = '';
-  state.trainingTypes.forEach(type => {
-    html += `<div><label>${type.name}</label><input type="number" step="0.01" min="0" id="cap-${type.id}"></div>`;
-  });
-  
-  container.innerHTML = html;
-  
-  // If a member is currently loaded, populate the values
-  if (currentCapMember) {
-    const c = state.capacity[currentCapMember] || {};
-    state.trainingTypes.forEach(type => {
-      const input = document.getElementById(`cap-${type.id}`);
-      if (input) {
-        input.value = c[type.id] || 0;
-      }
-    });
-  }
-}
-
-// ════════════════════════════════════════════
-//  CHECKLIST
-// ════════════════════════════════════════════
-function renderChecklist() {
-  const done = state.checklist.filter(item => item.checked).length;
-  const pct = Math.round(done/checklistItems.length*100);
-  document.getElementById('chk-done').textContent = done;
-  document.getElementById('chk-sub').textContent = `of ${checklistItems.length} items`;
-  document.getElementById('chk-pct').textContent = pct + '%';
-  document.getElementById('chk-bar').style.width = pct + '%';
-
-  const cont = document.getElementById('chk-container');
-  cont.innerHTML = `<div>${checklistItems.map((item,i) => {
-    const checkItem = state.checklist[i] || { checked: false, comment: '' };
-    return `
-    <div class="check-item">
-      <div class="check-item-main">
-        <div class="check-num">${(i+1).toString().padStart(2,'0')}</div>
-        <div class="check-text">
-          <div>${item[1]}</div>
-          <div class="check-cat">${item[0]}</div>
-        </div>
-        <div class="check-toggle ${checkItem.checked?'done':''}" onclick="toggleCheck(${i})">${checkItem.checked?'✓':''}</div>
-      </div>
-      <div class="check-comment-row">
-        <input 
-          type="text" 
-          class="check-comment-input" 
-          placeholder="Add comment (e.g., reason if not checked or N/A)..." 
-          value="${checkItem.comment}"
-          onblur="saveCheckComment(${i}, this.value)"
-          onkeydown="if(event.key==='Enter') this.blur()"
-        />
-      </div>
-    </div>`;
-  }).join('')}</div>`;
-}
-
-function toggleCheck(i) {
-  if (!state.checklist[i]) {
-    state.checklist[i] = { checked: false, comment: '' };
-  }
-  state.checklist[i].checked = !state.checklist[i].checked;
-  renderChecklist();
-  autoSave();
-}
-
-function saveCheckComment(i, comment) {
-  if (!state.checklist[i]) {
-    state.checklist[i] = { checked: false, comment: '' };
-  }
-  state.checklist[i].comment = comment;
-  autoSave();
-}
-
-// ════════════════════════════════════════════
-//  GUIDELINES
-// ════════════════════════════════════════════
-function renderGuidelines() {
-  document.getElementById('guide-tbody').innerHTML = guidelines.map(g => `
-    <tr>
-      <td>${g[0]}</td>
-      <td><strong>${g[1]}</strong></td>
-      <td class="text-muted">${g[2]}</td>
-    </tr>`).join('');
-}
-
-// ════════════════════════════════════════════
-//  CONFIG
-// ════════════════════════════════════════════
-function validateCapacityPercentages() {
-  const featSplit = +document.getElementById('cfg-featsplit').value || 0;
-  const bugSplit = +document.getElementById('cfg-bugsplit').value || 0;
-  const unplannedSplit = +document.getElementById('cfg-unplannedsplit').value || 0;
-  const total = featSplit + bugSplit + unplannedSplit;
-  
-  // Show warning if total is not 100
-  const existingWarning = document.getElementById('capacity-percentage-warning');
-  if (existingWarning) {
-    existingWarning.remove();
-  }
-  
-  if (Math.abs(total - 100) > 0.1) {
-    const warningDiv = document.createElement('div');
-    warningDiv.id = 'capacity-percentage-warning';
-    warningDiv.style.cssText = 'color:var(--danger);font-size:11px;margin-top:4px;font-weight:600;';
-    warningDiv.textContent = `⚠️ Warning: Total is ${total.toFixed(1)}% (should be 100%)`;
-    document.getElementById('cfg-unplannedsplit').parentElement.parentElement.insertAdjacentElement('afterend', warningDiv);
-  }
-  
-  // Auto-save the capacity percentages to state
-  autoSaveCapacityPercentages();
-}
-
-function autoSaveCapacityPercentages() {
-  // Save the capacity percentages immediately to state
-  state.config.featSplit = +document.getElementById('cfg-featsplit').value || 95;
-  state.config.bugSplit = +document.getElementById('cfg-bugsplit').value || 5;
-  state.config.unplannedSplit = +document.getElementById('cfg-unplannedsplit').value || 0;
-  
-  // Update all tabs that display capacity calculations
-  // Dashboard
-  if (document.getElementById('stat-featuredev')) {
-    const total = totalCapacity();
-    const featDays = (total * (state.config.featSplit !== undefined ? state.config.featSplit : 95) / 100).toFixed(1);
-    const bugDays = (total * (state.config.bugSplit !== undefined ? state.config.bugSplit : 5) / 100).toFixed(1);
-    const unplannedDays = (total * (state.config.unplannedSplit !== undefined ? state.config.unplannedSplit : 0) / 100).toFixed(1);
-    document.getElementById('stat-featuredev').textContent = featDays;
-    document.getElementById('stat-bugfix').textContent = bugDays;
-    if (document.getElementById('stat-unplanned')) {
-      document.getElementById('stat-unplanned').textContent = unplannedDays;
-    }
-  }
-  
-  // Capacity tab
-  if (document.getElementById('cap-feature-days')) {
-    renderCapacitySummary();
-  }
-  
-  // Save to localStorage
-  autoSave();
-}
-
 function renderConfig() {
-  const cfg = state.config;
-  document.getElementById('cfg-pi').value = cfg.pi;
-  document.getElementById('cfg-project').value = cfg.project;
-  document.getElementById('cfg-module').value = cfg.module || '';
-  document.getElementById('cfg-configid').value = cfg.configId || '';
-  document.getElementById('cfg-version').value = cfg.version;
-  document.getElementById('cfg-date').value = cfg.date || '';
-  document.getElementById('cfg-status').value = cfg.status;
-  document.getElementById('cfg-ppm').value = cfg.ppm || '';
-  document.getElementById('cfg-po').value = cfg.po || '';
-  document.getElementById('cfg-sm').value = cfg.sm || '';
-  document.getElementById('cfg-author').value = cfg.author || '';
-  document.getElementById('cfg-featsplit').value = cfg.featSplit !== undefined ? cfg.featSplit : 95;
-  document.getElementById('cfg-bugsplit').value = cfg.bugSplit !== undefined ? cfg.bugSplit : 5;
-  document.getElementById('cfg-unplannedsplit').value = cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0;
-  document.getElementById('cfg-sprints').value = cfg.sprints;
+  document.getElementById('config-project-name').value = state.config.projectName || '';
+  document.getElementById('config-module-name').value = state.config.moduleName || '';
+  document.getElementById('config-sprint-info').value = state.config.sprintInfo || '';
+  document.getElementById('config-start-date').value = state.config.startDate;
+  document.getElementById('config-end-date').value = state.config.endDate;
+  document.getElementById('config-working-days').value = state.config.workingDays;
+  document.getElementById('config-hours-per-day').value = state.config.hoursPerDay;
+  document.getElementById('config-sm').value = state.config.sm;
+  document.getElementById('config-po').value = state.config.po;
+
+  document.getElementById('sprint-badge').textContent = state.config.sprintInfo || '—';
+
+  document.getElementById('dash-project').textContent = state.config.projectName || '—';
+  document.getElementById('dash-module').textContent = state.config.moduleName || '—';
+  document.getElementById('dash-sprint-info').textContent = state.config.sprintInfo || '—';
 }
 
 function saveConfig() {
-  // Validate capacity percentages before saving
-  const featSplit = +document.getElementById('cfg-featsplit').value || 0;
-  const bugSplit = +document.getElementById('cfg-bugsplit').value || 0;
-  const unplannedSplit = +document.getElementById('cfg-unplannedsplit').value || 0;
-  const total = featSplit + bugSplit + unplannedSplit;
-  
-  if (Math.abs(total - 100) > 0.1) {
-    alert(`❌ Cannot Save Configuration!\n\nCapacity Distribution Error:\n\nFeature Development: ${featSplit}%\nBug Fixing: ${bugSplit}%\nUnplanned Activity: ${unplannedSplit}%\n\nTotal: ${total.toFixed(1)}%\n\n⚠️ The total must equal exactly 100%.\nPlease adjust the percentages and try again.`);
+  state.config.projectName = document.getElementById('config-project-name').value;
+  state.config.moduleName = document.getElementById('config-module-name').value;
+  state.config.sprintInfo = document.getElementById('config-sprint-info').value;
+  state.config.startDate = document.getElementById('config-start-date').value;
+  state.config.endDate = document.getElementById('config-end-date').value;
+  state.config.workingDays = parseFloat(document.getElementById('config-working-days').value);
+  state.config.hoursPerDay = parseFloat(document.getElementById('config-hours-per-day').value);
+  state.config.sm = document.getElementById('config-sm').value;
+  state.config.po = document.getElementById('config-po').value;
+
+  if (!state.config.projectName || !state.config.moduleName || !state.config.sprintInfo) {
+    toast('Program, module, and sprint number/name are required');
     return;
   }
+
+  saveState();
+  document.getElementById('sprint-badge').textContent = state.config.sprintInfo;
   
+  toast('Configuration saved ✓');
+  renderConfig();
+  renderDashboard();
+  renderCapacity();
+}
+
+function hasRequiredConfig() {
+  return Boolean(
+    (state.config.projectName || '').trim() &&
+    (state.config.moduleName || '').trim() &&
+    (state.config.sprintInfo || '').trim()
+  );
+}
+
+function resetConfiguration() {
+  const confirmed = confirm('Reset configuration and clear all saved team data?');
+  if (!confirmed) return;
+
   state.config = {
-    pi: document.getElementById('cfg-pi').value,
-    project: document.getElementById('cfg-project').value,
-    module: document.getElementById('cfg-module').value,
-    configId: document.getElementById('cfg-configid').value,
-    version: document.getElementById('cfg-version').value,
-    date: document.getElementById('cfg-date').value,
-    status: document.getElementById('cfg-status').value,
-    ppm: document.getElementById('cfg-ppm').value,
-    po: document.getElementById('cfg-po').value,
-    sm: document.getElementById('cfg-sm').value,
-    author: document.getElementById('cfg-author').value,
-    featSplit: featSplit,
-    bugSplit: bugSplit,
-    unplannedSplit: unplannedSplit,
-    sprints: +document.getElementById('cfg-sprints').value,
+    projectName: '',
+    moduleName: '',
+    sprintInfo: 'S-01 / Sprint 1',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    workingDays: 10,
+    hoursPerDay: 8.5,
+    sm: '',
+    po: ''
   };
-  document.querySelector('.pi-badge').textContent = state.config.pi;
-  
-  // Update dashboard subtitle
-  const subtitle = document.getElementById('dashboard-subtitle');
-  if (subtitle) {
-    const modulePart = state.config.module ? ` · ${state.config.module}` : '';
-    subtitle.textContent = `Program Increment · ${state.config.pi} · ${state.config.project}${modulePart}`;
-  }
-  
-  // Update capacity matrix if it exists (user might be viewing capacity tab)
-  if (document.getElementById('cap-matrix-tbody')) {
-    renderCapacityMatrix();
-  }
-  
-  // Update capacity summary if visible
-  if (document.getElementById('cap-feature-days')) {
-    renderCapacitySummary();
-  }
-  
-  // Update dashboard to reflect status change
+  state.members = [];
+  localStorage.removeItem('sprintCapacityState');
+  document.getElementById('sprint-badge').textContent = state.config.sprintInfo;
+  renderConfig();
   renderDashboard();
-  
-  autoSave();
-  toast('Config saved ✓');
+  renderCapacity();
+  toast('Configuration reset ✓');
 }
 
-function updateStatusRealtime() {
-  // Update status in config immediately
-  state.config.status = document.getElementById('cfg-status').value;
-  // Refresh dashboard to show new status
-  renderDashboard();
-  autoSave();
+function addTeamMember() {
+  editingMemberIndex = null;
+  document.getElementById('member-modal-title').textContent = 'Add Team Member';
+  document.getElementById('member-save-btn').textContent = 'Save';
+  document.getElementById('member-productivity').value = 0.95;
+  document.getElementById('member-misc').value = 0;
+  document.getElementById('member-training').value = 0;
+  document.getElementById('member-modal').classList.add('show');
 }
 
-// ════════════════════════════════════════════
-//  REPORT
-// ════════════════════════════════════════════
-function renderReport() {
-  const cfg = state.config;
-  const net = totalCapacity();
-  const avail = totalAvailDays();
-  const done = state.checklist.filter(item => item && item.checked).length;
-  const featDays = (net * (cfg.featSplit !== undefined ? cfg.featSplit : 95) / 100).toFixed(1);
-  const bugDays = (net * (cfg.bugSplit !== undefined ? cfg.bugSplit : 5) / 100).toFixed(1);
-  const unplannedDays = (net * (cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0) / 100).toFixed(1);
-  const el = document.getElementById('report-preview');
-  
-  el.innerHTML = `
-    <div class="form-title">PI Plan Report — ${cfg.pi}</div>
-    
-    <!-- PI Configuration -->
-    <div class="section-title">PI Configuration</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;" class="config-grid">
-      <div><strong>Project:</strong> ${cfg.project}</div>
-      <div><strong>Module/Team:</strong> ${cfg.module||'—'}</div>
-      <div><strong>Status:</strong> <span class="badge ${cfg.status==='Approved'?'badge-green':cfg.status==='Active'?'badge-blue':'badge-orange'}">${cfg.status}</span></div>
-      <div><strong>Version:</strong> ${cfg.version}</div>
-      <div><strong>Date:</strong> ${cfg.date||'Not set'}</div>
-      <div><strong>PPM:</strong> ${cfg.ppm||'—'}</div>
-      <div><strong>PO:</strong> ${cfg.po||'—'}</div>
-      <div><strong>Scrum Master:</strong> ${cfg.sm||'—'}</div>
-      <div><strong>Author:</strong> ${cfg.author||'—'}</div>
-      <div><strong>Sprints:</strong> ${cfg.sprints}</div>
-      <div><strong>Capacity Split:</strong> Feature ${cfg.featSplit !== undefined ? cfg.featSplit : 95}% | Bug ${cfg.bugSplit !== undefined ? cfg.bugSplit : 5}% | Unplanned ${cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0}%</div>
-    </div>
+function editMember(idx) {
+  const member = state.members[idx];
+  if (!member) return;
+  editingMemberIndex = idx;
+  document.getElementById('member-modal-title').textContent = 'Edit Team Member';
+  document.getElementById('member-save-btn').textContent = 'Update';
+  document.getElementById('member-name').value = member.name || '';
+  document.getElementById('member-role').value = member.role || 'Developer';
+  document.getElementById('member-allocation').value = member.allocation ?? 100;
+  document.getElementById('member-productivity').value = Math.min(member.productivityFactor ?? 0.95, 0.95);
+  document.getElementById('member-misc').value = member.misc ?? 0;
+  document.getElementById('member-training').value = member.training ?? 0;
+  document.getElementById('member-modal').classList.add('show');
+}
 
-    <!-- Dashboard Overview -->
-    <div class="section-title">Dashboard Overview</div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px;">
-      <div class="stat-card" style="--accent-color:var(--accent);"><div class="stat-label">Team Size</div><div class="stat-value">${state.members.length}</div><div class="stat-sub">Active members</div></div>
-      <div class="stat-card" style="--accent-color:var(--accent2);"><div class="stat-label">Net Capacity</div><div class="stat-value">${net.toFixed(1)}</div><div class="stat-sub">Total days</div></div>
-      <div class="stat-card" style="--accent-color:var(--accent);"><div class="stat-label">Feature Dev</div><div class="stat-value">${featDays}</div><div class="stat-sub">Days allocated</div></div>
-      <div class="stat-card" style="--accent-color:var(--accent4);"><div class="stat-label">Bug Fix</div><div class="stat-value">${bugDays}</div><div class="stat-sub">Days allocated</div></div>
-      <div class="stat-card" style="--accent-color:var(--accent3);"><div class="stat-label">Unplanned</div><div class="stat-value">${unplannedDays}</div><div class="stat-sub">Days allocated</div></div>
-    </div>
+function closeMemberModal() {
+  document.getElementById('member-modal').classList.remove('show');
+  document.getElementById('member-name').value = '';
+  document.getElementById('member-role').value = 'Developer';
+  document.getElementById('member-allocation').value = 100;
+  document.getElementById('member-productivity').value = 0.95;
+  document.getElementById('member-misc').value = 0;
+  document.getElementById('member-training').value = 0;
+  editingMemberIndex = null;
+  document.getElementById('member-modal-title').textContent = 'Add Team Member';
+  document.getElementById('member-save-btn').textContent = 'Save';
+}
 
-    <!-- Team Members Details -->
-    <div class="section-title">Team Members (${state.members.length})</div>
-    <div class="table-container" style="margin-bottom:18px;">
+function saveTeamMember() {
+  const name = document.getElementById('member-name').value.trim();
+  if (!name) {
+    toast('Please enter member name');
+    return;
+  }
+
+  const isEditing = editingMemberIndex !== null;
+  const existingMember = isEditing ? state.members[editingMemberIndex] : null;
+
+  const member = {
+    name,
+    role: document.getElementById('member-role').value,
+    allocation: parseFloat(document.getElementById('member-allocation').value),
+    productivityFactor: Math.min(parseFloat(document.getElementById('member-productivity').value), 0.95),
+    training: Number.isFinite(parseFloat(document.getElementById('member-training').value)) ? parseFloat(document.getElementById('member-training').value) : 0,
+    misc: Number.isFinite(parseFloat(document.getElementById('member-misc').value)) ? parseFloat(document.getElementById('member-misc').value) : 0,
+    holidays: existingMember?.holidays ?? 0,
+    leaves: existingMember?.leaves ?? 0,
+    saturdays: existingMember?.saturdays ?? 0,
+    dayPlan: existingMember?.dayPlan || {}
+  };
+
+  if (editingMemberIndex === null) {
+    state.members.push(member);
+  } else {
+    state.members[editingMemberIndex] = member;
+  }
+  saveState();
+  closeMemberModal();
+  renderConfig();
+  renderDashboard();
+  renderCapacity();
+  toast(isEditing ? 'Team member updated ✓' : 'Team member added ✓');
+}
+
+function removeMember(idx) {
+  state.members.splice(idx, 1);
+  saveState();
+  renderConfig();
+  renderDashboard();
+  renderCapacity();
+  toast('Team member removed');
+}
+
+function renderTeamPlanner() {
+  const container = document.getElementById('team-planner-container');
+  const dates = getSprintDates();
+
+  if (state.members.length === 0) {
+    container.innerHTML = '<div style="padding:20px; color: var(--muted);">Add team members to see the date-wise planner here.</div>';
+    return;
+  }
+
+  if (dates.length === 0) {
+    container.innerHTML = '<div style="padding:20px; color: var(--muted);">Set sprint start and end dates to show the two-week availability planner.</div>';
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="padding:16px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; gap:12px; align-items:center;">
+      <div>
+        <div class="section-title" style="margin:0;">Date-wise Team Planner</div>
+        <div class="text-muted" style="font-size:11px; margin-top:4px;">Select working day, half day leave, full day leave, or public holiday for each team member.</div>
+      </div>
+      <div class="text-muted" style="font-size:11px; white-space:nowrap;">${dates.length} visible days</div>
+    </div>
+    <div class="table-wrap" style="max-height: 420px; overflow:auto;">
       <table>
         <thead>
-          <tr><th>Name</th><th>Role</th><th>Grade</th><th>Module</th><th>Avg PF</th></tr>
+          <tr>
+            <th style="position: sticky; left: 0; z-index: 2; background: var(--surface2);">Team Member</th>
+            ${dates.map(date => `<th>${formatScheduleDate(date)}</th>`).join('')}
+          </tr>
         </thead>
         <tbody>
-          ${state.members.map(m=>`<tr><td><strong>${m.name}</strong></td><td>${m.role}</td><td>${m.grade}</td><td>${m.module}</td><td>${calcAvgPF(m)}</td></tr>`).join('')}
+          ${state.members.map(member => `
+            <tr>
+              <td style="position: sticky; left: 0; z-index: 1; background: var(--surface); min-width: 180px;">
+                <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+                  <div>
+                    <strong>${member.name}</strong><br>
+                    <span class="text-muted" style="font-size: 11px;">${member.role}</span>
+                    <div class="text-muted" style="font-size: 10px; margin-top: 4px;">PF: ${(member.productivityFactor ?? 0.95).toFixed(2)} | Allocation: ${(member.allocation ?? 100).toFixed(0)}%</div>
+                  </div>
+                  <button class="secondary" onclick="editMember(${state.members.indexOf(member)})" style="padding: 4px 8px; font-size: 11px; white-space: nowrap;">Edit</button>
+                </div>
+              </td>
+              ${dates.map(date => {
+                const dateKey = date.toISOString().split('T')[0];
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                const status = getDailyStatus(member, dateKey) || (isWeekend ? '' : 'W');
+                const background = status === 'W'
+                  ? 'rgba(0, 229, 160, 0.08)'
+                  : status === 'L0.5'
+                    ? 'rgba(245, 166, 35, 0.12)'
+                    : status === 'L0'
+                      ? 'rgba(255, 107, 107, 0.12)'
+                      : status === 'H'
+                        ? 'rgba(79, 158, 255, 0.12)'
+                        : isWeekend ? 'rgba(245, 166, 35, 0.05)' : 'transparent';
+                const optionClass = status === 'W' ? 'status-working' : status === 'L0.5' ? 'status-half' : status === 'L0' ? 'status-leave' : status === 'H' ? 'status-holiday' : '';
+                return `
+                  <td class="${optionClass}" style="background:${background}; text-align:center; min-width: 118px;">
+                    <select class="day-status-select ${optionClass}" onchange='setDailyStatus(${JSON.stringify(member.name)}, ${JSON.stringify(dateKey)}, this.value, this)'>
+                      <option value="" ${status === '' ? 'selected' : ''}>-</option>
+                      <option value="W" ${status === 'W' ? 'selected' : ''}>Full Day</option>
+                      <option value="L0.5" ${status === 'L0.5' ? 'selected' : ''}>Half Leave</option>
+                      <option value="L0" ${status === 'L0' ? 'selected' : ''}>Leave</option>
+                      <option value="H" ${status === 'H' ? 'selected' : ''}>Holiday</option>
+                    </select>
+                  </td>`;
+              }).join('')}
+            </tr>
+          `).join('')}
         </tbody>
       </table>
-    </div>
+    </div>`;
 
-    <!-- Capacity Breakdown by Member -->
-    <div class="section-title">Capacity Breakdown</div>
-    <div class="table-container" style="margin-bottom:18px;">
+  container.innerHTML += `
+    <div class="planner-actions" style="padding: 14px 18px; border-top: 1px solid var(--border);">
+      <div class="planner-legend">
+        <span><i class="status-working" style="width:10px;height:10px;display:inline-block;border-radius:50%;"></i>Working day</span>
+        <span><i class="status-half" style="width:10px;height:10px;display:inline-block;border-radius:50%;"></i>Half day leave</span>
+        <span><i class="status-leave" style="width:10px;height:10px;display:inline-block;border-radius:50%;"></i>Leave</span>
+        <span><i class="status-holiday" style="width:10px;height:10px;display:inline-block;border-radius:50%;"></i>Holiday</span>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button onclick="savePlannerState()">Save Team Planning</button>
+        <button class="secondary" onclick="renderTeamPlanner()">Refresh View</button>
+      </div>
+    </div>`;
+}
+
+function savePlannerState() {
+  saveState();
+  renderConfig();
+  toast('Team planning saved ✓');
+}
+
+function getSprintDates() {
+  if (!state.config.startDate || !state.config.endDate) return [];
+  const startDate = new Date(state.config.startDate);
+  const endDate = new Date(state.config.endDate);
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime()) || startDate > endDate) return [];
+
+  const dates = [];
+  for (let current = new Date(startDate); current <= endDate; current.setDate(current.getDate() + 1)) {
+    dates.push(new Date(current));
+  }
+  return dates;
+}
+
+function formatScheduleDate(date) {
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function getDailyStatus(member, dateKey) {
+  return member.dayPlan ? member.dayPlan[dateKey] || '' : '';
+}
+
+function getPlannerStatusClass(value) {
+  if (value === 'W') return 'status-working';
+  if (value === 'L0.5') return 'status-half';
+  if (value === 'L0') return 'status-leave';
+  if (value === 'H') return 'status-holiday';
+  return '';
+}
+
+function setDailyStatus(memberName, dateKey, value, selectEl) {
+  const member = state.members.find(item => item.name === memberName);
+  if (!member) return;
+
+  if (!member.dayPlan) member.dayPlan = {};
+  if (!value) delete member.dayPlan[dateKey];
+  else member.dayPlan[dateKey] = value;
+
+  if (selectEl) {
+    const statusClass = getPlannerStatusClass(value);
+    const cell = selectEl.closest('td');
+    selectEl.className = `day-status-select ${statusClass}`.trim();
+    if (cell) {
+      cell.className = statusClass;
+    }
+  }
+
+  saveState();
+  renderDashboard();
+  renderCapacity();
+}
+
+function getMemberDayTotals(member) {
+  const dates = getSprintDates();
+  const productivityFactor = Math.min(Math.max(Number.isFinite(parseFloat(member.productivityFactor)) ? parseFloat(member.productivityFactor) : 0.95, 0), 0.95);
+  // Sprint Working Days (state.config.workingDays) is the single source of truth for the
+  // sprint length; the per-day plan only supplies exceptions (holiday/leave/half-leave)
+  // within it, so Available Days can never exceed Sprint Working Days.
+  const workingDays = state.config.workingDays || 0;
+  let holidays = member.holidays || 0;
+  let leaves = member.leaves || 0;
+  let halfLeaves = 0;
+
+  if (dates.length > 0) {
+    holidays = 0;
+    leaves = 0;
+    dates.forEach(date => {
+      const dateKey = date.toISOString().split('T')[0];
+      const status = getDailyStatus(member, dateKey);
+      if (status === 'H') holidays += 1;
+      else if (status === 'L0') leaves += 1;
+      else if (status === 'L0.5') halfLeaves += 0.5;
+    });
+  }
+
+  const grossAvailableDays = Math.max(workingDays - holidays - leaves - halfLeaves - (member.training || 0) - (member.misc || 0), 0);
+  const availableDays = Math.min(grossAvailableDays * productivityFactor, workingDays);
+
+  return {
+    workingDays,
+    holidays,
+    leaves,
+    halfLeaves,
+    productivityFactor,
+    grossAvailableDays,
+    availableDays
+  };
+}
+
+function getDailySummary(dates) {
+  return dates.map(date => {
+    const dateKey = date.toISOString().split('T')[0];
+    const summary = { working: 0, half: 0, leave: 0, holiday: 0 };
+
+    state.members.forEach(member => {
+      const status = getDailyStatus(member, dateKey);
+      const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+      if (status === 'H') summary.holiday += 1;
+      else if (status === 'L0') summary.leave += 1;
+      else if (status === 'L0.5') summary.half += 1;
+      else if (status === 'W' || (!status && !isWeekend)) summary.working += 1;
+    });
+
+    return { date, ...summary };
+  });
+}
+
+// ════════════════════════════════════════════
+// DASHBOARD PAGE
+// ════════════════════════════════════════════
+function renderDashboard() {
+  if (state.members.length === 0) {
+    document.getElementById('utilization-tbody').innerHTML = '<tr><td colspan="6" class="text-center text-muted">No team members configured</td></tr>';
+    document.getElementById('stat-members').textContent = '0';
+    document.getElementById('stat-total-days').textContent = '0.0';
+    document.getElementById('stat-total-hours').textContent = '0.0';
+    document.getElementById('stat-avg-daily').textContent = '0.0';
+    document.getElementById('stat-productivity').textContent = '0.0%';
+    return;
+  }
+
+  const tbody = document.getElementById('utilization-tbody');
+  tbody.innerHTML = '';
+
+  let totalDays = 0;
+  let totalHours = 0;
+  let grossAvailableHours = 0;
+
+  state.members.forEach(member => {
+    const totals = getMemberDayTotals(member);
+    const availableDays = totals.availableDays * (member.allocation / 100);
+    const availableHours = availableDays * state.config.hoursPerDay;
+    const memberGrossHours = state.config.workingDays * state.config.hoursPerDay * (member.allocation / 100);
+    
+    totalDays += availableDays;
+    totalHours += availableHours;
+    grossAvailableHours += memberGrossHours;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${member.name}</td>
+      <td><span class="badge badge-blue">${member.role}</span></td>
+      <td>${totals.workingDays}</td>
+      <td>${availableDays.toFixed(2)}</td>
+      <td>${availableHours.toFixed(2)}</td>
+      <td>
+        <div class="capacity-bar">
+          <div class="bar">
+            <div class="bar-fill" style="width: ${Math.min((availableHours / (state.config.hoursPerDay * 2)) * 100, 100)}%"></div>
+          </div>
+          <div class="bar-val">${(member.allocation).toFixed(0)}%</div>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  const avgDaily = state.members.length > 0 ? totalHours / Math.max(state.config.workingDays || 1, 1) : 0;
+  const productivityFactor = grossAvailableHours > 0 ? (totalHours / grossAvailableHours) * 100 : 0;
+
+  document.getElementById('stat-members').textContent = state.members.length;
+  document.getElementById('stat-total-days').textContent = totalDays.toFixed(2);
+  document.getElementById('stat-total-hours').textContent = totalHours.toFixed(2);
+  document.getElementById('stat-avg-daily').textContent = avgDaily.toFixed(2);
+  document.getElementById('stat-productivity').textContent = `${productivityFactor.toFixed(1)}%`;
+}
+
+// ════════════════════════════════════════════
+// CAPACITY PAGE
+// ════════════════════════════════════════════
+function renderCapacity() {
+  if (state.members.length === 0) {
+    document.getElementById('capacity-tbody').innerHTML = '<tr><td colspan="12" class="text-center text-muted">No team members configured</td></tr>';
+    document.getElementById('capacity-viz').innerHTML = '<p class="text-muted text-center">Add team members to see capacity visualization</p>';
+    renderTeamPlanner();
+    return;
+  }
+
+  const tbody = document.getElementById('capacity-tbody');
+  tbody.innerHTML = '';
+
+  let totalAvailableDays = 0;
+  let totalAvailableHours = 0;
+
+  state.members.forEach(member => {
+    const totals = getMemberDayTotals(member);
+    const availableDays = totals.availableDays * (member.allocation / 100);
+    const availableHours = availableDays * state.config.hoursPerDay;
+    const hoursPerDay = state.config.hoursPerDay * (member.allocation / 100);
+
+    totalAvailableDays += availableDays;
+    totalAvailableHours += availableHours;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><button class="secondary" onclick="editMember(${state.members.indexOf(member)})" style="padding:4px 8px; font-size:11px; white-space:nowrap;">Edit</button></td>
+      <td>${member.name}</td>
+      <td>${member.role}</td>
+      <td>${member.allocation}%</td>
+      <td>${Number(state.config.workingDays || 0).toFixed(2)}</td>
+      <td>${(member.misc ?? 0).toFixed(2)}</td>
+      <td>${(member.training ?? 0).toFixed(2)}</td>
+      <td>${totals.holidays.toFixed(2)}</td>
+      <td>${(totals.leaves + totals.halfLeaves).toFixed(2)}</td>
+      <td>${availableDays.toFixed(2)}</td>
+      <td>${availableHours.toFixed(2)}</td>
+      <td>${hoursPerDay.toFixed(2)}</td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  document.getElementById('total-available-days').innerHTML = `<div class="total-metric"><span>Available Days</span><strong>${totalAvailableDays.toFixed(2)}</strong></div>`;
+  document.getElementById('total-available-hours').innerHTML = `<div class="total-metric"><span>Available Hours</span><strong>${totalAvailableHours.toFixed(2)}</strong></div>`;
+
+  // Visualization
+  const viz = document.getElementById('capacity-viz');
+  viz.innerHTML = '';
+
+  state.members.forEach(member => {
+    const totals = getMemberDayTotals(member);
+    const availableDays = totals.availableDays * (member.allocation / 100);
+    const availableHours = availableDays * state.config.hoursPerDay;
+    const percentFilled = Math.min((availableHours / (state.config.hoursPerDay * state.config.workingDays)) * 100, 100);
+
+    const card = document.createElement('div');
+    card.style.marginBottom = '16px';
+    card.innerHTML = `
+      <div style="margin-bottom: 8px; display: flex; justify-content: space-between;">
+        <strong>${member.name}</strong>
+        <span class="text-muted">${availableHours.toFixed(1)} hrs (${availableDays.toFixed(1)} days)</span>
+      </div>
+      <div class="bar">
+        <div class="bar-fill ${percentFilled > 100 ? 'danger' : percentFilled > 85 ? 'warning' : ''}" style="width: ${percentFilled}%"></div>
+      </div>
+    `;
+    viz.appendChild(card);
+  });
+
+  renderTeamPlanner();
+}
+
+function renderReport() {
+  const totalAvailableDays = state.members.reduce((sum, member) => {
+    const totals = getMemberDayTotals(member);
+    return sum + (totals.availableDays * (member.allocation / 100));
+  }, 0);
+  const totalAvailableHours = totalAvailableDays * (state.config.hoursPerDay || 0);
+
+  const reportMetaBar = document.getElementById('report-meta-bar');
+  reportMetaBar.innerHTML = `
+    <span><strong>Program / Project:</strong> ${state.config.projectName || '—'}</span>
+    <span><strong>Team / Module:</strong> ${state.config.moduleName || '—'}</span>
+    <span><strong>Sprint Number / Sprint Name:</strong> ${state.config.sprintInfo || '—'}</span>
+    <span><strong>Productivity Factor:</strong> ${grossProductivityFactor().toFixed(1)}%</span>
+  `;
+
+  const dashboardStats = document.getElementById('report-dashboard-stats');
+  dashboardStats.innerHTML = `
+    <div class="stat-card" style="--accent-color: var(--accent2)">
+      <div class="stat-label">Total Team Members</div>
+      <div class="stat-value">${state.members.length}</div>
+      <div class="stat-sub">Active resources</div>
+    </div>
+    <div class="stat-card" style="--accent-color: var(--accent)">
+      <div class="stat-label">Total Capacity (Days)</div>
+      <div class="stat-value">${totalAvailableDays.toFixed(2)}</div>
+      <div class="stat-sub">Available work days</div>
+    </div>
+    <div class="stat-card" style="--accent-color: var(--accent)">
+      <div class="stat-label">Total Capacity (Hours)</div>
+      <div class="stat-value">${totalAvailableHours.toFixed(2)}</div>
+      <div class="stat-sub">Hours available</div>
+    </div>
+    <div class="stat-card" style="--accent-color: var(--accent4)">
+      <div class="stat-label">Avg Daily Capacity</div>
+      <div class="stat-value">${(state.members.length > 0 ? totalAvailableHours / Math.max(state.config.workingDays || 1, 1) : 0).toFixed(2)}</div>
+      <div class="stat-sub">Hours per day</div>
+    </div>
+    <div class="stat-card" style="--accent-color: var(--accent2)">
+      <div class="stat-label">Productivity Factor</div>
+      <div class="stat-value">${grossProductivityFactor().toFixed(1)}%</div>
+      <div class="stat-sub">Productive hours / total available hours</div>
+    </div>`;
+
+  const capacityTable = document.getElementById('report-capacity-table');
+  if (state.members.length === 0) {
+    capacityTable.innerHTML = '<div style="padding:18px;color:var(--muted);">Add team members to generate the PDF report.</div>';
+  } else {
+    capacityTable.innerHTML = `
       <table>
         <thead>
-          <tr><th>Name</th><th>Weekdays</th><th>Training Days</th><th>Available Days</th><th>Avg PF</th><th>Net Capacity</th></tr>
+          <tr>
+            <th>Team Member</th>
+            <th>Role</th>
+            <th>Allocation %</th>
+            <th>PF</th>
+            <th>Working Days</th>
+            <th>Holidays</th>
+            <th>Leaves</th>
+            <th>Available Days</th>
+            <th>Available Hours</th>
+          </tr>
         </thead>
         <tbody>
-          ${state.members.map(m => {
-            const c = calcCapacity(m.name);
-            return `<tr>
-              <td><strong>${m.name}</strong></td>
-              <td>${c.weekdays||0}</td>
-              <td>${(c.training||0).toFixed(1)}</td>
-              <td>${(c.available||0).toFixed(1)}</td>
-              <td>${c.pf||0}</td>
-              <td><strong>${(c.net||0).toFixed(1)}</strong></td>
-            </tr>`;
+          ${state.members.map(member => {
+            const totals = getMemberDayTotals(member);
+            const availableDays = totals.availableDays * (member.allocation / 100);
+            const availableHours = availableDays * state.config.hoursPerDay;
+            return `
+              <tr>
+                <td><strong>${member.name}</strong></td>
+                <td>${member.role}</td>
+                <td>${(member.allocation ?? 100).toFixed(0)}%</td>
+                <td>${(member.productivityFactor ?? 0.95).toFixed(2)}</td>
+                <td>${totals.workingDays.toFixed(2)}</td>
+                <td>${totals.holidays.toFixed(2)}</td>
+                <td>${(totals.leaves + totals.halfLeaves).toFixed(2)}</td>
+                <td>${availableDays.toFixed(2)}</td>
+                <td>${availableHours.toFixed(2)}</td>
+              </tr>`;
           }).join('')}
         </tbody>
-        <tfoot>
-          <tr>
-            <td><strong>TOTAL</strong></td>
-            <td>—</td>
-            <td>—</td>
-            <td><strong>${avail.toFixed(1)}</strong></td>
-            <td>—</td>
-            <td><strong>${net.toFixed(1)}</strong></td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-
-    <!-- Capacity Allocation -->
-    <div class="section-title">Capacity Allocation</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
-      <div class="stat-card" style="--accent-color:var(--accent);">
-        <div class="stat-label">Feature Development</div>
-        <div class="stat-value">${featDays}</div>
-        <div class="stat-sub">${cfg.featSplit}% of ${net.toFixed(1)} days</div>
-      </div>
-      <div class="stat-card" style="--accent-color:var(--accent4);">
-        <div class="stat-label">Regression Bug Fix</div>
-        <div class="stat-value">${bugDays}</div>
-        <div class="stat-sub">${100-cfg.featSplit}% of ${net.toFixed(1)} days</div>
-      </div>
-    </div>
-
-    <!-- Checklist Progress -->
-    <div class="section-title">Quality Checklist</div>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
-      <div class="progress-wrap" style="flex:1;"><div class="progress-fill" style="width:${Math.round(done/checklistItems.length*100)}%;"></div></div>
-      <span style="font-size:13px;"><strong>${done}/${checklistItems.length} complete</strong> (${Math.round(done/checklistItems.length*100)}%)</span>
-    </div>
-
-    <!-- Report Footer -->
-    <div style="margin-top:24px;padding-top:18px;border-top:1px solid var(--border);color:var(--muted);font-size:11px;text-align:center;">
-      Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
-    </div>
-  `;
-}
-
-function printReport() { 
-  // Validate configuration before printing
-  if (!validateConfiguration()) {
-    return;
+      </table>`;
   }
-  
-  try {
-    // Navigate to dashboard and ensure it's visible
-    navigate('dashboard');
-    
-    // Ensure dashboard is rendered
-    renderDashboard();
-    
-    // Save original title
-    const originalTitle = document.title;
-    
-    // Set document title for PDF filename
-    const cfg = state.config;
-    const modulePart = cfg.module ? ` - ${cfg.module}` : '';
-    document.title = `${cfg.pi} - ${cfg.project}${modulePart}`;
-    
-    // Force a small delay to ensure DOM is fully updated
-    setTimeout(() => {
-      try {
-        // Open the browser's print dialog
-        window.print();
-        
-        // Restore original title after a short delay
-        setTimeout(() => {
-          document.title = originalTitle;
-          toast('In the print dialog, select "Save as PDF" or "Microsoft Print to PDF" as the destination, then click Save');
-        }, 500);
-        
-      } catch (error) {
-        console.error('Print error:', error);
-        document.title = originalTitle; // Restore title on error
-        alert('Unable to open print dialog. Please try using Ctrl+P (Windows) or Cmd+P (Mac) to print, then select "Save as PDF".');
-      }
-    }, 500);
-    
-  } catch (error) {
-    console.error('Print report error:', error);
-    alert('Error preparing dashboard for printing. Please try again.');
-  }
-}
 
-function validateConfiguration() {
-  const cfg = state.config;
-  const missing = [];
-  
-  // Check required fields
-  if (!cfg.pi || cfg.pi === 'PI-YYYY-QX') {
-    missing.push('PI Name');
-  }
-  if (!cfg.project || cfg.project === 'Project Name') {
-    missing.push('Project');
-  }
-  if (!cfg.date) {
-    missing.push('Date');
-  }
-  if (!cfg.ppm || cfg.ppm.trim() === '') {
-    missing.push('PPM');
-  }
-  if (!cfg.po || cfg.po.trim() === '') {
-    missing.push('PO');
-  }
-  if (!cfg.sm || cfg.sm.trim() === '') {
-    missing.push('Scrum Master');
-  }
-  if (!cfg.author || cfg.author.trim() === '') {
-    missing.push('Author');
-  }
-  if (!cfg.module || cfg.module.trim() === '') {
-    missing.push('Module/Team Name');
-  }
-  
-  if (missing.length > 0) {
-    alert(
-      '⚠️ Configuration Incomplete\n\n' +
-      'Please fill in the following required fields in Configuration tab:\n\n' +
-      missing.map(f => `• ${f}`).join('\n') +
-      '\n\nGo to Configuration tab to complete these fields before exporting.'
-    );
-    return false;
-  }
-  
-  return true;
-}
+  const viz = document.getElementById('report-capacity-viz');
+  if (state.members.length === 0) {
+    viz.innerHTML = '<div style="padding:18px;color:var(--muted);">Add team members to view the capacity visualization.</div>';
+  } else {
+    viz.innerHTML = '';
+    state.members.forEach(member => {
+      const totals = getMemberDayTotals(member);
+      const availableDays = totals.availableDays * (member.allocation / 100);
+      const availableHours = availableDays * state.config.hoursPerDay;
+      const percentFilled = Math.min((availableHours / (state.config.hoursPerDay * state.config.workingDays)) * 100, 100);
 
-function copyReport() {
-  // Validate configuration before copying
-  if (!validateConfiguration()) {
-    return;
-  }
-  
-  const cfg = state.config;
-  const net = totalCapacity();
-  const avail = totalAvailDays();
-  const featDays = (net * (cfg.featSplit !== undefined ? cfg.featSplit : 95) / 100).toFixed(2);
-  const bugDays = (net * (cfg.bugSplit !== undefined ? cfg.bugSplit : 5) / 100).toFixed(2);
-  const unplannedDays = (net * (cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0) / 100).toFixed(2);
-  const done = state.checklist.filter(item => item && item.checked).length;
-  
-  // Build detailed capacity breakdown
-  const capacityBreakdown = state.members.map(m => {
-    const c = calcCapacity(m.name);
-    return `  ${m.name.padEnd(25)} | ${String(c.weekdays||0).padStart(8)} | ${String((c.training||0).toFixed(1)).padStart(12)} | ${String((c.available||0).toFixed(1)).padStart(14)} | ${String(c.pf||0).padStart(7)} | ${String((c.net||0).toFixed(1)).padStart(12)}`;
-  }).join('\n');
-  
-  const txt = `
-╔════════════════════════════════════════════════════════════════════════════╗
-║                         PI PLAN REPORT — ${cfg.pi.padEnd(16)}                 ║
-╚════════════════════════════════════════════════════════════════════════════╝
-
-PI CONFIGURATION
-${'─'.repeat(78)}
-Project              : ${cfg.project}
-Module/Team          : ${cfg.module||'—'}
-Status               : ${cfg.status}
-Version              : ${cfg.version}
-Date                 : ${cfg.date||'Not set'}
-PPM                  : ${cfg.ppm||'—'}
-PO                   : ${cfg.po||'—'}
-Scrum Master         : ${cfg.sm||'—'}
-Author               : ${cfg.author||'—'}
-Sprints              : ${cfg.sprints}
-Capacity Split       : Feature ${cfg.featSplit !== undefined ? cfg.featSplit : 95}% | Bug ${cfg.bugSplit !== undefined ? cfg.bugSplit : 5}% | Unplanned ${cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0}%
-
-DASHBOARD OVERVIEW
-${'─'.repeat(78)}
-Team Size            : ${state.members.length} members
-Net Capacity         : ${net.toFixed(2)} days
-Feature Development  : ${featDays} days (${cfg.featSplit !== undefined ? cfg.featSplit : 95}%)
-Bug Fixing           : ${bugDays} days (${cfg.bugSplit !== undefined ? cfg.bugSplit : 5}%)
-Unplanned Activity   : ${unplannedDays} days (${cfg.unplannedSplit !== undefined ? cfg.unplannedSplit : 0}%)
-Available Days       : ${avail.toFixed(2)} days
-
-TEAM MEMBERS
-${'─'.repeat(78)}
-${state.members.map((m,i)=>`${String(i+1).padStart(2)}. ${m.name.padEnd(25)} │ ${m.role.padEnd(12)} │ Grade ${m.grade} │ Module ${m.module} │ PF: ${calcAvgPF(m)}`).join('\n')}
-
-CAPACITY BREAKDOWN
-${'─'.repeat(78)}
-${'Name'.padEnd(25)} | Weekdays | Training Days | Available Days | Avg PF | Net Capacity
-${'-'.repeat(78)}
-${capacityBreakdown}
-${'-'.repeat(78)}
-${'TOTAL'.padEnd(25)} | ${' '.repeat(8)} | ${' '.repeat(12)} | ${String(avail.toFixed(1)).padStart(14)} | ${' '.repeat(7)} | ${String(net.toFixed(1)).padStart(12)}
-
-CAPACITY ALLOCATION
-${'─'.repeat(78)}
-Feature Development  : ${featDays} days (${cfg.featSplit}% of total capacity)
-Regression Bug Fix   : ${bugDays} days (${100-cfg.featSplit}% of total capacity)
-
-QUALITY CHECKLIST
-${'─'.repeat(78)}
-Completed            : ${done}/${checklistItems.length} items (${Math.round(done/checklistItems.length*100)}%)
-Progress             : ${'█'.repeat(Math.round(done/checklistItems.length*20))}${'░'.repeat(20-Math.round(done/checklistItems.length*20))} ${Math.round(done/checklistItems.length*100)}%
-
-${'─'.repeat(78)}
-Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
-`;
-  
-  navigator.clipboard.writeText(txt).then(()=>toast('Copied to clipboard ✓'));
-}
-
-// ════════════════════════════════════════════
-//  DOWNLOAD DATA
-// ════════════════════════════════════════════
-function downloadData() {
-  // Validate configuration before downloading
-  if (!validateConfiguration()) {
-    return;
-  }
-  
-  const dataStr = JSON.stringify(state, null, 2);
-  const blob = new Blob([dataStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const timestamp = new Date().toISOString().slice(0,10);
-  const cfg = state.config;
-  const modulePart = cfg.module ? `-${cfg.module.replace(/\s+/g, '-')}` : '';
-  a.href = url;
-  a.download = `${cfg.pi}-${cfg.project.replace(/\s+/g, '-')}${modulePart}-${timestamp}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  toast('Data downloaded ✓');
-}
-
-function downloadCSV() {
-  // Validate configuration before downloading
-  if (!validateConfiguration()) {
-    return;
-  }
-  
-  const cfg = state.config;
-  const net = totalCapacity();
-  const avail = totalAvailDays();
-  const timestamp = new Date().toISOString().slice(0,10);
-  
-  let csv = '';
-  
-  // PI Plan header with module/team name
-  const moduleHeader = cfg.module ? ` - ${cfg.module}` : '';
-  csv += `PI Plan: ${cfg.pi} - ${cfg.project}${moduleHeader},,,,,,,,,,\n`;
-  csv += ',,,,,,,,,,,\n';
-  
-  // Team member names row
-  csv += ',,';
-  state.members.forEach(m => csv += `"${m.name}",`);
-  csv += '0,0,0,0\n';
-  
-  // Role row
-  csv += ',Role,';
-  state.members.forEach(m => csv += `${m.role},`);
-  csv += ',,,\n';
-  
-  // Weeks in PI (derived from count of non-zero Sprint PF values * 2)
-  csv += `,Weeks in ${cfg.pi},`;
-  state.members.forEach(m => {
-    csv += `${calcWeeksFromSprints(m)},`;
-  });
-  csv += ',,,\n';
-  
-  // Weekdays
-  csv += `,Weekdays in ${cfg.pi},`;
-  state.members.forEach(m => {
-    const c = calcCapacity(m.name);
-    csv += `${c.weekdays||0},`;
-  });
-  csv += ',,,\n';
-  
-  // Sat Working
-  csv += ',Sat Working,';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    csv += `${c.sat||0},`;
-  });
-  csv += ',,,\n';
-  
-  // Company Holidays
-  csv += ',Company Holidays/Flexi Holiday,';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const holidays = c.holidays !== undefined ? c.holidays : 3;
-    csv += `${holidays},`;
-  });
-  csv += ',,,\n';
-  
-  // Leaves
-  csv += ',Leaves,';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    csv += `${(c.leaves||0).toFixed(2)},`;
-  });
-  csv += ',,,\n';
-  
-  // Misc / Non Training Project Activities
-  csv += ',Misc / Non Training Project Activities (Days),';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    csv += `${(c.misc||0).toFixed(2)},`;
-  });
-  csv += ',,,\n';
-  
-  // Training Days
-  csv += ',Training Days,';
-  state.members.forEach(m => {
-    const c = calcCapacity(m.name);
-    csv += `${(c.training||0).toFixed(2)},`;
-  });
-  csv += ',,,\n';
-  
-  // % Allocation
-  csv += ',% Allocation,';
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const alloc = c.alloc !== undefined ? c.alloc : 1;
-    csv += `${(alloc*100).toFixed(0)}%,`;
-  });
-  csv += ',,,\n';
-  
-  // Available Days
-  csv += ',Available Days,';
-  state.members.forEach(m => {
-    const c = calcCapacity(m.name);
-    csv += `${(c.available||0).toFixed(1)},`;
-  });
-  csv += ',,,\n';
-  
-  // KYT Productivity Factor
-  csv += ',KYT Productivity Factor,';
-  state.members.forEach(m => {
-    csv += `${calcAvgPF(m)},`;
-  });
-  csv += ',,,\n';
-  
-  // Total Available Capacity
-  csv += ',Total Available Capacity (days),';
-  state.members.forEach(m => {
-    const c = calcCapacity(m.name);
-    csv += `${(c.net||0).toFixed(1)},`;
-  });
-  csv += ',,,\n';
-  
-  // Empty rows
-  csv += ',,,,,,,,,,,\n';
-  csv += ',,,,,,,,,,,\n';
-  
-  // Training time section - export all training types dynamically
-  csv += ',Training time in (days),,,,,,,,,,\n';
-  
-  state.trainingTypes.forEach(type => {
-    csv += `,${type.name},`;
-    state.members.forEach(m => {
-      const c = state.capacity[m.name] || {};
-      csv += `${(c[type.id]||0).toFixed(2)},`;
+      const card = document.createElement('div');
+      card.style.marginBottom = '16px';
+      card.innerHTML = `
+        <div style="margin-bottom: 8px; display: flex; justify-content: space-between;">
+          <strong>${member.name}</strong>
+          <span class="text-muted">${availableHours.toFixed(1)} hrs (${availableDays.toFixed(1)} days)</span>
+        </div>
+        <div class="bar">
+          <div class="bar-fill ${percentFilled > 100 ? 'danger' : percentFilled > 85 ? 'warning' : ''}" style="width: ${percentFilled}%"></div>
+        </div>
+      `;
+      viz.appendChild(card);
     });
-    csv += ',,,\n';
-  });
-  
-  csv += ',,,,,,,,,,,\n';
-  
-  // Training Total
-  csv += ',Total,';
-  state.members.forEach(m => {
-    const c = calcCapacity(m.name);
-    csv += `${(c.training||0).toFixed(2)},`;
-  });
-  csv += '0.00,0.00,0.00,0.00\n';
-  
-  csv += ',,,,,,,,,,,\n';
-  
-  // Summary section (Weeks/Weekdays derived from Sprint PF data)
-  const grossDays = state.members.reduce((sum, m) => {
-    return sum + (calcWeeksFromSprints(m) * 5);
+  }
+}
+
+function grossProductivityFactor() {
+  const grossAvailableHours = state.members.reduce((sum, member) => {
+    const grossDays = Math.max((state.config.workingDays || 0) - (member.holidays || 0) - (member.leaves || 0) - (member.training || 0) - (member.misc || 0), 0);
+    return sum + (grossDays * state.config.hoursPerDay * ((member.allocation ?? 100) / 100));
   }, 0);
-  const diffPercent = ((grossDays - avail) / grossDays * 100).toFixed(1);
-  
-  csv += `,Available Cummulative Capacity (Days),,${avail.toFixed(1)},,"Step 1: Double check the data, all the data is transferred from the KYT Sheet.",,,,,,\n`;
-  csv += `,Capacity for Feature Development (Days),${cfg.featSplit}%,${(net*cfg.featSplit/100).toFixed(1)},,Step 2: Update the leaves and non training activities in the first table.,,,,,,\n`;
-  csv += `,Capacity for Regression Bug Fixing (Days),${100-cfg.featSplit}%,${(net*(100-cfg.featSplit)/100).toFixed(1)},,Step 3: Update the training details in the training table below.,,,,,,\n`;
-  csv += `,Difference of Gross Vs Net Available Days,,${diffPercent}%,,Step 4: Update the Capacity for Feature development in the bottom column.,,,,,,\n`;
-  
-  // Create and download CSV
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  const modulePart = cfg.module ? `-${cfg.module.replace(/\s+/g, '-')}` : '';
-  a.download = `${cfg.pi}-${cfg.project.replace(/\s+/g, '-')}${modulePart}-Capacity.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  toast('CSV downloaded ✓');
+  const productiveHours = state.members.reduce((sum, member) => {
+    const totals = getMemberDayTotals(member);
+    return sum + ((totals.availableDays * (member.allocation / 100)) * state.config.hoursPerDay);
+  }, 0);
+  return grossAvailableHours > 0 ? (productiveHours / grossAvailableHours) * 100 : 0;
 }
 
-// ════════════════════════════════════════════
-//  COMPLETE BACKUP & RESTORE (CSV)
-// ════════════════════════════════════════════
-function downloadCompleteCSV() {
-  // Validate configuration before downloading
-  if (!validateConfiguration()) {
+function printReport() {
+  if (!hasRequiredConfig()) {
+    toast('Fill Program / Project, Team / Module, and Sprint Number / Sprint Name before printing');
     return;
   }
-  
-  const timestamp = new Date().toISOString().slice(0,10);
-  let csv = '';
-  
-  // Helper function to properly escape CSV values
-  const escapeCSV = (val) => {
-    if (val === null || val === undefined) return '';
-    const str = String(val);
-    // Quote if contains comma, quotes, or newlines
-    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-      return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
-  };
-  
-  // ===== CONFIGURATION SECTION =====
-  csv += '### CONFIGURATION ###\n';
-  csv += 'Field,Value\n';
-  csv += `PI Name,${escapeCSV(state.config.pi)}\n`;
-  csv += `Project,${escapeCSV(state.config.project)}\n`;
-  csv += `Module/Team Name,${escapeCSV(state.config.module || '')}\n`;
-  csv += `Config ID,${escapeCSV(state.config.configId || '')}\n`;
-  csv += `Version,${escapeCSV(state.config.version)}\n`;
-  csv += `Date,${escapeCSV(state.config.date || '')}\n`;
-  csv += `Status,${escapeCSV(state.config.status)}\n`;
-  csv += `PPM,${escapeCSV(state.config.ppm || '')}\n`;
-  csv += `PO,${escapeCSV(state.config.po || '')}\n`;
-  csv += `Scrum Master,${escapeCSV(state.config.sm || '')}\n`;
-  csv += `Author,${escapeCSV(state.config.author || '')}\n`;
-  csv += `Feature Split %,${state.config.featSplit}\n`;
-  csv += `Sprints,${state.config.sprints}\n`;
-  csv += '\n';
-  
-  // ===== TRAINING TYPES SECTION =====
-  csv += '### TRAINING TYPES ###\n';
-  csv += 'ID,Name,Editable\n';
-  state.trainingTypes.forEach(type => {
-    csv += `${escapeCSV(type.id)},${escapeCSV(type.name)},${type.editable ? 'Yes' : 'No'}\n`;
-  });
-  csv += '\n';
-  
-  // ===== KYT SECTION =====
-  csv += '### TEAM MEMBERS (KYT) ###\n';
-  csv += 'Name,Grade,Role,Overall Experience,Technologies,Safety Certified,Cybersec Trained,Project Training Done,Delivered Code,Allocation %,S1 PF,S2 PF,S3 PF,S4 PF,S5 PF,S6 PF\n';
-  state.members.forEach(m => {
-    csv += `${escapeCSV(m.name)},${escapeCSV(m.grade)},${escapeCSV(m.role)},${escapeCSV(m.exp)},${escapeCSV(m.tech||'')},${escapeCSV(m.safety)},${escapeCSV(m.cybersec||'No')},${escapeCSV(m.training)},${escapeCSV(m.delivered)},${m.module},${m.s[0]},${m.s[1]},${m.s[2]},${m.s[3]},${m.s[4]},${m.s[5]}\n`;
-  });
-  csv += '\n';
-  
-  // ===== CAPACITY SECTION =====
-  csv += '### CAPACITY DETAILS ###\n';
-  // Build header dynamically with all training types
-  let capacityHeader = 'Name,Weeks,Saturdays,Holidays,Leaves,Misc Days,Allocation %';
-  state.trainingTypes.forEach(type => {
-    capacityHeader += `,${escapeCSV(type.name)}`;
-  });
-  csv += capacityHeader + '\n';
-  
-  // Export capacity data (Weeks is derived from Sprint PF data, not stored)
-  state.members.forEach(m => {
-    const c = state.capacity[m.name] || {};
-    const weeks = calcWeeksFromSprints(m);
-    const sat = c.sat !== undefined ? c.sat : 0;
-    const holidays = c.holidays !== undefined ? c.holidays : 3;
-    const leaves = c.leaves !== undefined ? c.leaves : 0;
-    const misc = c.misc !== undefined ? c.misc : 0;
-    const alloc = c.alloc !== undefined ? c.alloc : 1;
-    let row = `${escapeCSV(m.name)},${weeks},${sat},${holidays},${leaves},${misc},${alloc}`;
-    // Add all training type values
-    state.trainingTypes.forEach(type => {
-      row += `,${c[type.id] !== undefined ? c[type.id] : 0}`;
-    });
-    csv += row + '\n';
-  });
-  csv += '\n';
-  
-  // ===== CHECKLIST SECTION =====
-  csv += '### CHECKLIST ###\n';
-  csv += 'Item #,Category,Description,Checked,Comment\n';
-  checklistItems.forEach((item, i) => {
-    const checkItem = state.checklist[i] || { checked: false, comment: '' };
-    csv += `${i+1},${escapeCSV(item[0])},${escapeCSV(item[1])},${checkItem.checked ? 'Yes' : 'No'},${escapeCSV(checkItem.comment || '')}\n`;
-  });
-  csv += '\n';
-  
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  const modulePart = state.config.module ? `-${state.config.module.replace(/\s+/g, '-')}` : '';
-  a.download = `${state.config.pi}-${state.config.project.replace(/\s+/g, '-')}${modulePart}-Backup-${timestamp}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  toast('Complete backup downloaded ✓');
+  renderReport();
+  window.print();
 }
 
-function uploadCSV(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+// ════════════════════════════════════════════
+// EXPORT / IMPORT
+// ════════════════════════════════════════════
+function exportData() {
+  const csvLines = [
+    'SPRINT_CONFIG',
+    `Program / Project Name,${encodeURIComponent(state.config.projectName || '')}`,
+    `Team / Module Name,${encodeURIComponent(state.config.moduleName || '')}`,
+    `Sprint Number / Sprint Name,${encodeURIComponent(state.config.sprintInfo || '')}`,
+    `Start Date,${state.config.startDate || ''}`,
+    `End Date,${state.config.endDate || ''}`,
+    `Working Days,${state.config.workingDays || ''}`,
+    `Hours Per Day,${state.config.hoursPerDay || ''}`,
+    `Scrum Master,${encodeURIComponent(state.config.sm || '')}`,
+    `Product Owner,${encodeURIComponent(state.config.po || '')}`,
+    '',
+    'TEAM_MEMBERS',
+    'Name,Role,Allocation %,Productivity Factor,Holidays,Leaves,Saturdays,Training Days,Misc Days'
+  ];
+
+  state.members.forEach(member => {
+    csvLines.push(
+      `${encodeURIComponent(member.name || '')},${encodeURIComponent(member.role || '')},${member.allocation ?? 100},${member.productivityFactor ?? 0.95},${member.holidays ?? 0},${member.leaves ?? 0},${member.saturdays ?? 0},${member.training ?? 0},${member.misc ?? 0}`
+    );
+  });
+
+  csvLines.push('', 'DAY_PLANS', 'Name,Date,Status');
+
+  state.members.forEach(member => {
+    Object.entries(member.dayPlan || {}).forEach(([dateKey, status]) => {
+      csvLines.push(`${encodeURIComponent(member.name || '')},${dateKey},${encodeURIComponent(status)}`);
+    });
+  });
+
+  const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `sprint-capacity-${(state.config.sprintInfo || 'sprint').replace(/\s+/g, '-')}.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
   
+  toast('Data exported ✓');
+}
+
+function importData() {
+  document.getElementById('import-modal').classList.add('show');
+}
+
+function closeImportModal() {
+  document.getElementById('import-modal').classList.remove('show');
+}
+
+function processImport() {
+  const file = document.getElementById('import-file').files[0];
+  if (!file) {
+    toast('Please select a file');
+    return;
+  }
+
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = (e) => {
     try {
-      const text = e.target.result;
-      // Split lines, trim, and filter out empty lines or lines with only commas
-      const lines = text.split('\n')
-        .map(line => line.trim())
-        .filter(line => line && line.replace(/,/g, '').length > 0);
-      
+      const csv = e.target.result;
+      const lines = csv.split('\n');
       let section = '';
-      const newState = {
-        config: { ...state.config },
-        members: [],
-        capacity: {},
-        trainingTypes: [
-          { id: 'prepi', name: 'Pre-PI', editable: false },
-          { id: 'allhands', name: 'All Hands', editable: false },
-          { id: 'competency', name: 'Competency', editable: false },
-          { id: 'gnc', name: 'GNC', editable: false },
-          { id: 'others', name: 'Others', editable: false }
-        ],
-        features: [],
-        userStories: [],
-        checklist: Array(22).fill(null).map(() => ({ checked: false, comment: '' }))
+
+      state.config = {
+        projectName: '',
+        moduleName: '',
+        sprintInfo: 'S-01 / Sprint 1',
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        workingDays: 10,
+        hoursPerDay: 8.5,
+        sm: '',
+        po: ''
       };
+      state.members = [];
       
-      let capacityHeaders = []; // Store capacity headers for dynamic parsing
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+      lines.forEach(line => {
+        line = line.trim();
+        if (!line) return;
         
-        // Detect sections
-        if (line.includes('### CONFIGURATION ###')) {
+        if (line === 'SPRINT_CONFIG') {
           section = 'config';
-          i++; // Skip header row
-          continue;
-        } else if (line.includes('### TRAINING TYPES ###')) {
-          section = 'trainingTypes';
-          i++; // Skip header row
-          continue;
-        } else if (line.includes('### TEAM MEMBERS')) {
-          section = 'kyt';
-          i++; // Skip header row
-          continue;
-        } else if (line.includes('### CAPACITY DETAILS')) {
-          section = 'capacity';
-          // Parse capacity headers to get training type columns dynamically
-          i++; // Move to header row
-          if (i < lines.length) {
-            capacityHeaders = parseCSVLine(lines[i]);
+        } else if (line === 'TEAM_MEMBERS') {
+          section = 'members';
+        } else if (line === 'DAY_PLANS') {
+          section = 'dayPlans';
+        } else if (section === 'config' && line !== 'Name,Role') {
+          const [key, rawValue = ''] = line.split(',');
+          const value = decodeURIComponent(rawValue.trim());
+          if (key === 'Program / Project Name') state.config.projectName = value;
+          else if (key === 'Team / Module Name') state.config.moduleName = value;
+          else if (key === 'Sprint Number / Sprint Name' || key === 'Sprint Number' || key === 'Sprint Name') {
+            state.config.sprintInfo = key === 'Sprint Number / Sprint Name' ? value : `${state.config.sprintInfo || 'S-01 / Sprint 1'}`;
+            if (key === 'Sprint Number') state.config.sprintInfo = `${value} / ${(state.config.sprintInfo.split('/')[1] || 'Sprint 1').trim()}`;
+            if (key === 'Sprint Name') state.config.sprintInfo = `${(state.config.sprintInfo.split('/')[0] || 'S-01').trim()} / ${value}`;
           }
-          continue;
-        } else if (line.includes('### CHECKLIST')) {
-          section = 'checklist';
-          i++; // Skip header row
-          continue;
-        }
-        
-        // Parse data based on section
-        if (section === 'config' && line) {
-          const parts = parseCSVLine(line);
-          if (parts.length >= 2) {
-            const field = parts[0].trim();
-            const value = parts[1].trim();
-            
-            console.log(`Config: ${field} = ${value}`); // Debug logging
-            
-            if (field === 'PI Name') newState.config.pi = value;
-            else if (field === 'Project') newState.config.project = value;
-            else if (field === 'Module/Team Name') newState.config.module = value;
-            else if (field === 'Config ID') newState.config.configId = value;
-            else if (field === 'Version') newState.config.version = value;
-            else if (field === 'Date') newState.config.date = value;
-            else if (field === 'Status') newState.config.status = value;
-            else if (field === 'PPM') newState.config.ppm = value;
-            else if (field === 'PO') newState.config.po = value;
-            else if (field === 'Scrum Master') newState.config.sm = value;
-            else if (field === 'Author') newState.config.author = value;
-            else if (field === 'Feature Split %') newState.config.featSplit = parseFloat(value) || 95;
-            else if (field === 'Sprints') newState.config.sprints = parseInt(value) || 6;
+          else if (key === 'Start Date') state.config.startDate = value;
+          else if (key === 'End Date') state.config.endDate = value;
+          else if (key === 'Working Days') state.config.workingDays = parseFloat(value);
+          else if (key === 'Hours Per Day') state.config.hoursPerDay = parseFloat(value);
+          else if (key === 'Scrum Master') state.config.sm = value;
+          else if (key === 'Product Owner') state.config.po = value;
+        } else if (section === 'members' && !line.includes('Name,Role')) {
+          const parts = line.split(',');
+          if (parts.length >= 9) {
+            state.members.push(normalizeMember({
+              name: decodeURIComponent(parts[0].trim()),
+              role: decodeURIComponent(parts[1].trim()),
+              allocation: parseFloat(parts[2]),
+              productivityFactor: parseFloat(parts[3]),
+              holidays: parseFloat(parts[4]),
+              leaves: parseFloat(parts[5]),
+              saturdays: parseFloat(parts[6]),
+              training: parseFloat(parts[7]),
+              misc: parseFloat(parts[8])
+            }));
+          } else if (parts.length >= 8) {
+            state.members.push(normalizeMember({
+              name: decodeURIComponent(parts[0].trim()),
+              role: decodeURIComponent(parts[1].trim()),
+              allocation: parseFloat(parts[2]),
+              productivityFactor: parseFloat(parts[3]),
+              holidays: parseFloat(parts[4]),
+              leaves: parseFloat(parts[5]),
+              saturdays: parseFloat(parts[6]),
+              training: parseFloat(parts[7])
+            }));
+          } else if (parts.length >= 7) {
+            state.members.push(normalizeMember({
+              name: decodeURIComponent(parts[0].trim()),
+              role: decodeURIComponent(parts[1].trim()),
+              allocation: parseFloat(parts[2]),
+              holidays: parseFloat(parts[3]),
+              leaves: parseFloat(parts[4]),
+              saturdays: parseFloat(parts[5]),
+              training: parseFloat(parts[6])
+            }));
           }
-        } else if (section === 'trainingTypes' && line) {
-          // Parse training types: ID,Name,Editable
-          const parts = parseCSVLine(line);
+        } else if (section === 'dayPlans' && !line.includes('Name,Date,Status')) {
+          const parts = line.split(',');
           if (parts.length >= 3) {
-            const id = parts[0].trim();
-            const name = parts[1].trim();
-            const editable = parts[2].trim().toLowerCase() === 'yes';
-            
-            // Check if this training type already exists in the default list
-            const existingIndex = newState.trainingTypes.findIndex(t => t.id === id);
-            if (existingIndex >= 0) {
-              // Update existing training type name if it was changed
-              newState.trainingTypes[existingIndex].name = name;
-            } else {
-              // Add custom training type
-              newState.trainingTypes.push({ id, name, editable });
-            }
-          }
-        } else if (section === 'kyt' && line) {
-          // Parse KYT data: Name,Grade,Role,Overall Experience,Technologies,Safety,Cybersec,Training,Delivered,Allocation %,S1-S6
-          const parts = parseCSVLine(line);
-          if (parts.length >= 16) {
-            newState.members.push({
-              name: parts[0],
-              grade: parts[1],
-              role: parts[2],
-              exp: parts[3],
-              tech: parts[4],
-              safety: parts[5],
-              cybersec: parts[6],
-              training: parts[7],
-              delivered: parts[8],
-              module: +parts[9],
-              s: [+parts[10], +parts[11], +parts[12], +parts[13], +parts[14], +parts[15]]
-            });
-          }
-        } else if (section === 'capacity' && line) {
-          // Parse capacity dynamically based on headers
-          // Expected base columns: Name,Weeks,Saturdays,Holidays,Leaves,Misc Days,Allocation %
-          // Then followed by training type columns
-          const parts = parseCSVLine(line);
-          if (parts.length >= 7 && capacityHeaders.length > 0) {
-            const name = parts[0];
-            const capacityData = {
-              weeks: +parts[1],
-              sat: +parts[2],
-              holidays: +parts[3],
-              leaves: +parts[4],
-              misc: +parts[5],
-              alloc: +parts[6]
-            };
-            
-            // Parse training type values dynamically
-            // Start from index 7 (after the base columns)
-            for (let j = 7; j < capacityHeaders.length && j < parts.length; j++) {
-              const headerName = capacityHeaders[j].trim();
-              // Find the training type with this name
-              const trainingType = newState.trainingTypes.find(t => t.name === headerName);
-              if (trainingType) {
-                capacityData[trainingType.id] = +parts[j] || 0;
-              }
-            }
-            
-            newState.capacity[name] = capacityData;
-          }
-        } else if (section === 'checklist' && line) {
-          // Parse checklist: Item #,Category,Description,Checked,Comment
-          const parts = parseCSVLine(line);
-          if (parts.length >= 5) {
-            const itemNum = +parts[0] - 1; // Convert to 0-based index
-            if (itemNum >= 0 && itemNum < 22) {
-              newState.checklist[itemNum] = {
-                checked: parts[3].toLowerCase() === 'yes',
-                comment: parts[4] || ''
-              };
+            const memberName = decodeURIComponent(parts[0].trim());
+            const dateKey = parts[1].trim();
+            const status = decodeURIComponent(parts[2].trim());
+            const member = state.members.find(item => item.name === memberName);
+            if (member) {
+              if (!member.dayPlan) member.dayPlan = {};
+              if (status) member.dayPlan[dateKey] = status;
             }
           }
         }
-      }
-      
-      console.log('Imported configuration:', newState.config); // Debug logging
-      
-      // Apply the new state
-      state.config = newState.config;
-      state.members = newState.members;
-      state.capacity = newState.capacity;
-      state.trainingTypes = newState.trainingTypes;
-      state.checklist = newState.checklist;
-      
-      console.log('Applied configuration:', state.config); // Debug logging
-      
-      // Save and refresh all UI components
+      });
+
       saveState();
-      document.querySelector('.pi-badge').textContent = state.config.pi;
-      renderConfig(); // Refresh configuration form (updates status dropdown and other fields)
-      renderDashboard(); // Refresh dashboard view
-      renderKYT(); // Refresh KYT view
-      renderCapacity(); // Refresh capacity view with training types
-      renderChecklist(); // Refresh checklist
+      closeImportModal();
+      renderConfig();
+      renderDashboard();
+      renderCapacity();
       toast('Data imported successfully ✓');
-      
-      // Navigate to dashboard to show imported data
-      navigate('dashboard');
-      
-      // Clear file input
-      event.target.value = '';
-      
-    } catch (error) {
-      console.error('CSV import error:', error);
-      toast('Error importing CSV file. Please check format.');
+    } catch (err) {
+      toast('Error importing file');
+      console.error(err);
     }
   };
   reader.readAsText(file);
 }
 
-// Helper function to parse CSV line considering quoted values and escaped quotes
-function parseCSVLine(line) {
-  const result = [];
-  let current = '';
-  let inQuotes = false;
-  
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    const nextChar = line[i + 1];
-    
-    if (char === '"' && inQuotes && nextChar === '"') {
-      // Escaped quote ("" means literal ")
-      current += '"';
-      i++; // Skip next quote
-    } else if (char === '"') {
-      // Toggle quote mode
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      // Field separator outside quotes
-      result.push(current);
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-  result.push(current);
-  
-  // Remove trailing empty fields (Excel adds these)
-  while (result.length > 0 && result[result.length - 1] === '') {
-    result.pop();
-  }
-  
-  return result;
-}
-
 // ════════════════════════════════════════════
-//  TOAST
+// UTILITIES
 // ════════════════════════════════════════════
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2500);
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ════════════════════════════════════════════
-//  CLOCK
-// ════════════════════════════════════════════
 function updateClock() {
-  document.getElementById('clock').textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-// ════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════
-loadState();
-
-// Ensure trainingTypes is always initialized
-if (!state.trainingTypes || !Array.isArray(state.trainingTypes)) {
-  state.trainingTypes = [
-    { id: 'prepi', name: 'Pre-PI', editable: false },
-    { id: 'allhands', name: 'All Hands', editable: false },
-    { id: 'competency', name: 'Competency', editable: false },
-    { id: 'gnc', name: 'GNC', editable: false },
-    { id: 'others', name: 'Others', editable: false }
-  ];
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-document.querySelector('.pi-badge').textContent = state.config.pi;
-renderDashboard();
+// ════════════════════════════════════════════
+// START
+// ════════════════════════════════════════════
+init();
 </script>
+
 </body>
 </html>
